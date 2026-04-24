@@ -1,0 +1,1480 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nexus-Aegis — Base de données</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Syne:wght@400;600;700;800&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#050505;--surface:#0d0d0d;
+  --card:rgba(255,255,255,0.035);--border:rgba(255,255,255,0.07);
+  --text:#ececec;--sub:rgba(236,236,236,0.38);
+  --c1:#ff3b6b;--c2:#ff8c42;--c3:#f5e03e;--c4:#3df5b0;--c5:#38b4f5;--c6:#c23ef5;
+  --r:20px;
+}
+.lm{--bg:#f0eeea;--surface:#e4e2dd;--card:rgba(0,0,0,0.04);--border:rgba(0,0,0,0.09);--text:#111;--sub:rgba(0,0,0,0.38);}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;overflow:hidden;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;transition:background .4s,color .4s;user-select:none;}
+#wc{position:fixed;inset:0;z-index:0;pointer-events:none;}
+#bgTitle{position:fixed;inset:0;z-index:1;pointer-events:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;}
+#bgName{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(36px,9vw,120px);letter-spacing:.12em;text-transform:uppercase;background:linear-gradient(90deg,var(--c1),var(--c3),var(--c4),var(--c5),var(--c6),var(--c1));background-size:300%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:gs 4s linear infinite;opacity:.35;}
+#bgSub{font-family:'Share Tech Mono',monospace;font-size:clamp(10px,2vw,20px);letter-spacing:.38em;text-transform:uppercase;background:linear-gradient(90deg,var(--c5),var(--c4),var(--c6),var(--c5));background-size:300%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:gs 6s linear infinite reverse;opacity:.35;}
+@keyframes gs{0%{background-position:0%}100%{background-position:300%}}
+#wrap{position:fixed;top:0;left:0;right:0;bottom:0;z-index:10;display:flex;align-items:center;justify-content:center;transition:bottom .32s cubic-bezier(.22,1,.36,1);}
+#kbZone{position:fixed;bottom:0;left:0;right:0;z-index:100;display:flex;flex-direction:column;align-items:stretch;pointer-events:none;}
+#hud{display:flex;align-items:center;justify-content:center;gap:18px;padding:12px 0 10px;pointer-events:auto;}
+#bGuide{width:13px;height:13px;border-radius:50%;background:#2563eb;border:none;cursor:pointer;box-shadow:0 0 12px #2563eb;animation:pB 1.8s ease-in-out infinite;pointer-events:auto;}
+@keyframes pB{0%,100%{opacity:1;box-shadow:0 0 12px #2563eb;}50%{opacity:.15;box-shadow:none;}}
+#bKeys{width:13px;height:13px;border-radius:50%;background:#fff;border:none;cursor:pointer;box-shadow:0 0 10px #fff;animation:pW 1.5s ease-in-out infinite;pointer-events:auto;}
+@keyframes pW{0%,100%{opacity:1;box-shadow:0 0 10px #fff;}50%{opacity:.1;box-shadow:none;}}
+#bDisc{width:13px;height:13px;border-radius:50%;background:var(--c1);border:none;cursor:pointer;box-shadow:0 0 12px var(--c1);animation:pR 1.3s ease-in-out infinite;pointer-events:auto;}
+@keyframes pR{0%,100%{opacity:1;box-shadow:0 0 12px var(--c1);}50%{opacity:.15;box-shadow:none;}}
+#bArrow{width:11px;height:11px;border-right:2px solid rgba(255,255,255,.45);border-bottom:2px solid rgba(255,255,255,.45);transform:rotate(-45deg);pointer-events:none;animation:pA 2s ease-in-out infinite;}
+@keyframes pA{0%,100%{opacity:.45;}50%{opacity:1;border-color:#fff;}}
+#kbPanels{background:rgba(4,4,4,.95);backdrop-filter:blur(20px);border-top:1px solid var(--border);overflow:hidden;max-height:0;transition:max-height .32s cubic-bezier(.22,1,.36,1);pointer-events:auto;}
+#kbPanels.open{max-height:400px;}
+#kbInner{padding:14px 12px 18px;display:flex;flex-direction:row;align-items:flex-start;justify-content:center;gap:20px;flex-wrap:wrap;}
+.kbs-lbl{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.2em;color:var(--sub);text-transform:uppercase;text-align:center;margin-bottom:4px;}
+.st-on{color:var(--c4);}.st-off{color:var(--c1);}
+.kbSec{display:flex;flex-direction:column;align-items:center;}
+.kbSep{width:1px;min-height:60px;background:var(--border);align-self:center;}
+.kbBody{display:none;flex-direction:column;gap:7px;margin-top:4px;}
+.kbBody.on{display:flex;}
+.kbRow{display:flex;gap:7px;justify-content:center;}
+.kk{width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--text);font-family:'Share Tech Mono',monospace;font-size:13px;cursor:pointer;transition:background .1s,transform .1s;display:flex;align-items:center;justify-content:center;}
+.kk:hover{background:rgba(255,255,255,.12);}
+.kk:active{background:rgba(255,255,255,.2);transform:scale(.85);}
+.kkw{width:36px;height:36px;border-radius:6px;font-size:11px;}
+.kk-wide{width:88px;border-radius:21px;}
+.kk-back{width:50px;height:36px;border-radius:7px;font-size:15px;}
+#dpad{display:grid;grid-template-columns:repeat(3,42px);grid-template-rows:repeat(3,42px);gap:5px;}
+.dk{width:42px;height:42px;border-radius:7px;background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--text);font-family:'Share Tech Mono',monospace;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .1s,transform .1s;}
+.dk:hover{background:rgba(255,255,255,.12);}
+.dk:active{background:rgba(255,255,255,.2);transform:scale(.87);}
+.dk.empty{background:transparent;border:none;cursor:default;}
+#ldr{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.7);backdrop-filter:blur(10px);align-items:center;justify-content:center;flex-direction:column;gap:14px;}
+#ldr.on{display:flex;}
+#ldrTxt{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:.2em;color:var(--sub);}
+#ldrBar{width:320px;height:2px;background:rgba(255,255,255,.07);border-radius:9px;overflow:hidden;}
+#ldrFill{height:100%;width:0;background:linear-gradient(90deg,var(--c1),var(--c3),var(--c4),var(--c5));border-radius:9px;}
+.scr{display:none;flex-direction:column;align-items:center;justify-content:center;gap:26px;width:100%;height:100%;animation:fIn .4s ease;}
+.scr.on{display:flex;}
+@keyframes fIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+.scr-lbl{font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:var(--sub);font-family:'Share Tech Mono',monospace;text-align:center;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:38px 46px;backdrop-filter:blur(26px);min-width:320px;max-width:430px;width:92vw;display:flex;flex-direction:column;align-items:center;gap:20px;box-shadow:0 28px 80px rgba(0,0,0,.6);animation:sUp .38s cubic-bezier(.22,1,.36,1);}
+@keyframes sUp{from{opacity:0;transform:translateY(24px) scale(.96);}to{opacity:1;transform:none;}}
+.card-ttl{font-size:11px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--sub);text-align:center;}
+.cdisp{font-family:'Share Tech Mono',monospace;font-size:28px;letter-spacing:.3em;color:var(--text);min-height:44px;border-bottom:1px solid var(--border);width:100%;text-align:center;padding-bottom:10px;transition:color .2s;word-break:break-all;}
+.cdisp.err{color:var(--c1);animation:shk .3s;}
+@keyframes shk{0%,100%{transform:translateX(0);}25%{transform:translateX(-7px);}75%{transform:translateX(7px);}}
+.att-txt{font-size:11px;color:var(--c1);font-family:'Share Tech Mono',monospace;letter-spacing:.08em;text-align:center;}
+.choices{display:flex;flex-direction:column;gap:13px;width:100%;max-width:420px;}
+.cc{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px 26px;cursor:pointer;transition:all .28s cubic-bezier(.22,1,.36,1);display:flex;align-items:center;gap:16px;backdrop-filter:blur(16px);animation:fIn .4s ease both;}
+.cc:nth-child(1){animation-delay:0s;}.cc:nth-child(2){animation-delay:.07s;}.cc:nth-child(3){animation-delay:.14s;}
+.cc:hover{border-color:rgba(255,255,255,.2);transform:translateX(6px);background:rgba(255,255,255,.055);}
+.cc.sel{border-color:var(--c4);box-shadow:0 0 20px rgba(61,245,176,.16);}
+.ck{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Share Tech Mono',monospace;font-size:13px;font-weight:700;color:#000;flex-shrink:0;}
+.cc:nth-child(1) .ck{background:linear-gradient(135deg,var(--c4),var(--c5));}
+.cc:nth-child(2) .ck{background:linear-gradient(135deg,var(--c2),var(--c1));}
+.cc:nth-child(3) .ck{background:linear-gradient(135deg,var(--c6),var(--c5));}
+.cl{font-size:14px;font-weight:700;}.cs{font-size:11px;color:var(--sub);margin-top:2px;}
+.elist-wrap{width:100%;max-width:760px;display:flex;flex-direction:column;gap:11px;align-items:center;}
+.qo-bar{display:flex;align-items:center;gap:11px;background:var(--card);border:1px solid var(--border);border-radius:11px;padding:10px 18px;backdrop-filter:blur(12px);}
+.qo-lbl{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:.14em;color:var(--sub);}
+.qo-disp{font-family:'Share Tech Mono',monospace;font-size:21px;letter-spacing:.2em;color:var(--text);min-width:52px;text-align:center;border-bottom:1px solid var(--border);padding-bottom:2px;}
+.qo-disp.err{color:var(--c1);animation:shk .3s;}
+.qo-hint{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:.1em;color:var(--sub);}
+.elist{display:grid;grid-template-columns:repeat(auto-fill,minmax(275px,1fr));gap:7px;width:100%;max-height:52vh;overflow-y:auto;padding-right:3px;}
+.elist::-webkit-scrollbar{width:2px;}.elist::-webkit-scrollbar-thumb{background:var(--border);border-radius:9px;}
+.ec{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:11px 15px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:12px;backdrop-filter:blur(12px);}
+.ec:hover{border-color:rgba(255,255,255,.18);transform:translateX(3px);}
+.ec.sel{border-color:var(--c5);box-shadow:0 0 14px rgba(56,180,245,.12);}
+.enum{font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--sub);min-width:24px;}
+.einfo{flex:1;}.etit{font-size:13px;font-weight:700;}.ecod{font-size:10px;color:var(--sub);font-family:'Share Tech Mono',monospace;margin-top:1px;}
+.eacc{padding:5px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--sub);font-size:11px;cursor:pointer;transition:all .18s;font-family:'Syne',sans-serif;font-weight:600;letter-spacing:.04em;}
+.eacc:hover{background:rgba(255,255,255,.09);color:var(--text);}
+.plist{display:flex;flex-direction:column;gap:11px;width:100%;max-width:430px;}
+.pitem{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:15px 20px;cursor:pointer;transition:all .22s;font-size:13px;color:var(--c4);font-family:'Share Tech Mono',monospace;}
+.pitem:hover{background:rgba(61,245,176,.05);border-color:rgba(61,245,176,.28);}
+.no-pend{font-size:12px;color:var(--sub);font-family:'Share Tech Mono',monospace;letter-spacing:.1em;text-align:center;}
+#s1b-inner{font-family:'Share Tech Mono',monospace;color:var(--c1);text-align:center;font-size:13px;line-height:2.2;letter-spacing:.1em;}
+#dcMsg{position:fixed;top:38px;left:50%;transform:translateX(-50%);z-index:600;font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:.2em;color:var(--c4);background:rgba(0,0,0,.88);border:1px solid rgba(61,245,176,.28);padding:10px 28px;border-radius:28px;display:none;animation:fIn .35s;backdrop-filter:blur(12px);}
+
+/* ═══════════════════════════════════════
+   NOUVEAU PANNEAU GUIDE/CONVERTISSEUR
+   ═══════════════════════════════════════ */
+
+/* Overlay principal */
+#toolOverlay{
+  position:fixed;inset:0;z-index:700;
+  background:rgba(0,0,0,.96);
+  backdrop-filter:blur(18px);
+  display:none;
+  align-items:center;justify-content:center;
+  animation:fIn .28s;
+}
+#toolOverlay.on{display:flex;}
+
+/* ÉTAPE 1 — Choix A/B */
+#toolChoice{
+  display:flex;flex-direction:column;align-items:center;gap:28px;
+  animation:sUp .38s cubic-bezier(.22,1,.36,1);
+}
+.tool-ttl{
+  font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:.28em;
+  text-transform:uppercase;color:var(--sub);text-align:center;
+}
+.tool-choices{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;}
+.tool-cc{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r);
+  padding:22px 32px;cursor:pointer;
+  transition:all .28s cubic-bezier(.22,1,.36,1);
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  backdrop-filter:blur(16px);min-width:160px;
+}
+.tool-cc:hover{border-color:rgba(255,255,255,.2);transform:translateY(-4px);background:rgba(255,255,255,.055);}
+.tool-cc.sel{border-color:var(--c4);box-shadow:0 0 20px rgba(61,245,176,.16);}
+.tool-ck{
+  width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-family:'Share Tech Mono',monospace;font-size:15px;font-weight:700;color:#000;
+}
+.tool-cc:nth-child(1) .tool-ck{background:linear-gradient(135deg,var(--c4),var(--c5));}
+.tool-cc:nth-child(2) .tool-ck{background:linear-gradient(135deg,var(--c6),var(--c2));}
+.tool-cl{font-size:13px;font-weight:700;}
+.tool-cs{font-size:10px;color:var(--sub);}
+.tool-close-btn{
+  padding:9px 26px;border-radius:28px;border:1px solid var(--border);
+  background:transparent;color:var(--sub);
+  font-family:'Syne',sans-serif;font-size:12px;font-weight:600;
+  cursor:pointer;transition:all .18s;letter-spacing:.07em;
+}
+.tool-close-btn:hover{background:rgba(255,255,255,.07);color:var(--text);}
+
+/* ÉTAPE 2 — Digicode rond (style claviers existants) */
+#toolDigicode{
+  display:none;flex-direction:column;align-items:center;gap:24px;
+  animation:sUp .38s cubic-bezier(.22,1,.36,1);
+}
+.digi-screen-na{
+  font-family:'Share Tech Mono',monospace;font-size:28px;letter-spacing:.3em;
+  color:var(--text);min-height:44px;border-bottom:1px solid var(--border);
+  width:280px;text-align:center;padding-bottom:10px;transition:color .2s;
+}
+.digi-screen-na.err{color:var(--c1);animation:shk .3s;}
+.digi-att{font-size:11px;color:var(--c1);font-family:'Share Tech Mono',monospace;letter-spacing:.08em;text-align:center;min-height:18px;}
+/* Pavé numérique style claviers ronds */
+#digiPadNA{display:flex;flex-direction:column;gap:7px;}
+.digi-row{display:flex;gap:7px;justify-content:center;}
+.dkna{
+  width:42px;height:42px;border-radius:50%;
+  background:rgba(255,255,255,.05);border:1px solid var(--border);
+  color:var(--text);font-family:'Share Tech Mono',monospace;font-size:13px;
+  cursor:pointer;transition:background .1s,transform .1s;
+  display:flex;align-items:center;justify-content:center;
+}
+.dkna:hover{background:rgba(255,255,255,.12);}
+.dkna:active{background:rgba(255,255,255,.2);transform:scale(.85);}
+.dkna-wide{width:88px;border-radius:21px;font-size:11px;letter-spacing:.1em;}
+.dkna-back{width:50px;height:42px;border-radius:21px;font-size:15px;}
+.dkna-enter{
+  width:140px;border-radius:21px;font-size:11px;letter-spacing:.12em;
+  text-transform:uppercase;
+  background:rgba(61,245,176,.08);border-color:rgba(61,245,176,.3);color:var(--c4);
+}
+.dkna-enter:hover{background:rgba(61,245,176,.18);}
+
+/* ÉTAPE 3 — Contenu (guide ou convertisseur) */
+#toolContent{
+  display:none;position:fixed;inset:0;z-index:800;
+  background:#050505;
+  overflow:hidden;
+}
+#toolContentInner{
+  position:absolute;inset:0;overflow:auto;
+}
+#toolContentInner::-webkit-scrollbar{width:3px;}
+#toolContentInner::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+#toolCloseBar{
+  position:fixed;top:0;right:0;z-index:810;
+  padding:10px 16px;
+}
+#toolCloseBarBtn{
+  padding:7px 18px;border-radius:20px;
+  border:1px solid rgba(255,59,107,.3);
+  background:rgba(0,0,0,.8);color:#ff3b6b;
+  font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:.14em;
+  cursor:pointer;transition:all .2s;backdrop-filter:blur(10px);
+}
+#toolCloseBarBtn:hover{background:rgba(255,59,107,.15);}
+</style>
+</head>
+<body>
+
+<canvas id="wc"></canvas>
+<div id="bgTitle"><div id="bgName">Nexus-Aegis</div><div id="bgSub">base de données</div></div>
+<div id="dcMsg">— DÉCONNEXION EFFECTUÉE —</div>
+
+<!-- ═══════════════════════════════════
+     OVERLAY GUIDE / CONVERTISSEUR
+     ═══════════════════════════════════ -->
+<div id="toolOverlay">
+
+  <!-- Étape 1 : choix -->
+  <div id="toolChoice">
+    <div class="tool-ttl">Accès aux outils</div>
+    <div class="tool-choices">
+      <div class="tool-cc" id="tcA" onclick="selectTool('guide')">
+        <div class="tool-ck">A</div>
+        <div class="tool-cl">Guide complet</div>
+        <div class="tool-cs">Documentation Nexus-Aegis</div>
+      </div>
+      <div class="tool-cc" id="tcB" onclick="selectTool('b64')">
+        <div class="tool-ck">B</div>
+        <div class="tool-cl">Convertisseur B64</div>
+        <div class="tool-cs">Encodeur / Décodeur URL</div>
+      </div>
+    </div>
+    <button class="tool-close-btn" onclick="closeTool()">FERMER</button>
+  </div>
+
+  <!-- Étape 2 : digicode -->
+  <div id="toolDigicode">
+    <div class="tool-ttl" id="digiToolTitle">Code d'accès</div>
+    <div class="digi-screen-na" id="digiScreenNA">_</div>
+    <div class="digi-att" id="digiAttNA"></div>
+    <div id="digiPadNA">
+      <div class="digi-row">
+        <button class="dkna" data-dn="7">7</button>
+        <button class="dkna" data-dn="8">8</button>
+        <button class="dkna" data-dn="9">9</button>
+      </div>
+      <div class="digi-row">
+        <button class="dkna" data-dn="4">4</button>
+        <button class="dkna" data-dn="5">5</button>
+        <button class="dkna" data-dn="6">6</button>
+      </div>
+      <div class="digi-row">
+        <button class="dkna" data-dn="1">1</button>
+        <button class="dkna" data-dn="2">2</button>
+        <button class="dkna" data-dn="3">3</button>
+      </div>
+      <div class="digi-row">
+        <button class="dkna dkna-wide" data-dn="0">0</button>
+        <button class="dkna dkna-back" id="dknaBack">⌫</button>
+      </div>
+      <div class="digi-row">
+        <button class="dkna dkna-enter" id="dknaEnter">— VALIDER —</button>
+      </div>
+    </div>
+    <button class="tool-close-btn" onclick="backToToolChoice()">← RETOUR</button>
+  </div>
+
+</div>
+
+<!-- Contenu plein écran (guide ou b64) -->
+<div id="toolContent">
+  <div id="toolCloseBar">
+    <button id="toolCloseBarBtn" onclick="closeToolContent()">✕ FERMER</button>
+  </div>
+  <div id="toolContentInner"></div>
+</div>
+
+<!-- LOADER -->
+<div id="ldr"><div id="ldrTxt">CHARGEMENT EN COURS</div><div id="ldrBar"><div id="ldrFill"></div></div></div>
+
+<!-- CONTENU PRINCIPAL -->
+<div id="wrap">
+  <div id="s0" class="scr on"></div>
+  <div id="s1" class="scr">
+    <div class="scr-lbl">Authentification</div>
+    <div class="card">
+      <div class="card-ttl">Code d'accès</div>
+      <div class="cdisp" id="s1d">_</div>
+      <div class="att-txt" id="s1att"></div>
+    </div>
+  </div>
+  <div id="s1b" class="scr">
+    <div id="s1b-inner">ACCÈS BLOQUÉ<br>──────────────────<br>Trop de tentatives incorrectes.<br>Contactez l'administrateur.</div>
+  </div>
+  <div id="s2" class="scr">
+    <div class="scr-lbl">Menu principal</div>
+    <div class="choices">
+      <div class="cc" id="c1"><div class="ck">A</div><div><div class="cl">Sélection manuelle</div><div class="cs">Parcourir les 35 entrées</div></div></div>
+      <div class="cc" id="c2"><div class="ck">B</div><div><div class="cl">Recherche par code</div><div class="cs">Accès direct par code site</div></div></div>
+      <div class="cc" id="c3"><div class="ck">C</div><div><div class="cl">Enregistrement en attente</div><div class="cs">Sites en attente de validation</div></div></div>
+    </div>
+  </div>
+  <div id="s3" class="scr">
+    <div class="scr-lbl">Vérification</div>
+    <div class="card">
+      <div class="card-ttl">Code de confirmation</div>
+      <div class="cdisp" id="s3d">_</div>
+    </div>
+  </div>
+  <div id="s4a" class="scr">
+    <div class="scr-lbl">Sélection manuelle</div>
+    <div class="elist-wrap">
+      <div class="qo-bar">
+        <span class="qo-lbl">N° ENTRÉE :</span>
+        <div class="qo-disp" id="qoDisp">_</div>
+        <span class="qo-hint">→ E pour accéder</span>
+      </div>
+      <div class="elist" id="entryList"></div>
+    </div>
+  </div>
+  <div id="s4b" class="scr">
+    <div class="scr-lbl">Accès site</div>
+    <div class="card">
+      <div class="card-ttl">Code d'entrée</div>
+      <div class="cdisp" id="s4bd">_</div>
+    </div>
+  </div>
+  <div id="s5a" class="scr">
+    <div class="scr-lbl">Recherche par code</div>
+    <div class="card">
+      <div class="card-ttl">Code du site</div>
+      <div class="cdisp" id="s5ad">_</div>
+    </div>
+  </div>
+  <div id="s5b" class="scr">
+    <div class="scr-lbl">Accès site</div>
+    <div class="card">
+      <div class="card-ttl">Code d'accès</div>
+      <div class="cdisp" id="s5bd">_</div>
+    </div>
+  </div>
+  <div id="s6" class="scr">
+    <div class="scr-lbl">Enregistrements en attente</div>
+    <div class="plist" id="pendingList"></div>
+  </div>
+  <div id="s6b" class="scr">
+    <div class="scr-lbl">Accès site</div>
+    <div class="card">
+      <div class="card-ttl">Code d'accès</div>
+      <div class="cdisp" id="s6bd">_</div>
+    </div>
+  </div>
+</div>
+
+<!-- ZONE CLAVIER -->
+<div id="kbZone">
+  <div id="hud">
+    <button id="bGuide" title="Outils (T)"></button>
+    <button id="bKeys" title="Claviers"></button>
+    <button id="bDisc" title="Déconnexion (K)"></button>
+    <div id="bArrow"></div>
+  </div>
+  <div id="kbPanels">
+    <div id="kbInner">
+      <!-- AZERTY -->
+      <div class="kbSec">
+        <div class="kbs-lbl">AZERTY <span id="stAlpha" class="st-on">ON</span></div>
+        <div id="kbAlpha" class="kbBody on">
+          <div class="kbRow">
+            <button class="kk kkw" data-k="A">A</button><button class="kk kkw" data-k="Z">Z</button>
+            <button class="kk kkw" data-k="E">E</button><button class="kk kkw" data-k="R">R</button>
+            <button class="kk kkw" data-k="T">T</button><button class="kk kkw" data-k="Y">Y</button>
+            <button class="kk kkw" data-k="U">U</button><button class="kk kkw" data-k="I">I</button>
+            <button class="kk kkw" data-k="O">O</button><button class="kk kkw" data-k="P">P</button>
+          </div>
+          <div class="kbRow">
+            <button class="kk kkw" data-k="Q">Q</button><button class="kk kkw" data-k="S">S</button>
+            <button class="kk kkw" data-k="D">D</button><button class="kk kkw" data-k="F">F</button>
+            <button class="kk kkw" data-k="G">G</button><button class="kk kkw" data-k="H">H</button>
+            <button class="kk kkw" data-k="J">J</button><button class="kk kkw" data-k="K">K</button>
+            <button class="kk kkw" data-k="L">L</button><button class="kk kkw" data-k="M">M</button>
+          </div>
+          <div class="kbRow">
+            <button class="kk kkw" data-k="W">W</button><button class="kk kkw" data-k="X">X</button>
+            <button class="kk kkw" data-k="C">C</button><button class="kk kkw" data-k="V">V</button>
+            <button class="kk kkw" data-k="B">B</button><button class="kk kkw" data-k="N">N</button>
+            <button class="kk kk-back" id="kbBack">⌫</button>
+          </div>
+        </div>
+      </div>
+      <div class="kbSep"></div>
+      <!-- CHIFFRES -->
+      <div class="kbSec">
+        <div class="kbs-lbl">123 <span id="stNums" class="st-on">ON</span></div>
+        <div id="kbNums" class="kbBody on">
+          <div class="kbRow"><button class="kk" data-k="7">7</button><button class="kk" data-k="8">8</button><button class="kk" data-k="9">9</button></div>
+          <div class="kbRow"><button class="kk" data-k="4">4</button><button class="kk" data-k="5">5</button><button class="kk" data-k="6">6</button></div>
+          <div class="kbRow"><button class="kk" data-k="1">1</button><button class="kk" data-k="2">2</button><button class="kk" data-k="3">3</button></div>
+          <div class="kbRow"><button class="kk kk-wide" data-k="0">0</button></div>
+        </div>
+      </div>
+      <div class="kbSep"></div>
+      <!-- FLÈCHES -->
+      <div class="kbSec">
+        <div class="kbs-lbl">NAV <span id="stDpad" class="st-on">ON</span></div>
+        <div id="kbDpad" class="kbBody on">
+          <div id="dpad">
+            <div class="dk empty"></div>
+            <button class="dk" id="dpU">▲</button>
+            <div class="dk empty"></div>
+            <button class="dk" id="dpL">◀</button>
+            <button class="dk" id="dpOk" style="font-size:10px;letter-spacing:.03em;">OK</button>
+            <button class="dk" id="dpR">▶</button>
+            <div class="dk empty"></div>
+            <button class="dk" id="dpD">▼</button>
+            <div class="dk empty"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+// DATABASE
+// ══════════════════════════════════════════════════════
+const DB=[
+  {id:1, title:"Base 208", code:"100", _u:"aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2Jhc2UtY291cnMtMjA4Lw=="},
+  {id:2, title:"Français", code:"101", _u:"aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2ZyYW5jYWlzLWNvdXJzLTIwOC8="},
+  {id:3, title:"Synthèse", code:"102", _u:"aHR0cHM6Ly9ldmFubG9wZXowNjMwMC1sZ3RtLmdpdGh1Yi5pby9mcmFuY2Fpcy0yMDgv"},
+  {id:4, title:"Textes", code:"103", _u:"aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3RleHRlLWZyYW5jYWlzLTIwOC8="},
+  {id:5, title:"Anglais LV1", code:"104", _u:"aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2FuZ2xhaXMtY291cnMtMjA4Lw=="},
+  {id:6, title:"Padlet Anglais", code:"105", _u:"aHR0cHM6Ly9wYWRsZXQuY29tL2NoYWlsbGFuX2FuZ2xhaXMvY2xhc3Nlcy1kZS1zZWNvbmRlLTIwMjUtMjAyNi03NnZqcnE2bjd4cXUxNWdwcQ=="},
+  {id:7, title:"Russe LV3", code:"106", _u:"aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3J1c3NlLWNvdXJzLTIwOC8="},
+  {id:8, title:"Italien LV2", code:"107", _u:"aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2l0YWxpZW4tY291cnMtMjA4Lw=="},
+  {id:9, title:"Physique-Chimie", code:"108", _u:"aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3BoeXNpcXVlLWNvdXJzLTIwOC8="},
+  {id:10, title:"SVT", code:"109", _u:"aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3N2dC1jb3Vycy0yMDgv"},
+  {id:11, title:"SNT", code:"110", _u:"aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3NudC1jb3Vycy0yMDgv"},
+  {id:12, title:"SES", code:"111", _u:"aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3Nlcy1jb3Vycy0yMDgv"},
+  {id:13, title:"Heure", code:"200", _u:"aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2hldXJlLw=="},
+  {id:14, title:"Vecteurs Maths", code:"113", _u:"aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2NoYXAtNi12ZWN0ZXVycy8="},
+  {id:15, title:"Fonctions Maths", code:"114", _u:"aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2NoYXAtNy1mb25jdGlvbnMv"},
+  {id:16, title:"Sea Shepherd Diapo", code:"115", _u:"aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2V4cG8tZW1jLWRpYXBvLw=="},
+  {id:17, title:"Sea Shepherd Texte", code:"116", _u:"aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2V4cG8tZW1jLXRleHRlLw=="},
+  {id:18, title:"Physique 10-11", code:"117", _u:"aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2NoYXAtcGgv"},
+  {id:19, title:"Aviapro Inter", code:"201", _u:"aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2F2aWFwcm8taW50ZXIv"},
+  {id:20, title:"Métro Paris", code:"202", _u:"aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL21ldHJvLXBhcmlzLw=="},
+  {id:21, title:"Réveil", code:"203", _u:"aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3JldmVpbC8="},
+  {id:22, title:"Horloge Exam'", code:"204", _u:"aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2hvcmxvZ2UtZXhhbWVuLXByb21wdGV1ci8="},
+  {id:23, title:"Exposé 1984", code:"118", _u:"aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2V4cG8taXRhLw=="},
+  {id:24, title:"Prompteur Original", code:"205", _u:"aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3Byb21wdGV1ci1vcmlnaW5hbC8="},
+  {id:25, title:"Flightradar", code:"300", _u:"aHR0cHM6Ly93d3cuZmxpZ2h0cmFkYXIyNC5jb20vNDMuMzAsNS4zOS82"},
+  {id:26, title:"Cartometro", code:"301", _u:"aHR0cHM6Ly9jYXJ0b21ldHJvLmNvbS9jYXJ0ZXMvcGFyaXMtbXVsdGktZGFyay8="},
+  {id:27, title:"IDFM", code:"302", _u:"aHR0cHM6Ly93d3cuaWxlZGVmcmFuY2UtbW9iaWxpdGVzLmZyLw=="},
+  {id:28, title:"ChatGPT", code:"303", _u:"aHR0cHM6Ly9jaGF0Z3B0LmNvbS8="},
+  {id:29, title:"Gemini", code:"304", _u:"aHR0cHM6Ly9nZW1pbmkuZ29vZ2xlLmNvbS9hcHA/aGw9ZnI="},
+  {id:30, title:"Claude", code:"305", _u:"aHR0cHM6Ly9jbGF1ZGUuYWkvcmVjZW50cw=="},
+  {id:31, title:"Canva", code:"306", _u:"aHR0cHM6Ly93d3cuY2FudmEuY29tL2ZyX2ZyLw=="},
+  {id:32, title:"Github", code:"307", _u:"aHR0cHM6Ly9naXRodWIuY29tLw=="},
+  {id:33, title:"Atrium", code:"308", _u:"aHR0cHM6Ly9hdHJpdW0tc3VkLmZyLw=="},
+  {id:34, title:"RATP", code:"309", _u:"aHR0cHM6Ly93d3cucmF0cC5mci8="},
+  {id:35, title:"Ita Mestieri", code:"119", _u:"aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2l0YS1tZXN0aWVyaQ=="},
+];
+
+const PENDING=[];
+
+const C={
+  access:"26866569389",
+  menu:"1710",
+  entry:"2450",
+  search:"1251",
+  pend:"0929",
+  tool:"820114630254"
+};
+
+const MAX_ATT=3;
+let S={screen:'s0',buf:'',qoBuf:'',att:0,choice:null,entry:null,sTgt:null,pTgt:null,revTmr:null};
+function resetState(){S={screen:'s0',buf:'',qoBuf:'',att:0,choice:null,entry:null,sTgt:null,pTgt:null,revTmr:null};}
+
+// Canvas
+const cv=document.getElementById('wc'),ctx=cv.getContext('2d');
+let W,H;
+function rsz(){W=cv.width=innerWidth;H=cv.height=innerHeight;}
+rsz();addEventListener('resize',rsz);
+const waves=[
+  {c:'#ff3b6b',a:70,f:.0016,p:0},{c:'#ff8c42',a:85,f:.0013,p:1.05},
+  {c:'#f5e03e',a:60,f:.002,p:2.1},{c:'#3df5b0',a:95,f:.0011,p:3.14},
+  {c:'#38b4f5',a:75,f:.00175,p:4.19},{c:'#c23ef5',a:55,f:.00225,p:5.24}
+];
+let wt=0;
+(function draw(){
+  ctx.clearRect(0,0,W,H);
+  waves.forEach((w,i)=>{
+    const yb=H*(.12+i*.145);
+    ctx.beginPath();
+    for(let x=0;x<=W;x+=2){const y=yb+Math.sin(x*w.f+wt+w.p)*w.a;x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}
+    ctx.strokeStyle=w.c+'55';ctx.lineWidth=1.8;ctx.stroke();
+  });
+  wt+=0.025;requestAnimationFrame(draw);
+})();
+
+function syncBottom(){document.getElementById('wrap').style.bottom=document.getElementById('kbZone').offsetHeight+'px';}
+addEventListener('resize',syncBottom);
+
+function loader(dur,cb){
+  const el=document.getElementById('ldr'),fill=document.getElementById('ldrFill');
+  el.classList.add('on');fill.style.transition='none';fill.style.width='0%';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    fill.style.transition=`width ${dur}s linear`;fill.style.width='100%';
+  }));
+  setTimeout(()=>{el.classList.remove('on');fill.style.width='0%';cb&&cb();},dur*1000);
+}
+
+function go(id){
+  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  S.screen=id;S.buf='';S.qoBuf='';
+  rDisp();rQo();
+}
+
+const DISP={s1:'s1d',s3:'s3d',s4b:'s4bd',s5a:'s5ad',s5b:'s5bd',s6b:'s6bd'};
+const INP=['s1','s3','s4b','s5a','s5b','s6b'];
+
+function rDisp(){
+  const el=document.getElementById(DISP[S.screen]);
+  if(!el)return;
+  if(!S.buf){el.textContent='_';return;}
+  el.textContent='●'.repeat(S.buf.length-1)+S.buf[S.buf.length-1];
+  if(S.revTmr)clearTimeout(S.revTmr);
+  S.revTmr=setTimeout(()=>{const e2=document.getElementById(DISP[S.screen]);if(e2)e2.textContent='●'.repeat(S.buf.length);},800);
+}
+function rQo(){const el=document.getElementById('qoDisp');if(el)el.textContent=S.qoBuf||'_';}
+function shake(id){const el=document.getElementById(id);if(!el)return;el.classList.add('err');setTimeout(()=>el.classList.remove('err'),400);}
+function dec(b){try{return atob(b);}catch(e){return '#';}}
+function openSite(b){window.open(dec(b),'_blank');}
+
+let secState={alpha:true,nums:true,dpad:true};
+function setSec(bodyId,stId,on){
+  const key=bodyId==='kbAlpha'?'alpha':bodyId==='kbNums'?'nums':'dpad';
+  secState[key]=on;
+  document.getElementById(bodyId).classList.toggle('on',on);
+  const st=document.getElementById(stId);
+  st.textContent=on?'ON':'OFF';
+  st.className=on?'st-on':'st-off';
+  setTimeout(syncBottom,50);
+}
+
+function resetMenu(){['c1','c2','c3'].forEach(id=>{const el=document.getElementById(id);el.className='cc';el.style.cssText='';});S.choice=null;}
+
+function pickChoice(n){
+  if(S.choice===n)return;S.choice=n;
+  ['c1','c2','c3'].forEach((id,i)=>{
+    const el=document.getElementById(id);
+    if(i+1===n){
+      el.classList.add('sel');
+      setTimeout(()=>{
+        ['c1','c2','c3'].forEach((oid,oi)=>{
+          if(oi+1!==n){
+            const o=document.getElementById(oid);
+            o.style.transition='opacity .32s,transform .32s';
+            o.style.opacity='0';o.style.pointerEvents='none';
+            setTimeout(()=>o.style.display='none',340);
+          }
+        });
+      },80);
+    }
+  });
+}
+
+function buildList(){
+  const list=document.getElementById('entryList');list.innerHTML='';
+  DB.forEach(item=>{
+    const d=document.createElement('div');d.className='ec';d.dataset.id=item.id;
+    d.innerHTML=`<div class="enum">${String(item.id).padStart(2,'0')}</div>
+      <div class="einfo"><div class="etit">${item.title}</div><div class="ecod">CODE : ${item.code}</div></div>
+      <button class="eacc">OUVRIR</button>`;
+    d.querySelector('.eacc').addEventListener('click',e=>{
+      e.stopPropagation();
+      S.entry=item.id;
+      loader(0.8,()=>go('s4b'));
+    });
+    d.addEventListener('click',()=>{
+      S.entry=item.id;S.qoBuf=String(item.id);rQo();
+      document.querySelectorAll('.ec').forEach(c=>c.classList.toggle('sel',c.dataset.id==item.id));
+    });
+    list.appendChild(d);
+  });
+}
+
+function qoOpen(){
+  const num=parseInt(S.qoBuf);
+  const item=DB.find(e=>e.id===num);
+  if(item){S.entry=item.id;S.qoBuf='';rQo();loader(0.8,()=>go('s4b'));}
+  else{shake('qoDisp');S.qoBuf='';rQo();}
+}
+
+function buildPending(){
+  const list=document.getElementById('pendingList');list.innerHTML='';
+  if(!PENDING.length){list.innerHTML='<div class="no-pend">Aucun enregistrement en attente.</div>';return;}
+  PENDING.forEach((item,i)=>{
+    const d=document.createElement('div');d.className='pitem';
+    d.textContent=`[ ${i+1} ] ${item.label}`;
+    d.addEventListener('click',()=>{S.pTgt=item._u;loader(1.2,()=>go('s6b'));});
+    list.appendChild(d);
+  });
+}
+
+function disc(){
+  resetState();resetMenu();go('s0');
+  const m=document.getElementById('dcMsg');
+  m.style.display='block';
+  setTimeout(()=>m.style.display='none',3000);
+}
+
+function listScroll(dir){
+  const l=document.getElementById('entryList');
+  if(l)l.scrollBy({top:dir==='up'?-110:110,behavior:'smooth'});
+}
+
+function doBack(){
+  if(S.screen==='s4a'){S.qoBuf=S.qoBuf.slice(0,-1);rQo();}
+  else if(INP.includes(S.screen)){S.buf=S.buf.slice(0,-1);rDisp();}
+}
+
+function handle(key,source){
+  key=key.toUpperCase();
+  source=source||'touch';
+  if(key==='T'){openToolOverlay();return;}
+  if(key==='K'){disc();return;}
+  if(key==='L'){document.body.classList.toggle('lm');return;}
+  if(source==='kbd'){
+    if(key==='M'){setSec('kbAlpha','stAlpha',true);return;}
+    if(key==='O'){setSec('kbAlpha','stAlpha',false);return;}
+    if(key==='N'){setSec('kbNums','stNums',true);return;}
+    if(key==='P'){setSec('kbNums','stNums',false);return;}
+    if(key==='Q'){setSec('kbDpad','stDpad',true);return;}
+    if(key==='R'){setSec('kbDpad','stDpad',false);return;}
+  }
+  const sc=S.screen;
+  const isD=/^[0-9]$/.test(key);
+  if(sc==='s0'){if(key==='E'){loader(1.2,()=>go('s1'));}return;}
+  if(sc==='s1'){
+    if(isD){S.buf+=key;rDisp();return;}
+    if(key==='F'){
+      if(S.buf===C.access){loader(1.2,()=>{resetMenu();go('s2');});}
+      else{
+        S.att++;const left=MAX_ATT-S.att;
+        document.getElementById('s1att').textContent=left>0?`${left} tentative${left>1?'s':''} restante${left>1?'s':''}`:'' ;
+        shake('s1d');S.buf='';rDisp();
+        if(S.att>=MAX_ATT)setTimeout(()=>go('s1b'),600);
+      }
+      return;
+    }
+    return;
+  }
+  if(sc==='s2'){
+    if(key==='A'){pickChoice(1);return;}
+    if(key==='B'){pickChoice(2);return;}
+    if(key==='C'){pickChoice(3);return;}
+    if(key==='G'&&S.choice){loader(1.2,()=>go('s3'));return;}
+    return;
+  }
+  if(sc==='s3'){
+    if(isD){S.buf+=key;rDisp();return;}
+    if(key==='G'){
+      if(S.buf===C.menu){
+        loader(1.2,()=>{
+          if(S.choice===1){buildList();go('s4a');}
+          else if(S.choice===2){go('s5a');}
+          else{buildPending();go('s6');}
+        });
+      }else{shake('s3d');S.buf='';rDisp();}
+      return;
+    }
+    return;
+  }
+  if(sc==='s4a'){
+    if(isD){S.qoBuf+=key;rQo();return;}
+    if(key==='E'){qoOpen();return;}
+    return;
+  }
+  if(sc==='s4b'){
+    if(isD){S.buf+=key;rDisp();return;}
+    if(key==='H'){
+      if(S.buf===C.entry){const item=DB.find(e=>e.id===S.entry);if(item)openSite(item._u);loader(0.5,()=>go('s4a'));}
+      else{shake('s4bd');S.buf='';rDisp();}
+      return;
+    }
+    return;
+  }
+  if(sc==='s5a'){
+    if(isD){S.buf+=key;rDisp();return;}
+    if(key==='J'){
+      const found=DB.find(e=>e.code===S.buf);
+      if(found){S.sTgt=found._u;loader(1.2,()=>go('s5b'));}
+      else{shake('s5ad');S.buf='';rDisp();}
+      return;
+    }
+    return;
+  }
+  if(sc==='s5b'){
+    if(isD){S.buf+=key;rDisp();return;}
+    if(key==='J'){
+      if(S.buf===C.search){openSite(S.sTgt);loader(0.5,()=>go('s5a'));}
+      else{shake('s5bd');S.buf='';rDisp();}
+      return;
+    }
+    return;
+  }
+  if(sc==='s6b'){
+    if(isD){S.buf+=key;rDisp();return;}
+    if(key==='V'){
+      if(S.buf===C.pend){openSite(S.pTgt);loader(0.5,()=>go('s6'));}
+      else{shake('s6bd');S.buf='';rDisp();}
+      return;
+    }
+    return;
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// NOUVEAU SYSTÈME GUIDE / CONVERTISSEUR
+// ══════════════════════════════════════════════════════
+let toolTarget=null; // 'guide' ou 'b64'
+let toolDigiBuf='';
+let toolDigiAtt=0;
+let toolDigiRevTmr=null;
+let toolUnlocked=false;
+
+function openToolOverlay(){
+  toolTarget=null;
+  toolDigiBuf='';
+  toolDigiAtt=0;
+  document.getElementById('toolOverlay').classList.add('on');
+  document.getElementById('toolChoice').style.display='flex';
+  document.getElementById('toolDigicode').style.display='none';
+  document.getElementById('tcA').classList.remove('sel');
+  document.getElementById('tcB').classList.remove('sel');
+}
+
+function selectTool(t){
+  toolTarget=t;
+  toolDigiBuf='';
+  toolDigiAtt=0;
+  document.getElementById('digiScreenNA').textContent='_';
+  document.getElementById('digiScreenNA').classList.remove('err');
+  document.getElementById('digiAttNA').textContent='';
+  document.getElementById('digiToolTitle').textContent=t==='guide'?'Guide — Code d\'accès':'Convertisseur — Code d\'accès';
+  document.getElementById('toolChoice').style.display='none';
+  document.getElementById('toolDigicode').style.display='flex';
+}
+
+function backToToolChoice(){
+  toolTarget=null;
+  document.getElementById('toolChoice').style.display='flex';
+  document.getElementById('toolDigicode').style.display='none';
+}
+
+function closeTool(){
+  document.getElementById('toolOverlay').classList.remove('on');
+}
+
+function closeToolContent(){
+  document.getElementById('toolContent').style.display='none';
+  document.getElementById('toolContentInner').innerHTML='';
+}
+
+function toolDigiUpdate(){
+  const scr=document.getElementById('digiScreenNA');
+  if(!toolDigiBuf){scr.textContent='_';return;}
+  scr.textContent='●'.repeat(toolDigiBuf.length-1)+toolDigiBuf[toolDigiBuf.length-1];
+  if(toolDigiRevTmr)clearTimeout(toolDigiRevTmr);
+  toolDigiRevTmr=setTimeout(()=>{scr.textContent='●'.repeat(toolDigiBuf.length);},800);
+}
+
+function toolDigiPress(n){
+  toolDigiBuf+=String(n);
+  toolDigiUpdate();
+}
+
+function toolDigiDel(){
+  toolDigiBuf=toolDigiBuf.slice(0,-1);
+  toolDigiUpdate();
+}
+
+function toolDigiEnter(){
+  if(toolDigiBuf===C.tool){
+    // Succès
+    document.getElementById('toolOverlay').classList.remove('on');
+    openToolContent(toolTarget);
+  } else {
+    toolDigiAtt++;
+    const left=MAX_ATT-toolDigiAtt;
+    const scr=document.getElementById('digiScreenNA');
+    scr.classList.add('err');
+    setTimeout(()=>scr.classList.remove('err'),400);
+    document.getElementById('digiAttNA').textContent=
+      left>0?`${left} tentative${left>1?'s':''} restante${left>1?'s':''}`:
+             'Accès refusé — réessayer plus tard';
+    toolDigiBuf='';
+    toolDigiUpdate();
+    if(toolDigiAtt>=MAX_ATT){
+      setTimeout(()=>{
+        backToToolChoice();
+        toolDigiAtt=0;
+      },1800);
+    }
+  }
+}
+
+// Pavé numérique du digicode outil
+document.getElementById('digiPadNA').addEventListener('click',e=>{
+  const btn=e.target.closest('[data-dn]');
+  if(btn){toolDigiPress(btn.dataset.dn);return;}
+});
+document.getElementById('dknaBack').addEventListener('click',()=>toolDigiDel());
+document.getElementById('dknaEnter').addEventListener('click',()=>toolDigiEnter());
+
+// Keyboard support in digicode tool overlay
+document.addEventListener('keydown',e=>{
+  const overlay=document.getElementById('toolOverlay');
+  const content=document.getElementById('toolContent');
+  
+  // Si l'overlay outil est ouvert et le digicode est visible
+  if(overlay.classList.contains('on') && document.getElementById('toolDigicode').style.display==='flex'){
+    if(e.key==='Backspace'){toolDigiDel();e.preventDefault();return;}
+    if(e.key==='Enter'){toolDigiEnter();e.preventDefault();return;}
+    if(e.key==='Escape'){backToToolChoice();return;}
+    if(/^[0-9]$/.test(e.key)){toolDigiPress(e.key);e.preventDefault();return;}
+    return;
+  }
+  if(overlay.classList.contains('on')){
+    if(e.key==='Escape'){closeTool();return;}
+    if(e.key==='a'||e.key==='A'){selectTool('guide');return;}
+    if(e.key==='b'||e.key==='B'){selectTool('b64');return;}
+    return;
+  }
+  if(content.style.display==='flex'||content.style.display==='block'){
+    if(e.key==='Escape'){closeToolContent();return;}
+    return;
+  }
+  // Navigation normale
+  if(e.key==='Backspace'){doBack();e.preventDefault();return;}
+  if(e.key==='Enter'){e.preventDefault();return;}
+  const k=e.key.toUpperCase();
+  if(/^[A-Z0-9]$/.test(k))handle(k,'kbd');
+});
+
+// ══════════════════════════════════════════════════════
+// CONTENU GUIDE & B64 (injecté inline)
+// ══════════════════════════════════════════════════════
+function openToolContent(type){
+  const inner=document.getElementById('toolContentInner');
+  inner.innerHTML='';
+  const tc=document.getElementById('toolContent');
+  tc.style.display='flex';
+
+  if(type==='guide'){
+    inner.innerHTML=guideHTML();
+    // Active sidebar scroll
+    setTimeout(()=>{
+      const sections=inner.querySelectorAll('.doc-section');
+      const links=inner.querySelectorAll('.sid-link');
+      inner.addEventListener('scroll',()=>{
+        let cur='';
+        sections.forEach(s=>{if(s.getBoundingClientRect().top<80)cur=s.id;});
+        links.forEach(l=>{l.classList.toggle('active',l.getAttribute('href')==='#'+cur);});
+      },{passive:true});
+      links.forEach(l=>l.addEventListener('click',ev=>{
+        ev.preventDefault();
+        const t=inner.querySelector(l.getAttribute('href'));
+        if(t)t.scrollIntoView({behavior:'smooth'});
+      }));
+    },100);
+  } else {
+    inner.innerHTML=b64HTML();
+    setTimeout(()=>initB64App(inner),100);
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// GUIDE HTML (contenu complet)
+// ══════════════════════════════════════════════════════
+function guideHTML(){
+return `<style>
+#g-wrap{display:flex;min-height:100vh;font-family:'Syne',sans-serif;}
+#g-side{position:sticky;top:0;height:100vh;width:220px;min-width:220px;background:#0f0f1a;border-right:1px solid rgba(255,255,255,0.08);overflow-y:auto;padding:28px 0 40px;flex-shrink:0;}
+#g-side::-webkit-scrollbar{width:2px;}#g-side::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.07);}
+.g-brand{padding:0 22px 20px;font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#3df5b0;border-bottom:1px solid rgba(255,255,255,0.08);margin-bottom:16px;}
+.g-sec-lbl{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:#5a5a78;padding:10px 22px 4px;}
+.g-link{display:block;padding:7px 22px;font-size:12px;font-weight:600;letter-spacing:.04em;color:#5a5a78;transition:all .2s;border-left:2px solid transparent;text-decoration:none;}
+.g-link:hover{color:#eeeae0;background:rgba(255,255,255,.04);}
+.g-link.active{color:#3df5b0;border-left-color:#3df5b0;background:rgba(61,245,176,.06);}
+#g-main{flex:1;padding:60px 64px 100px;max-width:860px;color:#eeeae0;overflow-y:auto;}
+.g-hero{margin-bottom:60px;}
+.g-hero-tag{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#5a5a78;margin-bottom:10px;}
+.g-hero-title{font-size:clamp(32px,5vw,52px);font-weight:800;letter-spacing:.04em;line-height:1.1;background:linear-gradient(90deg,#3df5b0,#38b4f5,#c23ef5);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.g-hero-sub{font-size:15px;color:#5a5a78;margin-top:12px;max-width:560px;}
+.g-section{margin-bottom:56px;scroll-margin-top:32px;}
+.g-sec-num{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:.2em;color:#5a5a78;margin-bottom:4px;}
+.g-sec-title{font-size:22px;font-weight:700;letter-spacing:.03em;margin-bottom:18px;color:#eeeae0;}
+.g-sec-title span{color:#f5e03e;}
+.g-subsec{margin-bottom:28px;}
+.g-subsec-title{font-size:14px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#3df5b0;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,0.08);}
+p.gp{font-size:14px;color:#5a5a78;margin-bottom:12px;}
+p.gp strong{color:#eeeae0;font-weight:600;}
+.g-steps{display:flex;flex-direction:column;gap:12px;}
+.g-step{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:16px 20px;display:flex;gap:16px;align-items:flex-start;}
+.g-step-num{font-family:'Share Tech Mono',monospace;font-size:18px;font-weight:700;color:#f5e03e;min-width:28px;line-height:1;}
+.g-step-title{font-size:13px;font-weight:700;color:#eeeae0;margin-bottom:4px;}
+.g-step-desc{font-size:12px;color:#5a5a78;line-height:1.6;}
+.g-step-code{font-family:'Share Tech Mono',monospace;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,0.08);border-radius:6px;padding:3px 8px;font-size:12px;color:#3df5b0;display:inline-block;margin-top:4px;}
+.g-ktable{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:8px;}
+.g-ktable th{text-align:left;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:.14em;color:#5a5a78;padding:6px 12px;border-bottom:1px solid rgba(255,255,255,0.08);text-transform:uppercase;}
+.g-ktable td{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:top;}
+.g-ktable tr:hover td{background:rgba(255,255,255,.02);}
+.g-kt-key{font-family:'Share Tech Mono',monospace;color:#f5e03e;font-size:13px;}
+.g-kt-desc{color:#5a5a78;font-size:12px;line-height:1.5;}
+.g-callout{border-left:3px solid #f5e03e;background:rgba(245,224,62,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:14px 0;}
+.g-callout-warn{border-color:#ff3b6b;background:rgba(255,59,107,.06);}
+.g-callout-info{border-color:#38b4f5;background:rgba(56,180,245,.06);}
+.g-callout p{margin:0;font-size:13px;color:#5a5a78;}
+.g-callout p strong{color:#f5e03e;}
+.g-callout-warn p strong{color:#ff3b6b;}
+.g-callout-info p strong{color:#38b4f5;}
+.g-hud-legend{display:flex;gap:20px;flex-wrap:wrap;margin:12px 0;}
+.g-hud-item{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 14px;}
+.g-hud-dot{width:13px;height:13px;border-radius:50%;flex-shrink:0;}
+.g-hud-name{font-weight:700;color:#eeeae0;font-size:12px;}
+.g-hud-detail{color:#5a5a78;font-size:11px;}
+.g-codeblock{background:#0a0a14;border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:18px 20px;font-family:'Share Tech Mono',monospace;font-size:12px;color:#b8f0c8;line-height:2;overflow-x:auto;margin:10px 0;}
+.g-codeblock .cm{color:#5a5a78;}.g-codeblock .ck{color:#f5e03e;}.g-codeblock .cv{color:#3df5b0;}.g-codeblock .cs{color:#f87171;}
+.g-flow{display:flex;flex-direction:column;gap:6px;margin:12px 0;}
+.g-flow-step{display:flex;align-items:center;gap:10px;}
+.g-flow-box{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:8px 14px;font-family:'Share Tech Mono',monospace;font-size:11px;color:#eeeae0;flex:1;}
+.g-flow-key{font-family:'Share Tech Mono',monospace;font-size:11px;color:#f5e03e;background:rgba(245,224,62,.1);border-radius:5px;padding:3px 8px;white-space:nowrap;}
+.g-flow-arrow{font-size:18px;color:#5a5a78;}
+.g-dbtable{width:100%;border-collapse:collapse;font-size:12px;}
+.g-dbtable th{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#5a5a78;padding:7px 10px;border-bottom:1px solid rgba(255,255,255,0.08);text-align:left;}
+.g-dbtable td{padding:6px 10px;border-bottom:1px solid rgba(255,255,255,.04);font-family:'Share Tech Mono',monospace;vertical-align:top;}
+.g-dbtable tr:hover td{background:rgba(255,255,255,.02);}
+.g-td-id{color:#5a5a78;}.g-td-title{color:#eeeae0;font-family:'Syne',sans-serif;font-size:12px;font-weight:600;}
+.g-td-code{color:#f5e03e;}.g-td-cat{color:#5a5a78;font-size:11px;}
+@media(max-width:700px){#g-side{display:none;}#g-main{padding:30px 20px 80px;}}
+</style>
+<div id="g-wrap">
+<nav id="g-side">
+  <div class="g-brand">Nexus-Aegis<br>Guide complet</div>
+  <div class="g-sec-lbl">Présentation</div>
+  <a class="g-link" href="#g-intro">Introduction</a>
+  <a class="g-link" href="#g-interface">Interface</a>
+  <div class="g-sec-lbl">Utilisation</div>
+  <a class="g-link" href="#g-connexion">Se connecter</a>
+  <a class="g-link" href="#g-menu">Naviguer dans les menus</a>
+  <a class="g-link" href="#g-menu-a">Menu A — Sélection</a>
+  <a class="g-link" href="#g-menu-b">Menu B — Code direct</a>
+  <a class="g-link" href="#g-menu-c">Menu C — En attente</a>
+  <a class="g-link" href="#g-claviers">Claviers virtuels</a>
+  <a class="g-link" href="#g-raccourcis">Raccourcis clavier</a>
+  <div class="g-sec-lbl">Administration</div>
+  <a class="g-link" href="#g-ajouter">Ajouter un site</a>
+  <a class="g-link" href="#g-encoder">Encoder une URL</a>
+  <a class="g-link" href="#g-attente">Enregistrements en attente</a>
+  <a class="g-link" href="#g-codes">Modifier les codes</a>
+  <div class="g-sec-lbl">Référence</div>
+  <a class="g-link" href="#g-sites">Liste complète des sites</a>
+  <a class="g-link" href="#g-faq">FAQ</a>
+</nav>
+<main id="g-main">
+  <div class="g-hero">
+    <div class="g-hero-tag">Documentation officielle · v5.0</div>
+    <div class="g-hero-title">Guide complet<br>Nexus-Aegis</div>
+    <div class="g-hero-sub">Portail d'accès sécurisé à la base de données Classe 208.</div>
+  </div>
+
+  <div class="g-section" id="g-intro">
+    <div class="g-sec-num">01</div>
+    <div class="g-sec-title">Introduction</div>
+    <p class="gp"><strong>Nexus-Aegis</strong> est un portail d'accès sécurisé permettant d'atteindre rapidement tous les sites et ressources de la Classe 208. L'accès est protégé par plusieurs niveaux de codes.</p>
+    <p class="gp">Le portail fonctionne entièrement dans le navigateur — aucune installation requise. Toutes les URLs sont encodées en Base64 dans le fichier HTML.</p>
+    <div class="g-callout"><p><strong>Compatibilité :</strong> fonctionne sur ordinateur (Chrome, Firefox, Safari, Edge) et sur mobile.</p></div>
+  </div>
+
+  <div class="g-section" id="g-interface">
+    <div class="g-sec-num">02</div>
+    <div class="g-sec-title">Interface</div>
+    <div class="g-subsec">
+      <div class="g-subsec-title">Boutons HUD</div>
+      <div class="g-hud-legend">
+        <div class="g-hud-item"><div class="g-hud-dot" style="background:#2563eb;box-shadow:0 0 8px #2563eb;"></div><div><div class="g-hud-name">Bouton bleu</div><div class="g-hud-detail">Tactile + touche T · Ouvre guide/outils</div></div></div>
+        <div class="g-hud-item"><div class="g-hud-dot" style="background:#fff;box-shadow:0 0 8px #fff;"></div><div><div class="g-hud-name">Bouton blanc</div><div class="g-hud-detail">Tactile · Affiche/masque les claviers</div></div></div>
+        <div class="g-hud-item"><div class="g-hud-dot" style="background:#ff3b6b;box-shadow:0 0 8px #ff3b6b;"></div><div><div class="g-hud-name">Bouton rouge</div><div class="g-hud-detail">Tactile + touche K · Déconnexion</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="g-section" id="g-connexion">
+    <div class="g-sec-num">03</div>
+    <div class="g-sec-title">Se connecter</div>
+    <div class="g-flow">
+      <div class="g-flow-step"><div class="g-flow-box">Écran d'accueil</div><div class="g-flow-arrow">→</div><div class="g-flow-key">E</div></div>
+      <div class="g-flow-step"><div class="g-flow-box">Saisir le code : <strong>26866569389</strong></div><div class="g-flow-arrow">→</div><div class="g-flow-key">F</div></div>
+      <div class="g-flow-step"><div class="g-flow-box">Menu principal</div><div class="g-flow-arrow">✓</div></div>
+    </div>
+    <div class="g-callout g-callout-warn"><p><strong>Attention :</strong> après 3 tentatives incorrectes, l'accès est bloqué. Rafraîchir la page (F5) pour réessayer.</p></div>
+  </div>
+
+  <div class="g-section" id="g-menu">
+    <div class="g-sec-num">04</div>
+    <div class="g-sec-title">Naviguer dans les menus</div>
+    <p class="gp">Choisir avec <strong>A, B ou C</strong>, confirmer avec <strong>G</strong>. Code de confirmation : <strong>1710</strong>, valider avec <strong>G</strong>.</p>
+    <table class="g-ktable">
+      <tr><th>Touche</th><th>Action</th></tr>
+      <tr><td class="g-kt-key">A + G</td><td class="g-kt-desc">Sélection manuelle</td></tr>
+      <tr><td class="g-kt-key">B + G</td><td class="g-kt-desc">Recherche par code</td></tr>
+      <tr><td class="g-kt-key">C + G</td><td class="g-kt-desc">Enregistrements en attente</td></tr>
+    </table>
+  </div>
+
+  <div class="g-section" id="g-menu-a">
+    <div class="g-sec-num">05</div>
+    <div class="g-sec-title">Menu A — <span>Sélection manuelle</span></div>
+    <div class="g-subsec">
+      <div class="g-subsec-title">Méthode 1 — N° + E</div>
+      <div class="g-steps">
+        <div class="g-step"><div class="g-step-num">1</div><div><div class="g-step-title">Saisir le numéro</div><div class="g-step-desc">Taper le numéro (ex: <span class="g-step-code">9</span>) avec le pavé.</div></div></div>
+        <div class="g-step"><div class="g-step-num">2</div><div><div class="g-step-title">Appuyer sur E</div><div class="g-step-desc">Le site s'ouvre dans un nouvel onglet.</div></div></div>
+      </div>
+    </div>
+    <div class="g-subsec">
+      <div class="g-subsec-title">Méthode 2 — Bouton OUVRIR</div>
+      <div class="g-steps">
+        <div class="g-step"><div class="g-step-num">1</div><div><div class="g-step-title">Cliquer sur OUVRIR</div></div></div>
+        <div class="g-step"><div class="g-step-num">2</div><div><div class="g-step-title">Saisir le code d'entrée : 2450</div></div></div>
+        <div class="g-step"><div class="g-step-num">3</div><div><div class="g-step-title">Valider avec H</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="g-section" id="g-menu-b">
+    <div class="g-sec-num">06</div>
+    <div class="g-sec-title">Menu B — <span>Recherche par code</span></div>
+    <div class="g-flow">
+      <div class="g-flow-step"><div class="g-flow-box">Code du site (ex: 108)</div><div class="g-flow-arrow">→</div><div class="g-flow-key">J</div></div>
+      <div class="g-flow-step"><div class="g-flow-box">Code d'accès : <strong>1251</strong></div><div class="g-flow-arrow">→</div><div class="g-flow-key">J</div></div>
+      <div class="g-flow-step"><div class="g-flow-box">Le site s'ouvre</div></div>
+    </div>
+  </div>
+
+  <div class="g-section" id="g-menu-c">
+    <div class="g-sec-num">07</div>
+    <div class="g-sec-title">Menu C — <span>Enregistrements en attente</span></div>
+    <p class="gp">Cliquer sur un enregistrement → saisir le code <strong>0929</strong> → valider avec <strong>V</strong>.</p>
+  </div>
+
+  <div class="g-section" id="g-claviers">
+    <div class="g-sec-num">08</div>
+    <div class="g-sec-title">Claviers virtuels</div>
+    <table class="g-ktable">
+      <tr><th>Section</th><th>Activer</th><th>Désactiver</th></tr>
+      <tr><td class="g-kt-key">AZERTY</td><td class="g-kt-desc">M</td><td class="g-kt-desc">O</td></tr>
+      <tr><td class="g-kt-key">123</td><td class="g-kt-desc">N</td><td class="g-kt-desc">P</td></tr>
+      <tr><td class="g-kt-key">NAV</td><td class="g-kt-desc">Q</td><td class="g-kt-desc">R</td></tr>
+    </table>
+  </div>
+
+  <div class="g-section" id="g-raccourcis">
+    <div class="g-sec-num">09</div>
+    <div class="g-sec-title">Raccourcis clavier</div>
+    <table class="g-ktable">
+      <tr><th>Touche</th><th>Action</th></tr>
+      <tr><td class="g-kt-key">T</td><td class="g-kt-desc">Ouvrir guide / outils</td></tr>
+      <tr><td class="g-kt-key">K</td><td class="g-kt-desc">Déconnexion</td></tr>
+      <tr><td class="g-kt-key">L</td><td class="g-kt-desc">Mode sombre/clair</td></tr>
+      <tr><td class="g-kt-key">E</td><td class="g-kt-desc">Entrer / ouvrir entrée</td></tr>
+      <tr><td class="g-kt-key">F</td><td class="g-kt-desc">Valider code principal</td></tr>
+      <tr><td class="g-kt-key">A/B/C</td><td class="g-kt-desc">Sélectionner menu</td></tr>
+      <tr><td class="g-kt-key">G</td><td class="g-kt-desc">Confirmer / valider 1710</td></tr>
+      <tr><td class="g-kt-key">H</td><td class="g-kt-desc">Valider code entrée 2450</td></tr>
+      <tr><td class="g-kt-key">J</td><td class="g-kt-desc">Valider code site / accès B</td></tr>
+      <tr><td class="g-kt-key">V</td><td class="g-kt-desc">Valider code attente 0929</td></tr>
+      <tr><td class="g-kt-key">Backspace</td><td class="g-kt-desc">Effacer dernier caractère</td></tr>
+    </table>
+  </div>
+
+  <div class="g-section" id="g-ajouter">
+    <div class="g-sec-num">10</div>
+    <div class="g-sec-title">Ajouter un nouveau site</div>
+    <div class="g-steps">
+      <div class="g-step"><div class="g-step-num">1</div><div><div class="g-step-title">Ouvrir le fichier HTML dans un éditeur</div><div class="g-step-desc">Chercher la section <code>// ─── CASES VIDES — REMPLIR ICI</code>.</div></div></div>
+      <div class="g-step"><div class="g-step-num">2</div><div><div class="g-step-title">Encoder l'URL en Base64</div><div class="g-step-desc">Dans la console (F12) : <span class="g-step-code">btoa("https://votre-url.com/")</span></div></div></div>
+      <div class="g-step"><div class="g-step-num">3</div><div><div class="g-step-title">Décommenter une case vide et remplir</div><div class="g-step-desc">Supprimer les <code>//</code> et remplir id, title, code, _u.</div></div></div>
+      <div class="g-step"><div class="g-step-num">4</div><div><div class="g-step-title">Sauvegarder et tester</div></div></div>
+    </div>
+  </div>
+
+  <div class="g-section" id="g-encoder">
+    <div class="g-sec-num">11</div>
+    <div class="g-sec-title">Encoder une URL</div>
+    <div class="g-codeblock"><span class="cm">// Console navigateur (F12) :</span>
+btoa(<span class="cs">"https://monsite.github.io/page/"</span>)
+<span class="cm">// Décoder :</span>
+atob(<span class="cs">"aHR0cH..."</span>)</div>
+  </div>
+
+  <div class="g-section" id="g-attente">
+    <div class="g-sec-num">12</div>
+    <div class="g-sec-title">Enregistrements en attente</div>
+    <div class="g-codeblock"><span class="ck">const</span> PENDING=[
+  <span class="cm">// {label:"Description", _u:"URL_EN_BASE64"},</span>
+];</div>
+  </div>
+
+  <div class="g-section" id="g-codes">
+    <div class="g-sec-num">13</div>
+    <div class="g-sec-title">Modifier les codes d'accès</div>
+    <div class="g-codeblock"><span class="ck">const</span> C={
+  <span class="ck">access</span>: <span class="cs">"26866569389"</span>, <span class="cm">// connexion</span>
+  <span class="ck">menu</span>:   <span class="cs">"1710"</span>,        <span class="cm">// confirmation menu</span>
+  <span class="ck">entry</span>:  <span class="cs">"2450"</span>,        <span class="cm">// accès site menu A</span>
+  <span class="ck">search</span>: <span class="cs">"1251"</span>,        <span class="cm">// accès menu B</span>
+  <span class="ck">pend</span>:   <span class="cs">"0929"</span>,        <span class="cm">// enregistrements en attente</span>
+  <span class="ck">tool</span>:   <span class="cs">"820114630254"</span> <span class="cm">// guide & convertisseur</span>
+};</div>
+  </div>
+
+  <div class="g-section" id="g-sites">
+    <div class="g-sec-num">14</div>
+    <div class="g-sec-title">Liste complète des sites</div>
+    <table class="g-dbtable">
+      <tr><th>N°</th><th>Titre</th><th>Code</th><th>Catégorie</th></tr>
+      <tr><td class="g-td-id">01</td><td class="g-td-title">Base 208</td><td class="g-td-code">100</td><td class="g-td-cat">Cours 208</td></tr>
+      <tr><td class="g-td-id">02</td><td class="g-td-title">Français</td><td class="g-td-code">101</td><td class="g-td-cat">Cours 208</td></tr>
+      <tr><td class="g-td-id">03</td><td class="g-td-title">Synthèse</td><td class="g-td-code">102</td><td class="g-td-cat">Cours 208</td></tr>
+      <tr><td class="g-td-id">04</td><td class="g-td-title">Textes</td><td class="g-td-code">103</td><td class="g-td-cat">Cours 208</td></tr>
+      <tr><td class="g-td-id">05</td><td class="g-td-title">Anglais LV1</td><td class="g-td-code">104</td><td class="g-td-cat">Cours 208</td></tr>
+      <tr><td class="g-td-id">06</td><td class="g-td-title">Padlet Anglais</td><td class="g-td-code">105</td><td class="g-td-cat">Cours 208</td></tr>
+      <tr><td class="g-td-id">07</td><td class="g-td-title">Russe LV3</td><td class="g-td-code">106</td><td class="g-td-cat">Cours 208</td></tr>
+      <tr><td class="g-td-id">08</td><td class="g-td-title">Italien LV2</td><td class="g-td-code">107</td><td class="g-td-cat">Cours 208</td></tr>
+      <tr><td class="g-td-id">09</td><td class="g-td-title">Physique-Chimie</td><td class="g-td-code">108</td><td class="g-td-cat">Cours 208</td></tr>
+      <tr><td class="g-td-id">10</td><td class="g-td-title">SVT</td><td class="g-td-code">109</td><td class="g-td-cat">Cours 208</td></tr>
+      <tr><td class="g-td-id">11</td><td class="g-td-title">SNT</td><td class="g-td-code">110</td><td class="g-td-cat">Cours 208</td></tr>
+      <tr><td class="g-td-id">12</td><td class="g-td-title">SES</td><td class="g-td-code">111</td><td class="g-td-cat">Cours 208</td></tr>
+      <tr><td class="g-td-id">13</td><td class="g-td-title">Heure</td><td class="g-td-code">200</td><td class="g-td-cat">Outils</td></tr>
+      <tr><td class="g-td-id">14</td><td class="g-td-title">Vecteurs Maths</td><td class="g-td-code">113</td><td class="g-td-cat">Cours 208</td></tr>
+      <tr><td class="g-td-id">15</td><td class="g-td-title">Fonctions Maths</td><td class="g-td-code">114</td><td class="g-td-cat">Cours 208</td></tr>
+      <tr><td class="g-td-id">16</td><td class="g-td-title">Sea Shepherd Diapo</td><td class="g-td-code">115</td><td class="g-td-cat">Cours 208</td></tr>
+      <tr><td class="g-td-id">17</td><td class="g-td-title">Sea Shepherd Texte</td><td class="g-td-code">116</td><td class="g-td-cat">Cours 208</td></tr>
+      <tr><td class="g-td-id">18</td><td class="g-td-title">Physique 10-11</td><td class="g-td-code">117</td><td class="g-td-cat">Cours 208</td></tr>
+      <tr><td class="g-td-id">19</td><td class="g-td-title">Aviapro Inter</td><td class="g-td-code">201</td><td class="g-td-cat">Outils</td></tr>
+      <tr><td class="g-td-id">20</td><td class="g-td-title">Métro Paris</td><td class="g-td-code">202</td><td class="g-td-cat">Outils</td></tr>
+      <tr><td class="g-td-id">21</td><td class="g-td-title">Réveil</td><td class="g-td-code">203</td><td class="g-td-cat">Outils</td></tr>
+      <tr><td class="g-td-id">22</td><td class="g-td-title">Horloge Exam'</td><td class="g-td-code">204</td><td class="g-td-cat">Outils</td></tr>
+      <tr><td class="g-td-id">23</td><td class="g-td-title">Exposé 1984</td><td class="g-td-code">118</td><td class="g-td-cat">Cours 208</td></tr>
+      <tr><td class="g-td-id">24</td><td class="g-td-title">Prompteur Original</td><td class="g-td-code">205</td><td class="g-td-cat">Outils</td></tr>
+      <tr><td class="g-td-id">25</td><td class="g-td-title">Flightradar</td><td class="g-td-code">300</td><td class="g-td-cat">Externe</td></tr>
+      <tr><td class="g-td-id">26</td><td class="g-td-title">Cartometro</td><td class="g-td-code">301</td><td class="g-td-cat">Externe</td></tr>
+      <tr><td class="g-td-id">27</td><td class="g-td-title">IDFM</td><td class="g-td-code">302</td><td class="g-td-cat">Externe</td></tr>
+      <tr><td class="g-td-id">28</td><td class="g-td-title">ChatGPT</td><td class="g-td-code">303</td><td class="g-td-cat">Externe</td></tr>
+      <tr><td class="g-td-id">29</td><td class="g-td-title">Gemini</td><td class="g-td-code">304</td><td class="g-td-cat">Externe</td></tr>
+      <tr><td class="g-td-id">30</td><td class="g-td-title">Claude</td><td class="g-td-code">305</td><td class="g-td-cat">Externe</td></tr>
+      <tr><td class="g-td-id">31</td><td class="g-td-title">Canva</td><td class="g-td-code">306</td><td class="g-td-cat">Externe</td></tr>
+      <tr><td class="g-td-id">32</td><td class="g-td-title">Github</td><td class="g-td-code">307</td><td class="g-td-cat">Externe</td></tr>
+      <tr><td class="g-td-id">33</td><td class="g-td-title">Atrium</td><td class="g-td-code">308</td><td class="g-td-cat">Externe</td></tr>
+      <tr><td class="g-td-id">34</td><td class="g-td-title">RATP</td><td class="g-td-code">309</td><td class="g-td-cat">Externe</td></tr>
+      <tr><td class="g-td-id">35</td><td class="g-td-title">Ita Mestieri</td><td class="g-td-code">119</td><td class="g-td-cat">Cours 208</td></tr>
+    </table>
+  </div>
+
+  <div class="g-section" id="g-faq">
+    <div class="g-sec-num">15</div>
+    <div class="g-sec-title">FAQ</div>
+    <div class="g-subsec"><div class="g-subsec-title">Le site ne s'ouvre pas</div><p class="gp">Vérifier que le navigateur n'<strong>bloque pas les pop-ups</strong>.</p></div>
+    <div class="g-subsec"><div class="g-subsec-title">Comment effacer ?</div><p class="gp"><strong>Backspace</strong> sur ordi, bouton <strong>⌫</strong> sur mobile.</p></div>
+    <div class="g-subsec"><div class="g-subsec-title">Accès bloqué après 3 erreurs</div><p class="gp">Rafraîchir avec <strong>F5</strong>.</p></div>
+    <div class="g-subsec"><div class="g-subsec-title">Code du guide ?</div><p class="gp">Le code est <strong>820114630254</strong>.</p></div>
+  </div>
+</main>
+</div>`;
+}
+
+// ══════════════════════════════════════════════════════
+// B64 CONVERTISSEUR HTML
+// ══════════════════════════════════════════════════════
+function b64HTML(){
+return `<style>
+#b64-wrap{min-height:100vh;background:#04040a;color:#eeeae0;font-family:'Syne',sans-serif;}
+#b64-header{display:flex;align-items:center;justify-content:space-between;padding:18px 24px 16px;border-bottom:1px solid rgba(255,255,255,0.07);background:rgba(8,8,26,.8);}
+.b64-brand{font-family:'Bebas Neue','Share Tech Mono',monospace;font-size:22px;letter-spacing:.16em;background:linear-gradient(90deg,#3df5b0,#38b4f5);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.b64-tag{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.2em;color:#5a5a78;text-transform:uppercase;}
+.b64-tabs{display:flex;border-bottom:1px solid rgba(255,255,255,0.07);background:rgba(8,8,26,.6);}
+.b64-tab{padding:13px 22px;font-family:'Share Tech Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#5a5a78;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;position:relative;top:1px;}
+.b64-tab:hover{color:#eeeae0;}
+.b64-tab.active{color:#3df5b0;border-bottom-color:#3df5b0;}
+.b64-body{padding:28px 32px;max-width:800px;}
+.b64-panel{display:none;}
+.b64-panel.active{display:flex;flex-direction:column;gap:18px;}
+.b64-lbl{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.2em;color:#5a5a78;text-transform:uppercase;margin-bottom:6px;}
+.b64-irow{display:flex;gap:8px;align-items:stretch;}
+.b64-input{flex:1;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,0.14);border-radius:10px;color:#eeeae0;font-family:'Share Tech Mono',monospace;font-size:13px;padding:12px 16px;outline:none;transition:border-color .2s;}
+.b64-input::placeholder{color:#5a5a78;}
+.b64-input:focus{border-color:#3df5b0;}
+.b64-btn{padding:12px 20px;border-radius:10px;border:1px solid #3df5b0;background:rgba(61,245,176,.08);color:#3df5b0;font-family:'Share Tech Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.b64-btn:hover{background:rgba(61,245,176,.2);}
+.b64-btn.c2{border-color:#38b4f5;color:#38b4f5;background:rgba(56,180,245,.08);}
+.b64-btn.c2:hover{background:rgba(56,180,245,.2);}
+.b64-btn.sm{padding:8px 14px;font-size:10px;}
+.b64-result{background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:14px 16px;font-family:'Share Tech Mono',monospace;font-size:12px;color:#3df5b0;word-break:break-all;line-height:1.7;min-height:52px;position:relative;}
+.b64-result.empty{color:#5a5a78;font-size:11px;}
+.b64-copy-btn{position:absolute;top:10px;right:10px;padding:4px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.14);background:rgba(255,255,255,.05);color:#5a5a78;font-size:10px;letter-spacing:.1em;cursor:pointer;font-family:'Share Tech Mono',monospace;transition:all .2s;}
+.b64-copy-btn:hover{background:rgba(255,255,255,.1);color:#eeeae0;}
+.b64-copy-btn.copied{color:#3df5b0;border-color:rgba(61,245,176,.4);}
+.b64-batch-area{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,0.14);border-radius:10px;color:#eeeae0;font-family:'Share Tech Mono',monospace;font-size:12px;padding:14px 16px;resize:vertical;outline:none;transition:border-color .2s;min-height:120px;width:100%;}
+.b64-batch-area:focus{border-color:#38b4f5;}
+.b64-table-wrap{border:1px solid rgba(255,255,255,0.07);border-radius:10px;overflow:auto;max-height:300px;}
+.b64-table-wrap::-webkit-scrollbar{width:2px;}
+.b64-table{width:100%;border-collapse:collapse;font-family:'Share Tech Mono',monospace;font-size:11px;}
+.b64-table th{background:rgba(255,255,255,.04);color:#5a5a78;letter-spacing:.12em;text-transform:uppercase;padding:9px 12px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.07);position:sticky;top:0;}
+.b64-table td{padding:9px 12px;border-bottom:1px solid rgba(255,255,255,.03);word-break:break-all;vertical-align:top;}
+.b64-table tr:hover td{background:rgba(255,255,255,.02);}
+.b64-portail{background:#020210;border:1px solid rgba(61,245,176,.2);border-radius:10px;padding:16px;font-family:'Share Tech Mono',monospace;font-size:12px;color:#b8f0c8;line-height:2;overflow-x:auto;min-height:54px;position:relative;}
+.b64-portail .cm{color:#5a5a78;}.b64-portail .ck{color:#f5e03e;}.b64-portail .cv{color:#3df5b0;}.b64-portail .cs{color:#f87171;}
+.b64-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.b64-info-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:16px;}
+.b64-info-title{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#eeeae0;margin-bottom:8px;}
+.b64-info-card p{font-size:11px;color:#5a5a78;line-height:1.7;}
+.b64-info-card code{font-family:'Share Tech Mono',monospace;color:#3df5b0;font-size:11px;}
+#b64-toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(60px);background:rgba(61,245,176,.12);border:1px solid rgba(61,245,176,.35);color:#3df5b0;font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:.14em;padding:10px 22px;border-radius:22px;z-index:999;transition:transform .3s cubic-bezier(.22,1,.36,1);backdrop-filter:blur(14px);pointer-events:none;}
+#b64-toast.show{transform:translateX(-50%) translateY(0);}
+@media(max-width:600px){.b64-info-grid{grid-template-columns:1fr;}}
+</style>
+<div id="b64-wrap">
+<div id="b64-header">
+  <div><div class="b64-brand">NEXUS — B64</div><div class="b64-tag">Convertisseur URL ↔ Base64</div></div>
+</div>
+<div class="b64-tabs">
+  <div class="b64-tab active" data-b64tab="single">Encodage URL</div>
+  <div class="b64-tab" data-b64tab="batch">Lot de liens</div>
+  <div class="b64-tab" data-b64tab="decode">Décodage</div>
+  <div class="b64-tab" data-b64tab="portail">Code Portail</div>
+  <div class="b64-tab" data-b64tab="info">Guide</div>
+</div>
+<div class="b64-body">
+  <!-- SINGLE -->
+  <div class="b64-panel active" id="b64-panel-single">
+    <div><div class="b64-lbl">URL à convertir</div>
+    <div class="b64-irow">
+      <input class="b64-input" id="b64-sInput" type="text" placeholder="https://exemple.github.io/site/" spellcheck="false">
+      <button class="b64-btn" id="b64-sConvert">Convertir</button>
+    </div></div>
+    <div><div class="b64-lbl">Résultat Base64</div>
+    <div class="b64-result empty" id="b64-sResult">Entrez une URL…<button class="b64-copy-btn" id="b64-sCopy" style="display:none">Copier</button></div></div>
+    <div><div class="b64-lbl">Vérification</div><div class="b64-result empty" id="b64-sVerify">—</div></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="b64-btn c2 sm" id="b64-sClear">Effacer</button>
+      <button class="b64-btn sm" id="b64-sCopyFull">Copier pour portail</button>
+    </div>
+  </div>
+  <!-- BATCH -->
+  <div class="b64-panel" id="b64-panel-batch">
+    <div><div class="b64-lbl">URLs (une par ligne)</div>
+    <textarea class="b64-batch-area" id="b64-bInput" rows="5" placeholder="https://site1.github.io/&#10;https://site2.github.io/page/"></textarea></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="b64-btn" id="b64-bConvert">Tout convertir</button>
+      <button class="b64-btn c2 sm" id="b64-bClear">Effacer</button>
+      <button class="b64-btn sm" id="b64-bExport">Exporter tout</button>
+    </div>
+    <div class="b64-table-wrap" id="b64-bResults" style="display:none;">
+      <table class="b64-table"><thead><tr><th>#</th><th>URL</th><th>Base64</th><th></th></tr></thead><tbody id="b64-bBody"></tbody></table>
+    </div>
+  </div>
+  <!-- DECODE -->
+  <div class="b64-panel" id="b64-panel-decode">
+    <div><div class="b64-lbl">Chaîne Base64 à décoder</div>
+    <div class="b64-irow">
+      <input class="b64-input" id="b64-dInput" type="text" placeholder="aHR0cHM6Ly9leGVtcGxlLmdpdGh1Yi5pby8=" spellcheck="false">
+      <button class="b64-btn c2" id="b64-dBtn">Décoder</button>
+    </div></div>
+    <div><div class="b64-lbl">URL décodée</div><div class="b64-result empty" id="b64-dResult">Entrez une chaîne Base64…</div></div>
+    <div style="display:flex;gap:8px;">
+      <button class="b64-btn c2 sm" id="b64-dClear">Effacer</button>
+      <button class="b64-btn sm" id="b64-dCopy">Copier l'URL</button>
+    </div>
+  </div>
+  <!-- PORTAIL -->
+  <div class="b64-panel" id="b64-panel-portail">
+    <div><div class="b64-lbl">Générer une ligne complète pour le portail</div>
+    <div style="display:grid;grid-template-columns:60px 1fr 80px;gap:8px;">
+      <div><div class="b64-lbl">N°</div><input class="b64-input" id="b64-pId" type="number" placeholder="36" min="1" style="padding:10px;"></div>
+      <div><div class="b64-lbl">URL</div><input class="b64-input" id="b64-pUrl" type="text" placeholder="https://exemple.github.io/site/" spellcheck="false"></div>
+      <div><div class="b64-lbl">Code</div><input class="b64-input" id="b64-pCode" type="text" placeholder="310" style="padding:10px;"></div>
+    </div>
+    <div style="margin-top:8px;"><div class="b64-lbl">Titre</div><input class="b64-input" id="b64-pTitle" type="text" placeholder="Mon Site"></div></div>
+    <button class="b64-btn" id="b64-pGenerate">Générer la ligne</button>
+    <div><div class="b64-lbl">Ligne à coller dans DB</div>
+    <div class="b64-portail" id="b64-pResult"><span style="color:#5a5a78;font-size:11px;">Remplissez et cliquez Générer…</span></div>
+    <div style="display:flex;gap:8px;margin-top:8px;">
+      <button class="b64-btn sm" id="b64-pCopy">Copier la ligne</button>
+      <button class="b64-btn c2 sm" id="b64-pCopyGuide">Copier ligne guide</button>
+    </div></div>
+  </div>
+  <!-- INFO -->
+  <div class="b64-panel" id="b64-panel-info">
+    <div class="b64-info-grid">
+      <div class="b64-info-card"><div class="b64-info-title">Qu'est-ce que Base64 ?</div><p>Base64 transforme n'importe quelle URL en une chaîne ASCII lisible mais non directement compréhensible.</p></div>
+      <div class="b64-info-card"><div class="b64-info-title">Console navigateur</div><p>Encoder : <code>btoa("https://url.com/")</code><br>Décoder : <code>atob("aHR0cH...")</code></p></div>
+      <div class="b64-info-card"><div class="b64-info-title">Règles</div><p>L'URL doit commencer par <code>https://</code>. Le <code>/</code> final est important.</p></div>
+      <div class="b64-info-card"><div class="b64-info-title">Codes portail</div><p>Connexion : <code>26866569389</code><br>Menu : <code>1710</code> · Entrée : <code>2450</code><br>Recherche : <code>1251</code> · Attente : <code>0929</code></p></div>
+    </div>
+  </div>
+</div>
+<div id="b64-toast">Copié !</div>
+</div>`;
+}
+
+function initB64App(root){
+  // Tabs
+  root.querySelectorAll('.b64-tab').forEach(tab=>{
+    tab.addEventListener('click',()=>{
+      root.querySelectorAll('.b64-tab').forEach(t=>t.classList.remove('active'));
+      root.querySelectorAll('.b64-panel').forEach(p=>p.classList.remove('active'));
+      tab.classList.add('active');
+      root.querySelector('#b64-panel-'+tab.dataset.b64tab).classList.add('active');
+    });
+  });
+
+  // Toast
+  let toastTimer=null;
+  function showToast(msg){
+    const t=root.querySelector('#b64-toast');
+    t.textContent=msg;t.classList.add('show');
+    if(toastTimer)clearTimeout(toastTimer);
+    toastTimer=setTimeout(()=>t.classList.remove('show'),2000);
+  }
+  function copyText(text){
+    navigator.clipboard.writeText(text).then(()=>showToast('Copié !')).catch(()=>{
+      const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();showToast('Copié !');
+    });
+  }
+  function encodeURL(url){try{return btoa(unescape(encodeURIComponent(url)));}catch(e){return btoa(url);}}
+  function decodeB64(b64){try{return decodeURIComponent(escape(atob(b64)));}catch(e){try{return atob(b64);}catch(e2){return null;}}}
+
+  // SINGLE
+  function doSingle(){
+    const url=root.querySelector('#b64-sInput').value.trim();
+    const res=root.querySelector('#b64-sResult');
+    const ver=root.querySelector('#b64-sVerify');
+    if(!url){res.textContent='⚠ Entrez une URL.';res.className='b64-result empty';return;}
+    const b64=encodeURL(url);
+    res.className='b64-result';
+    res.innerHTML=`<span>${b64}</span>`;
+    const cb=document.createElement('button');cb.className='b64-copy-btn';cb.textContent='Copier';
+    cb.addEventListener('click',()=>{copyText(b64);cb.textContent='✓';cb.classList.add('copied');setTimeout(()=>{cb.textContent='Copier';cb.classList.remove('copied');},1500);});
+    res.appendChild(cb);
+    const decoded=decodeB64(b64);
+    ver.className=decoded===url?'b64-result':'b64-result empty';
+    ver.textContent=decoded?`✓ Vérifié : ${decoded}`:'⚠ Erreur';
+  }
+  root.querySelector('#b64-sConvert').addEventListener('click',doSingle);
+  root.querySelector('#b64-sInput').addEventListener('keydown',e=>{if(e.key==='Enter')doSingle();});
+  root.querySelector('#b64-sClear').addEventListener('click',()=>{
+    root.querySelector('#b64-sInput').value='';
+    root.querySelector('#b64-sResult').className='b64-result empty';
+    root.querySelector('#b64-sResult').innerHTML='Entrez une URL…';
+    root.querySelector('#b64-sVerify').className='b64-result empty';
+    root.querySelector('#b64-sVerify').textContent='—';
+  });
+  root.querySelector('#b64-sCopyFull').addEventListener('click',()=>{
+    const url=root.querySelector('#b64-sInput').value.trim();
+    if(!url)return;
+    copyText(`_u:"${encodeURL(url)}"`);showToast('Copié pour portail !');
+  });
+
+  // BATCH
+  root.querySelector('#b64-bConvert').addEventListener('click',()=>{
+    const lines=root.querySelector('#b64-bInput').value.split('\n').map(l=>l.trim()).filter(l=>l.length>0);
+    if(!lines.length){showToast('Aucune URL');return;}
+    const tbody=root.querySelector('#b64-bBody');tbody.innerHTML='';
+    lines.forEach((url,i)=>{
+      const b64=encodeURL(url);
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td style="color:#5a5a78">${i+1}</td><td style="color:#5a5a78;font-size:10px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${url}">${url}</td><td style="color:#3df5b0;font-size:10px;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${b64}">${b64}</td><td><button class="b64-btn sm" style="padding:4px 10px;font-size:9px;" onclick="(function(){navigator.clipboard.writeText('${b64.replace(/'/g,"\\'")}').catch(()=>{});})()">Copier</button></td>`;
+      tbody.appendChild(tr);
+    });
+    root.querySelector('#b64-bResults').style.display='block';
+  });
+  root.querySelector('#b64-bClear').addEventListener('click',()=>{
+    root.querySelector('#b64-bInput').value='';
+    root.querySelector('#b64-bResults').style.display='none';
+    root.querySelector('#b64-bBody').innerHTML='';
+  });
+  root.querySelector('#b64-bExport').addEventListener('click',()=>{
+    const rows=root.querySelectorAll('#b64-bBody tr');if(!rows.length){showToast('Rien à exporter');return;}
+    let out='';rows.forEach((row,i)=>{const cells=row.querySelectorAll('td');out+=`// ${i+1}. ${cells[1]?.title||''}\n_u:"${cells[2]?.title||''}"\n\n`;});
+    copyText(out);showToast('Tout copié !');
+  });
+
+  // DECODE
+  function doDecode(){
+    const b64=root.querySelector('#b64-dInput').value.trim();
+    const res=root.querySelector('#b64-dResult');
+    if(!b64){res.className='b64-result empty';res.textContent='Entrez une chaîne Base64…';return;}
+    const url=decodeB64(b64);
+    if(url){res.className='b64-result';res.style.color='#38b4f5';res.textContent=url;}
+    else{res.className='b64-result';res.style.color='#ff3b6b';res.textContent='⚠ Chaîne Base64 invalide';}
+  }
+  root.querySelector('#b64-dBtn').addEventListener('click',doDecode);
+  root.querySelector('#b64-dInput').addEventListener('keydown',e=>{if(e.key==='Enter')doDecode();});
+  root.querySelector('#b64-dClear').addEventListener('click',()=>{
+    root.querySelector('#b64-dInput').value='';
+    root.querySelector('#b64-dResult').className='b64-result empty';
+    root.querySelector('#b64-dResult').textContent='Entrez une chaîne Base64…';
+    root.querySelector('#b64-dResult').style.color='';
+  });
+  root.querySelector('#b64-dCopy').addEventListener('click',()=>{
+    const res=root.querySelector('#b64-dResult');
+    if(!res.classList.contains('empty'))copyText(res.textContent);else showToast('Rien à copier');
+  });
+
+  // PORTAIL
+  function genPortail(){
+    const id=root.querySelector('#b64-pId').value.trim();
+    const url=root.querySelector('#b64-pUrl').value.trim();
+    const code=root.querySelector('#b64-pCode').value.trim();
+    const title=root.querySelector('#b64-pTitle').value.trim();
+    const res=root.querySelector('#b64-pResult');
+    if(!url){res.innerHTML='<span style="color:#ff3b6b">⚠ URL requise</span>';return;}
+    const b64=encodeURL(url);
+    const idS=id||'??',codeS=code||'???',titleS=title||'Sans titre';
+    res.innerHTML=`<span class="cm">// ${idS}. ${titleS} — ${url}</span>\n{<span class="ck">id</span>:<span class="cv">${idS}</span>, <span class="ck">title</span>:<span class="cs">"${titleS}"</span>, <span class="ck">code</span>:<span class="cs">"${codeS}"</span>, <span class="ck">_u</span>:<span class="cs">"${b64}"</span>},`;
+  }
+  root.querySelector('#b64-pGenerate').addEventListener('click',genPortail);
+  ['#b64-pId','#b64-pUrl','#b64-pCode','#b64-pTitle'].forEach(sel=>{
+    root.querySelector(sel).addEventListener('keydown',e=>{if(e.key==='Enter')genPortail();});
+  });
+  root.querySelector('#b64-pCopy').addEventListener('click',()=>{
+    copyText(root.querySelector('#b64-pResult').innerText);showToast('Ligne copiée !');
+  });
+  root.querySelector('#b64-pCopyGuide').addEventListener('click',()=>{
+    const id=root.querySelector('#b64-pId').value.trim()||'??';
+    const code=root.querySelector('#b64-pCode').value.trim()||'???';
+    const title=root.querySelector('#b64-pTitle').value.trim()||'Sans titre';
+    copyText(`<div class="hRow"><span class="hKey">${id}/${code}</span><span class="hDesc">${title}</span></div>`);
+    showToast('Ligne guide copiée !');
+  });
+}
+
+// ══════════════════════════════════════════════════════
+// BOUTONS HUD
+// ══════════════════════════════════════════════════════
+document.getElementById('bGuide').addEventListener('click',openToolOverlay);
+document.getElementById('bDisc').addEventListener('click',disc);
+document.getElementById('bKeys').addEventListener('click',()=>{
+  const p=document.getElementById('kbPanels');
+  p.classList.toggle('open');
+  setTimeout(syncBottom,350);
+  syncBottom();
+});
+
+document.querySelectorAll('[data-k]').forEach(b=>
+  b.addEventListener('click',()=>handle(b.dataset.k,'touch'))
+);
+document.getElementById('kbBack').addEventListener('click',doBack);
+document.getElementById('dpU').addEventListener('click',()=>listScroll('up'));
+document.getElementById('dpD').addEventListener('click',()=>listScroll('down'));
+document.getElementById('dpL').addEventListener('click',()=>{});
+document.getElementById('dpR').addEventListener('click',()=>{});
+document.getElementById('dpOk').addEventListener('click',()=>handle('E','touch'));
+
+syncBottom();
+</script>
+</body>
+</html>
