@@ -1,795 +1,869 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-	<title></title>
-	<meta name="generator" content="LibreOffice 25.8.4.2 (Windows)"/>
-	<meta name="created" content="2026-05-22T12:45:05.510486700"/>
-	<meta name="changed" content="2026-05-22T12:56:11.989690800"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nexus-Aegis</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap');
+
+:root {
+  --bg: #0d0d12;
+  --surface: #13131a;
+  --border: #1e1e2e;
+  --accent: #6c63ff;
+  --accent2: #c084fc;
+  --accent3: #38bdf8;
+  --accent4: #34d399;
+  --text: #e8e8f4;
+  --muted: #52527a;
+  --red: #f87171;
+  --grad: linear-gradient(135deg, #6c63ff, #c084fc);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'IBM Plex Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── CANVAS WAVES ── */
+#waveCanvas {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.28;
+}
+
+/* ── DIGICODE ── */
+#lock {
+  position: fixed; inset: 0;
+  background: radial-gradient(ellipse at 50% 40%, #1a1030 0%, var(--bg) 70%);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 28px;
+  z-index: 999;
+  transition: opacity .45s ease;
+}
+
+.lock-brand {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 30px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #6c63ff 0%, #c084fc 50%, #38bdf8 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradShift 3s linear infinite;
+  letter-spacing: -0.02em;
+}
+
+@keyframes gradShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.lock-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.35em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.dots { display: flex; gap: 14px; }
+
+.dot {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  border: 1.5px solid var(--muted);
+  transition: all .25s cubic-bezier(.34,1.56,.64,1);
+}
+.dot.filled {
+  background: var(--grad);
+  border-color: transparent;
+  box-shadow: 0 0 12px #6c63ff88;
+  transform: scale(1.2);
+}
+.dot.error { background: var(--red); border-color: var(--red); box-shadow: 0 0 12px #f8717188; }
+
+.numpad {
+  display: grid;
+  grid-template-columns: repeat(3, 60px);
+  gap: 10px;
+}
+
+.key {
+  width: 60px; height: 60px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  color: var(--text);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 20px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all .18s;
+  position: relative;
+  overflow: hidden;
+}
+.key::after {
+  content: '';
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  background: var(--grad);
+  opacity: 0;
+  transition: opacity .18s;
+}
+.key:hover { border-color: var(--accent); box-shadow: 0 0 0 4px #6c63ff1e; }
+.key:hover::after { opacity: 0.09; }
+.key:active { transform: scale(.9); }
+.key:active::after { opacity: 0.24; }
+.key.del { font-size: 16px; color: var(--muted); }
+.key.del:hover { color: var(--red); border-color: var(--red); box-shadow: 0 0 0 3px #f8717122; }
+
+/* ── APP ── */
+#app {
+  display: none;
+  position: relative;
+  z-index: 1;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+  animation: fadeUp .55s ease both;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.header {
+  display: flex; align-items: baseline; gap: 12px;
+  margin-bottom: 4px;
+}
+
+h1 {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 26px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #6c63ff 0%, #c084fc 50%, #38bdf8 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradShift 3s linear infinite;
+  letter-spacing: -0.02em;
+}
+
+.count-badge {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 2px 10px;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 28px;
+}
+
+/* ── SEARCH ── */
+.search-bar {
+  position: relative;
+  margin-bottom: 24px;
+}
+.search-bar input {
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 14px;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+.search-bar input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px #6c63ff1a;
+}
+.search-bar input::placeholder { color: var(--muted); }
+
+/* ── TABLE ── */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+thead th {
+  text-align: left;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 0 12px 12px;
+  border-bottom: 1px solid var(--border);
+}
+tbody tr {
+  border-bottom: 1px solid #15151f;
+  transition: background .15s;
+  animation: rowIn .3s ease both;
+}
+@keyframes rowIn {
+  from { opacity: 0; transform: translateX(-6px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+tbody tr:hover { background: #141420; }
+tbody td { padding: 11px 12px; vertical-align: middle; }
+
+.num {
+  font-family: 'IBM Plex Mono', monospace;
+  color: var(--muted);
+  font-size: 11px;
+  width: 36px;
+}
+.name { font-weight: 500; color: var(--text); }
+
+.code {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  border-radius: 5px;
+  padding: 2px 8px;
+  display: inline-block;
+  width: 46px;
+  text-align: center;
+  font-weight: 600;
+}
+.code-0 { background: #1a1030; color: #a78bfa; border: 1px solid #3d2a70; }
+.code-1 { background: #0f1f30; color: #38bdf8; border: 1px solid #1a4060; }
+.code-2 { background: #0f2020; color: #34d399; border: 1px solid #1a4040; }
+.code-3 { background: #201510; color: #fb923c; border: 1px solid #50301a; }
+.code-4 { background: #20101a; color: #f472b6; border: 1px solid #50203a; }
+.code-5 { background: #1a1010; color: #f87171; border: 1px solid #502020; }
+.code-6 { background: #181820; color: #e2e8f0; border: 1px solid #303050; }
+.code-7 { background: #1a1a10; color: #facc15; border: 1px solid #504010; }
+.code-8 { background: #0f1a1f; color: #67e8f9; border: 1px solid #1a3f4a; }
+.code-9 { background: #1a1028; color: #c084fc; border: 1px solid #40186a; }
+
+/* ── BOUTONS LIGNE ── */
+.btn-open {
+  padding: 5px 14px;
+  background: linear-gradient(135deg, #6c63ff, #a855f7);
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  cursor: pointer;
+  transition: filter .15s, transform .15s;
+  margin-right: 6px;
+}
+.btn-open:hover { filter: brightness(1.15); transform: scale(1.04); }
+
+.btn-lock {
+  padding: 5px 10px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--muted);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all .15s;
+}
+.btn-lock:hover { border-color: var(--accent3); color: var(--accent3); background: #0f1f2a; }
+
+.no-results {
+  text-align: center;
+  padding: 48px;
+  color: var(--muted);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+}
+
+/* ── SEPARATOR ── */
+.sep {
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
+  margin: 44px 0;
+}
+
+/* ── CONVERTER ── */
+.conv-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent2);
+  margin-bottom: 16px;
+}
+.conv-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 540px) { .conv-grid { grid-template-columns: 1fr; } }
+.conv-box label {
+  font-size: 11px;
+  color: var(--muted);
+  font-family: 'IBM Plex Mono', monospace;
+  display: block;
+  margin-bottom: 6px;
+}
+.conv-box textarea {
+  width: 100%;
+  height: 80px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  padding: 10px;
+  resize: none;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+.conv-box textarea:focus {
+  border-color: var(--accent2);
+  box-shadow: 0 0 0 3px #c084fc18;
+}
+.conv-actions { display: flex; gap: 8px; margin-top: 12px; }
+.btn {
+  padding: 8px 18px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  border-radius: 7px;
+  border: 1.5px solid var(--border);
+  cursor: pointer;
+  transition: all .15s;
+}
+.btn-enc { background: linear-gradient(135deg, #6c63ff, #a855f7); color: #fff; border-color: transparent; }
+.btn-enc:hover { filter: brightness(1.15); }
+.btn-dec { background: transparent; color: var(--accent3); border-color: var(--accent3); }
+.btn-dec:hover { background: #0f1f30; }
+.btn-clear { background: transparent; color: var(--muted); }
+.btn-clear:hover { color: var(--red); border-color: var(--red); }
+
+/* ── MODAL ── */
+#modal-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: #00000090;
+  backdrop-filter: blur(8px);
+  z-index: 500;
+  align-items: center;
+  justify-content: center;
+}
+#modal-overlay.open { display: flex; }
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 36px 32px 28px;
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  position: relative;
+  animation: modalIn .3s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(.86) translateY(10px); }
+  to   { opacity: 1; transform: scale(1)   translateY(0); }
+}
+
+.modal-close {
+  position: absolute; top: 12px; right: 14px;
+  background: none; border: none;
+  color: var(--muted); font-size: 18px;
+  cursor: pointer; transition: color .15s;
+  line-height: 1;
+}
+.modal-close:hover { color: var(--text); }
+
+.modal-heading {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--muted);
+  align-self: flex-start;
+}
+
+/* modal dots */
+.m-dots { display: flex; gap: 12px; }
+.m-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  border: 1.5px solid var(--muted);
+  transition: all .25s cubic-bezier(.34,1.56,.64,1);
+}
+.m-dot.filled {
+  background: linear-gradient(135deg, var(--accent3), var(--accent4));
+  border-color: transparent;
+  box-shadow: 0 0 10px #38bdf855;
+  transform: scale(1.2);
+}
+.m-dot.error { background: var(--red); border-color: var(--red); }
+
+/* modal numpad */
+.m-numpad {
+  display: grid;
+  grid-template-columns: repeat(3, 52px);
+  gap: 8px;
+}
+.m-key {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  color: var(--text);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all .15s;
+}
+.m-key:hover { border-color: var(--accent3); box-shadow: 0 0 0 3px #38bdf81a; }
+.m-key:active { transform: scale(.9); }
+.m-key.mdel { font-size: 13px; color: var(--muted); }
+.m-key.mdel:hover { color: var(--red); border-color: var(--red); }
+
+/* info panel */
+.info-panel {
+  display: none;
+  width: 100%;
+  flex-direction: column;
+  gap: 10px;
+  animation: fadeUp .3s ease;
+}
+.info-panel.open { display: flex; }
+
+.info-row { display: flex; flex-direction: column; gap: 2px; }
+.info-lbl {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.info-val {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+.info-val.sub {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--muted);
+  font-family: 'IBM Plex Mono', monospace;
+}
+.info-val.grad {
+  background: linear-gradient(135deg, var(--accent3), var(--accent4));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.info-open-btn {
+  width: 100%;
+  padding: 10px;
+  margin-top: 4px;
+  background: linear-gradient(135deg, #6c63ff, #a855f7);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  cursor: pointer;
+  transition: filter .15s;
+}
+.info-open-btn:hover { filter: brightness(1.15); }
+</style>
 </head>
-<body lang="fr-FR" dir="ltr"><p>&lt;!DOCTYPE html&gt;</p>
-<p>&lt;html lang=&quot;fr&quot;&gt;</p>
-<p>&lt;head&gt;</p>
-<p>&lt;meta charset=&quot;UTF-8&quot;&gt;</p>
-<p>&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,
-initial-scale=1.0&quot;&gt;</p>
-<p>&lt;title&gt;Nexus-Aegis&lt;/title&gt;</p>
-<p>&lt;style&gt;</p>
-<p>@import
-url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:wght@300;400;500&amp;display=swap');</p>
-<p><br/>
-<br/>
+<body>
 
-</p>
-<p>:root {</p>
-<p>--bg: #0d0d12;</p>
-<p>--surface: #13131a;</p>
-<p>--border: #1e1e2e;</p>
-<p>--accent: #6c63ff;</p>
-<p>--accent2: #c084fc;</p>
-<p>--accent3: #38bdf8;</p>
-<p>--accent4: #34d399;</p>
-<p>--text: #e8e8f4;</p>
-<p>--muted: #52527a;</p>
-<p>--red: #f87171;</p>
-<p>--grad: linear-gradient(135deg, #6c63ff, #c084fc);</p>
-<p>}</p>
-<p><br/>
-<br/>
+<canvas id="waveCanvas"></canvas>
 
-</p>
-<p>* { box-sizing: border-box; margin: 0; padding: 0; }</p>
-<p><br/>
-<br/>
+<!-- ══ DIGICODE ══ -->
+<div id="lock">
+  <div class="lock-brand">Nexus-Aegis</div>
+  <div class="lock-title">Accès sécurisé</div>
+  <div class="dots">
+    <div class="dot" id="d0"></div>
+    <div class="dot" id="d1"></div>
+    <div class="dot" id="d2"></div>
+    <div class="dot" id="d3"></div>
+  </div>
+  <div class="numpad">
+    <button class="key" onclick="pressKey('1')">1</button>
+    <button class="key" onclick="pressKey('2')">2</button>
+    <button class="key" onclick="pressKey('3')">3</button>
+    <button class="key" onclick="pressKey('4')">4</button>
+    <button class="key" onclick="pressKey('5')">5</button>
+    <button class="key" onclick="pressKey('6')">6</button>
+    <button class="key" onclick="pressKey('7')">7</button>
+    <button class="key" onclick="pressKey('8')">8</button>
+    <button class="key" onclick="pressKey('9')">9</button>
+    <button class="key del" onclick="delKey()">⌫</button>
+    <button class="key" onclick="pressKey('0')">0</button>
+    <button class="key" style="visibility:hidden"></button>
+  </div>
+</div>
 
-</p>
-<p>body {</p>
-<p>font-family: 'IBM Plex Sans', sans-serif;</p>
-<p>background: var(--bg);</p>
-<p>color: var(--text);</p>
-<p>min-height: 100vh;</p>
-<p>}</p>
-<p><br/>
-<br/>
+<!-- ══ APP ══ -->
+<div id="app">
+  <div class="header">
+    <h1>Nexus-Aegis</h1>
+    <span class="count-badge" id="countBadge">0 sites</span>
+  </div>
+  <p class="subtitle">Base de liens — Classe 208</p>
 
-</p>
-<p>/* ── DIGICODE ── */</p>
-<p>#lock {</p>
-<p>position: fixed; inset: 0;</p>
-<p>background: radial-gradient(ellipse at 50% 40%, #1a1030 0%,
-var(--bg) 70%);</p>
-<p>display: flex; flex-direction: column;</p>
-<p>align-items: center; justify-content: center;</p>
-<p>gap: 28px;</p>
-<p>z-index: 999;</p>
-<p>}</p>
-<p><br/>
-<br/>
+  <div class="search-bar">
+    <input type="text" id="search" placeholder="Rechercher un nom, un mot-clé, ou un code XXX…" oninput="filterSites()">
+  </div>
 
-</p>
-<p>.lock-icon {</p>
-<p>font-size: 28px;</p>
-<p>background: var(--grad);</p>
-<p>-webkit-background-clip: text;</p>
-<p>-webkit-text-fill-color: transparent;</p>
-<p>background-clip: text;</p>
-<p>}</p>
-<p><br/>
-<br/>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Nom</th>
+        <th>Code</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
 
-</p>
-<p>.lock-title {</p>
-<p>font-family: 'IBM Plex Mono', monospace;</p>
-<p>font-size: 11px;</p>
-<p>letter-spacing: 0.35em;</p>
-<p>color: var(--muted);</p>
-<p>text-transform: uppercase;</p>
-<p>}</p>
-<p><br/>
-<br/>
+  <hr class="sep">
 
-</p>
-<p>.dots {</p>
-<p>display: flex; gap: 14px;</p>
-<p>}</p>
-<p><br/>
-<br/>
+  <div class="conv-title">↔ Convertisseur Base64</div>
+  <div class="conv-grid">
+    <div class="conv-box">
+      <label>URL / Texte brut</label>
+      <textarea id="rawInput" placeholder="https://exemple.com"></textarea>
+    </div>
+    <div class="conv-box">
+      <label>Base64</label>
+      <textarea id="b64Input" placeholder="aHR0cHM6Ly9leGVtcGxlLmNvbQ=="></textarea>
+    </div>
+  </div>
+  <div class="conv-actions">
+    <button class="btn btn-enc" onclick="encode()">Encoder →</button>
+    <button class="btn btn-dec" onclick="decode()">← Décoder</button>
+    <button class="btn btn-clear" onclick="clearConv()">Effacer</button>
+  </div>
+</div>
 
-</p>
-<p>.dot {</p>
-<p>width: 12px; height: 12px;</p>
-<p>border-radius: 50%;</p>
-<p>border: 1.5px solid var(--muted);</p>
-<p>transition: all .25s cubic-bezier(.34,1.56,.64,1);</p>
-<p>}</p>
-<p>.dot.filled {</p>
-<p>background: var(--grad);</p>
-<p>border-color: transparent;</p>
-<p>box-shadow: 0 0 10px #6c63ff88;</p>
-<p>transform: scale(1.15);</p>
-<p>}</p>
-<p>.dot.error {</p>
-<p>background: var(--red);</p>
-<p>border-color: var(--red);</p>
-<p>box-shadow: 0 0 10px #f8717188;</p>
-<p>}</p>
-<p><br/>
-<br/>
+<!-- ══ MODAL CADENAS ══ -->
+<div id="modal-overlay">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-heading" id="modal-heading">Code d'accès</div>
 
-</p>
-<p>.numpad {</p>
-<p>display: grid;</p>
-<p>grid-template-columns: repeat(3, 60px);</p>
-<p>gap: 10px;</p>
-<p>}</p>
-<p><br/>
-<br/>
+    <div id="m-code-panel" style="display:flex;flex-direction:column;align-items:center;gap:16px;width:100%">
+      <div class="m-dots">
+        <div class="m-dot" id="md0"></div>
+        <div class="m-dot" id="md1"></div>
+        <div class="m-dot" id="md2"></div>
+        <div class="m-dot" id="md3"></div>
+      </div>
+      <div class="m-numpad">
+        <button class="m-key" onclick="mKey('1')">1</button>
+        <button class="m-key" onclick="mKey('2')">2</button>
+        <button class="m-key" onclick="mKey('3')">3</button>
+        <button class="m-key" onclick="mKey('4')">4</button>
+        <button class="m-key" onclick="mKey('5')">5</button>
+        <button class="m-key" onclick="mKey('6')">6</button>
+        <button class="m-key" onclick="mKey('7')">7</button>
+        <button class="m-key" onclick="mKey('8')">8</button>
+        <button class="m-key" onclick="mKey('9')">9</button>
+        <button class="m-key mdel" onclick="mDel()">⌫</button>
+        <button class="m-key" onclick="mKey('0')">0</button>
+        <button class="m-key" style="visibility:hidden"></button>
+      </div>
+    </div>
 
-</p>
-<p>.key {</p>
-<p>width: 60px; height: 60px;</p>
-<p>background: var(--surface);</p>
-<p>border: 1.5px solid var(--border);</p>
-<p>color: var(--text);</p>
-<p>font-family: 'IBM Plex Mono', monospace;</p>
-<p>font-size: 20px;</p>
-<p>border-radius: 50%;</p>
-<p>cursor: pointer;</p>
-<p>transition: all .18s;</p>
-<p>position: relative;</p>
-<p>overflow: hidden;</p>
-<p>}</p>
-<p>.key::after {</p>
-<p>content: '';</p>
-<p>position: absolute; inset: 0;</p>
-<p>border-radius: 50%;</p>
-<p>background: var(--grad);</p>
-<p>opacity: 0;</p>
-<p>transition: opacity .18s;</p>
-<p>}</p>
-<p>.key:hover { border-color: var(--accent); box-shadow: 0 0 0 3px
-#6c63ff22; }</p>
-<p>.key:hover::after { opacity: 0.08; }</p>
-<p>.key:active { transform: scale(.92); }</p>
-<p>.key:active::after { opacity: 0.22; }</p>
-<p>.key.del { font-size: 16px; color: var(--muted); }</p>
-<p>.key.del:hover { color: var(--red); border-color: var(--red);
-box-shadow: 0 0 0 3px #f8717122; }</p>
-<p><br/>
-<br/>
+    <div class="info-panel" id="info-panel">
+      <div class="info-row">
+        <span class="info-lbl">Nom</span>
+        <span class="info-val grad" id="i-nom">—</span>
+      </div>
+      <div class="info-row">
+        <span class="info-lbl">Numéro</span>
+        <span class="info-val" id="i-num">—</span>
+      </div>
+      <div class="info-row">
+        <span class="info-lbl">Code</span>
+        <span class="info-val" id="i-code">—</span>
+      </div>
+      <div class="info-row">
+        <span class="info-lbl">Description</span>
+        <span class="info-val sub" id="i-desc">Non renseigné</span>
+      </div>
+      <div class="info-row">
+        <span class="info-lbl">Date</span>
+        <span class="info-val sub" id="i-date">Non renseigné</span>
+      </div>
+      <button class="info-open-btn" onclick="openFromModal()">Ouvrir le lien →</button>
+    </div>
+  </div>
+</div>
 
-</p>
-<p>/* ── APP ── */</p>
-<p>#app { display: none; max-width: 800px; margin: 0 auto; padding:
-48px 24px 80px; }</p>
-<p><br/>
-<br/>
+<script>
+// ══════════════════════════════════════════
+//  DONNÉES
+//  Ajouter un site : copier une ligne et remplir
+//  b64  → coller le résultat du convertisseur
+//  desc → description (optionnel)
+//  date → date ajout   (optionnel)
+// ══════════════════════════════════════════
+const sites = [
+  { num:  1, nom: "Base 208",          b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2Jhc2UtY291cnMtMjA4Lw==",                                             code: "100", desc: "Non renseigné", date: "Non renseigné" },
+  { num:  2, nom: "Français",          b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2ZyYW5jYWlzLWNvdXJzLTIwOC8=",                                        code: "101", desc: "Non renseigné", date: "Non renseigné" },
+  { num:  3, nom: "Synthèse",          b64: "aHR0cHM6Ly9ldmFubG9wZXowNjMwMC1sZ3RtLmdpdGh1Yi5pby9mcmFuY2Fpcy0yMDgv",                                    code: "102", desc: "Non renseigné", date: "Non renseigné" },
+  { num:  4, nom: "Textes",            b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3RleHRlLWZyYW5jYWlzLTIwOC8=",                                        code: "103", desc: "Non renseigné", date: "Non renseigné" },
+  { num:  5, nom: "Anglais LV1",       b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2FuZ2xhaXMtY291cnMtMjA4Lw==",                                        code: "104", desc: "Non renseigné", date: "Non renseigné" },
+  { num:  6, nom: "Padlet Anglais",    b64: "aHR0cHM6Ly9wYWRsZXQuY29tL2NoYWlsbGFuX2FuZ2xhaXMvY2xhc3Nlcy1kZS1zZWNvbmRlLTIwMjUtMjAyNi03NnZqcnE2bjd4cXUxNWdwcQ==", code: "105", desc: "Non renseigné", date: "Non renseigné" },
+  { num:  7, nom: "Russe LV3",         b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3J1c3NlLWNvdXJzLTIwOC8=",                                            code: "106", desc: "Non renseigné", date: "Non renseigné" },
+  { num:  8, nom: "Italien LV2",       b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2l0YWxpZW4tY291cnMtMjA4Lw==",                                        code: "107", desc: "Non renseigné", date: "Non renseigné" },
+  { num:  9, nom: "Physique-Chimie",   b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3BoeXNpcXVlLWNvdXJzLTIwOC8=",                                        code: "108", desc: "Non renseigné", date: "Non renseigné" },
+  { num: 10, nom: "SVT",               b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3N2dC1jb3Vycy0yMDgv",                                                 code: "109", desc: "Non renseigné", date: "Non renseigné" },
+  { num: 11, nom: "SNT",               b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3NudC1jb3Vycy0yMDgv",                                                 code: "110", desc: "Non renseigné", date: "Non renseigné" },
+  { num: 12, nom: "SES",               b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3Nlcy1jb3Vycy0yMDgv",                                                 code: "111", desc: "Non renseigné", date: "Non renseigné" },
+  { num: 13, nom: "Heure",             b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2hldXJlLw==",                                                          code: "200", desc: "Non renseigné", date: "Non renseigné" },
+  { num: 14, nom: "Vecteurs Maths",    b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2NoYXAtNi12ZWN0ZXVycy8=",                                             code: "113", desc: "Non renseigné", date: "Non renseigné" },
+  { num: 15, nom: "Fonctions Maths",   b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2NoYXAtNy1mb25jdGlvbnMv",                                             code: "114", desc: "Non renseigné", date: "Non renseigné" },
+  { num: 16, nom: "Sea Shepherd Diapo",b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2V4cG8tZW1jLWRpYXBvLw==",                                             code: "115", desc: "Non renseigné", date: "Non renseigné" },
+  { num: 17, nom: "Sea Shepherd Texte",b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2V4cG8tZW1jLXRleHRlLw==",                                             code: "116", desc: "Non renseigné", date: "Non renseigné" },
+  { num: 18, nom: "Physique 10-11",    b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2NoYXAtcGgv",                                                          code: "117", desc: "Non renseigné", date: "Non renseigné" },
+  { num: 19, nom: "Aviapro Inter",     b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2F2aWFwcm8taW50ZXIv",                                                  code: "201", desc: "Non renseigné", date: "Non renseigné" },
+  { num: 20, nom: "Métro Paris",       b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL21ldHJvLXBhcmlzLw==",                                                  code: "202", desc: "Non renseigné", date: "Non renseigné" },
+  { num: 21, nom: "Réveil",            b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3JldmVpbC8=",                                                           code: "203", desc: "Non renseigné", date: "Non renseigné" },
+  { num: 22, nom: "Horloge Exam'",     b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2hvcmxvZ2UtZXhhbWVuLXByb21wdGV1ci8=",                                 code: "204", desc: "Non renseigné", date: "Non renseigné" },
+  { num: 23, nom: "Exposé 1984",       b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2V4cG8taXRhLw==",                                                      code: "118", desc: "Non renseigné", date: "Non renseigné" },
+  { num: 24, nom: "Prompteur Original",b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3Byb21wdGV1ci1vcmlnaW5hbC8=",                                         code: "205", desc: "Non renseigné", date: "Non renseigné" },
+  { num: 25, nom: "Flightradar",       b64: "aHR0cHM6Ly93dy5mbGlnaHRyYWRhcjI0LmNvbS80My4zMCw1LjM5LzY=",                                                  code: "300", desc: "Non renseigné", date: "Non renseigné" },
+  { num: 26, nom: "Cartometro",        b64: "aHR0cHM6Ly9jYXJ0b21ldHJvLmNvbS9jYXJ0ZXMvcGFyaXMtbXVsdGktZGFyay8=",                                         code: "301", desc: "Non renseigné", date: "Non renseigné" },
+  { num: 27, nom: "IDFM",              b64: "aHR0cHM6Ly93dy5pbGVkZWZyYW5jZS1tb2JpbGl0ZXMuZnIv",                                                           code: "302", desc: "Non renseigné", date: "Non renseigné" },
+  { num: 28, nom: "ChatGPT",           b64: "aHR0cHM6Ly9jaGF0Z3B0LmNvbS8=",                                                                                code: "303", desc: "Non renseigné", date: "Non renseigné" },
+  { num: 29, nom: "Gemini",            b64: "aHR0cHM6Ly9nZW1pbmkuZ29vZ2xlLmNvbS9hcHA/aGw9ZnI=",                                                           code: "304", desc: "Non renseigné", date: "Non renseigné" },
+  { num: 30, nom: "Claude",            b64: "aHR0cHM6Ly9jbGF1ZGUuYWkvcmVjZW50cw==",                                                                        code: "305", desc: "Non renseigné", date: "Non renseigné" },
+  { num: 31, nom: "Canva",             b64: "aHR0cHM6Ly93dy5jYW52YS5jb20vZnJfZnIv",                                                                        code: "306", desc: "Non renseigné", date: "Non renseigné" },
+  { num: 32, nom: "Github",            b64: "aHR0cHM6Ly9naXRodWIuY29tLw==",                                                                                code: "307", desc: "Non renseigné", date: "Non renseigné" },
+  { num: 33, nom: "Atrium",            b64: "aHR0cHM6Ly9hdHJpdW0tc3VkLmZyLw==",                                                                            code: "308", desc: "Non renseigné", date: "Non renseigné" },
+  { num: 34, nom: "RATP",              b64: "aHR0cHM6Ly93dy5yYXRwLmZyLw==",                                                                                code: "309", desc: "Non renseigné", date: "Non renseigné" },
+  { num: 35, nom: "Ita Mestieri",      b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2l0YS1tZXN0aWVyaQ==",                                                  code: "119", desc: "Non renseigné", date: "Non renseigné" },
+  // ── Ajouter ici : { num: 36, nom: "Nom", b64: "base64", code: "XXX", desc: "...", date: "JJ/MM/AAAA" },
+];
+// ══════════════════════════════════════════
 
-</p>
-<p>.header {</p>
-<p>display: flex; align-items: baseline; gap: 12px;</p>
-<p>margin-bottom: 4px;</p>
-<p>}</p>
-<p>h1 {</p>
-<p>font-family: 'IBM Plex Mono', monospace;</p>
-<p>font-size: 22px;</p>
-<p>font-weight: 600;</p>
-<p>background: var(--grad);</p>
-<p>-webkit-background-clip: text;</p>
-<p>-webkit-text-fill-color: transparent;</p>
-<p>background-clip: text;</p>
-<p>}</p>
-<p>.count-badge {</p>
-<p>font-family: 'IBM Plex Mono', monospace;</p>
-<p>font-size: 11px;</p>
-<p>color: var(--muted);</p>
-<p>background: var(--surface);</p>
-<p>border: 1px solid var(--border);</p>
-<p>border-radius: 20px;</p>
-<p>padding: 2px 10px;</p>
-<p>}</p>
-<p>.subtitle {</p>
-<p>font-size: 13px;</p>
-<p>color: var(--muted);</p>
-<p>margin-bottom: 28px;</p>
-<p>}</p>
-<p><br/>
-<br/>
+// ── WAVES ──────────────────────────────────
+const canvas = document.getElementById("waveCanvas");
+const ctx    = canvas.getContext("2d");
+let W, H, tick = 0;
 
-</p>
-<p>/* ── SEARCH ── */</p>
-<p>.search-bar {</p>
-<p>position: relative;</p>
-<p>margin-bottom: 24px;</p>
-<p>}</p>
-<p>.search-bar input {</p>
-<p>width: 100%;</p>
-<p>padding: 12px 16px;</p>
-<p>background: var(--surface);</p>
-<p>border: 1.5px solid var(--border);</p>
-<p>border-radius: 10px;</p>
-<p>color: var(--text);</p>
-<p>font-family: 'IBM Plex Mono', monospace;</p>
-<p>font-size: 14px;</p>
-<p>outline: none;</p>
-<p>transition: border-color .2s, box-shadow .2s;</p>
-<p>}</p>
-<p>.search-bar input:focus {</p>
-<p>border-color: var(--accent);</p>
-<p>box-shadow: 0 0 0 3px #6c63ff1a;</p>
-<p>}</p>
-<p>.search-bar input::placeholder { color: var(--muted); }</p>
-<p>.search-hint {</p>
-<p>font-size: 11px;</p>
-<p>color: var(--muted);</p>
-<p>margin-top: 6px;</p>
-<p>font-family: 'IBM Plex Mono', monospace;</p>
-<p>}</p>
-<p>.search-hint span { color: var(--accent2); }</p>
-<p><br/>
-<br/>
+const WAVES = [
+  { amp: 48, freq: 0.011, speed: 0.28, yRatio: 0.20, color: "#6c63ff" },
+  { amp: 36, freq: 0.016, speed: 0.18, yRatio: 0.40, color: "#c084fc" },
+  { amp: 52, freq: 0.009, speed: 0.22, yRatio: 0.58, color: "#38bdf8" },
+  { amp: 30, freq: 0.020, speed: 0.15, yRatio: 0.74, color: "#34d399" },
+  { amp: 42, freq: 0.013, speed: 0.20, yRatio: 0.88, color: "#f472b6" },
+];
 
-</p>
-<p>/* ── TABLE ── */</p>
-<p>table {</p>
-<p>width: 100%;</p>
-<p>border-collapse: collapse;</p>
-<p>font-size: 13px;</p>
-<p>}</p>
-<p>thead th {</p>
-<p>text-align: left;</p>
-<p>font-family: 'IBM Plex Mono', monospace;</p>
-<p>font-size: 10px;</p>
-<p>letter-spacing: 0.18em;</p>
-<p>text-transform: uppercase;</p>
-<p>color: var(--muted);</p>
-<p>padding: 0 12px 12px;</p>
-<p>border-bottom: 1px solid var(--border);</p>
-<p>}</p>
-<p>tbody tr {</p>
-<p>border-bottom: 1px solid #15151f;</p>
-<p>transition: background .15s;</p>
-<p>}</p>
-<p>tbody tr:hover { background: #141420; }</p>
-<p>tbody td { padding: 11px 12px; vertical-align: middle; }</p>
-<p><br/>
-<br/>
+function resize() { W = canvas.width = innerWidth; H = canvas.height = innerHeight; }
+window.addEventListener("resize", resize);
+resize();
 
-</p>
-<p>.num {</p>
-<p>font-family: 'IBM Plex Mono', monospace;</p>
-<p>color: var(--muted);</p>
-<p>font-size: 11px;</p>
-<p>width: 36px;</p>
-<p>}</p>
-<p>.name { font-weight: 500; color: var(--text); }</p>
-<p><br/>
-<br/>
+(function loop() {
+  ctx.clearRect(0, 0, W, H);
+  WAVES.forEach(w => {
+    ctx.beginPath();
+    for (let x = 0; x <= W; x += 2) {
+      const y = w.yRatio * H + Math.sin(x * w.freq + tick * w.speed) * w.amp;
+      x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    }
+    ctx.strokeStyle = w.color;
+    ctx.lineWidth   = 1.4;
+    ctx.globalAlpha = 0.55;
+    ctx.stroke();
+  });
+  ctx.globalAlpha = 1;
+  tick += 0.04;
+  requestAnimationFrame(loop);
+})();
 
-</p>
-<p>/* Codes colorés selon la centaine */</p>
-<p>.code {</p>
-<p>font-family: 'IBM Plex Mono', monospace;</p>
-<p>font-size: 11px;</p>
-<p>border-radius: 5px;</p>
-<p>padding: 2px 8px;</p>
-<p>display: inline-block;</p>
-<p>width: 46px;</p>
-<p>text-align: center;</p>
-<p>font-weight: 600;</p>
-<p>}</p>
-<p>.code-0 { background: #1a1030; color: #a78bfa; border: 1px solid
-#3d2a70; }</p>
-<p>.code-1 { background: #0f1f30; color: #38bdf8; border: 1px solid
-#1a4060; }</p>
-<p>.code-2 { background: #0f2020; color: #34d399; border: 1px solid
-#1a4040; }</p>
-<p>.code-3 { background: #201510; color: #fb923c; border: 1px solid
-#50301a; }</p>
-<p>.code-4 { background: #20101a; color: #f472b6; border: 1px solid
-#50203a; }</p>
-<p>.code-5 { background: #1a1010; color: #f87171; border: 1px solid
-#502020; }</p>
-<p>.code-6 { background: #181820; color: #e2e8f0; border: 1px solid
-#303050; }</p>
-<p>.code-7 { background: #1a1a10; color: #facc15; border: 1px solid
-#504010; }</p>
-<p>.code-8 { background: #0f1a1f; color: #67e8f9; border: 1px solid
-#1a3f4a; }</p>
-<p>.code-9 { background: #1a1028; color: #c084fc; border: 1px solid
-#40186a; }</p>
-<p><br/>
-<br/>
+// ── DIGICODE PRINCIPAL ──────────────────────
+const MAIN_CODE = "1710";
+let mainIn = "";
 
-</p>
-<p>.link-cell a {</p>
-<p>color: var(--accent3);</p>
-<p>text-decoration: none;</p>
-<p>font-family: 'IBM Plex Mono', monospace;</p>
-<p>font-size: 11px;</p>
-<p>opacity: .65;</p>
-<p>transition: opacity .15s;</p>
-<p>}</p>
-<p>.link-cell a:hover { opacity: 1; text-decoration: underline; }</p>
-<p><br/>
-<br/>
+function pressKey(k) {
+  if (mainIn.length >= 4) return;
+  mainIn += k;
+  updateDots(false);
+  if (mainIn.length === 4) setTimeout(checkMain, 80);
+}
+function delKey() { mainIn = mainIn.slice(0, -1); updateDots(false); }
 
-</p>
-<p>.no-results {</p>
-<p>text-align: center;</p>
-<p>padding: 48px;</p>
-<p>color: var(--muted);</p>
-<p>font-family: 'IBM Plex Mono', monospace;</p>
-<p>font-size: 13px;</p>
-<p>}</p>
-<p><br/>
-<br/>
+function updateDots(err) {
+  for (let i = 0; i < 4; i++) {
+    const d = document.getElementById("d" + i);
+    d.className = "dot";
+    if (err)              d.classList.add("error");
+    else if (i < mainIn.length) d.classList.add("filled");
+  }
+}
 
-</p>
-<p>/* ── SEPARATOR ── */</p>
-<p>.sep {</p>
-<p>border: none;</p>
-<p>height: 1px;</p>
-<p>background: linear-gradient(90deg, transparent, var(--border),
-transparent);</p>
-<p>margin: 44px 0;</p>
-<p>}</p>
-<p><br/>
-<br/>
+function checkMain() {
+  if (mainIn === MAIN_CODE) {
+    const lock = document.getElementById("lock");
+    lock.style.opacity = "0";
+    setTimeout(() => {
+      lock.style.display = "none";
+      document.getElementById("app").style.display = "block";
+      renderTable(sites);
+      document.getElementById("countBadge").textContent = sites.length + " site" + (sites.length > 1 ? "s" : "");
+    }, 450);
+  } else {
+    updateDots(true);
+    setTimeout(() => { mainIn = ""; updateDots(false); }, 700);
+  }
+}
 
-</p>
-<p>/* ── CONVERTER ── */</p>
-<p>.conv-title {</p>
-<p>font-family: 'IBM Plex Mono', monospace;</p>
-<p>font-size: 11px;</p>
-<p>letter-spacing: 0.22em;</p>
-<p>text-transform: uppercase;</p>
-<p>color: var(--accent2);</p>
-<p>margin-bottom: 16px;</p>
-<p>}</p>
-<p>.conv-grid {</p>
-<p>display: grid;</p>
-<p>grid-template-columns: 1fr 1fr;</p>
-<p>gap: 16px;</p>
-<p>}</p>
-<p>@media (max-width: 540px) { .conv-grid { grid-template-columns:
-1fr; } }</p>
-<p>.conv-box label {</p>
-<p>font-size: 11px;</p>
-<p>color: var(--muted);</p>
-<p>font-family: 'IBM Plex Mono', monospace;</p>
-<p>display: block;</p>
-<p>margin-bottom: 6px;</p>
-<p>}</p>
-<p>.conv-box textarea {</p>
-<p>width: 100%;</p>
-<p>height: 80px;</p>
-<p>background: var(--surface);</p>
-<p>border: 1.5px solid var(--border);</p>
-<p>border-radius: 8px;</p>
-<p>color: var(--text);</p>
-<p>font-family: 'IBM Plex Mono', monospace;</p>
-<p>font-size: 12px;</p>
-<p>padding: 10px;</p>
-<p>resize: none;</p>
-<p>outline: none;</p>
-<p>transition: border-color .2s, box-shadow .2s;</p>
-<p>}</p>
-<p>.conv-box textarea:focus {</p>
-<p>border-color: var(--accent2);</p>
-<p>box-shadow: 0 0 0 3px #c084fc18;</p>
-<p>}</p>
-<p>.conv-actions {</p>
-<p>display: flex; gap: 8px;</p>
-<p>margin-top: 12px;</p>
-<p>}</p>
-<p>.btn {</p>
-<p>padding: 8px 18px;</p>
-<p>font-family: 'IBM Plex Mono', monospace;</p>
-<p>font-size: 12px;</p>
-<p>border-radius: 7px;</p>
-<p>border: 1.5px solid var(--border);</p>
-<p>cursor: pointer;</p>
-<p>transition: all .15s;</p>
-<p>}</p>
-<p>.btn-enc {</p>
-<p>background: linear-gradient(135deg, #6c63ff, #a855f7);</p>
-<p>color: #fff;</p>
-<p>border-color: transparent;</p>
-<p>}</p>
-<p>.btn-enc:hover { filter: brightness(1.15); }</p>
-<p>.btn-dec {</p>
-<p>background: transparent;</p>
-<p>color: var(--accent3);</p>
-<p>border-color: var(--accent3);</p>
-<p>}</p>
-<p>.btn-dec:hover { background: #0f1f30; }</p>
-<p>.btn-clear {</p>
-<p>background: transparent;</p>
-<p>color: var(--muted);</p>
-<p>}</p>
-<p>.btn-clear:hover { color: var(--red); border-color: var(--red); }</p>
-<p>&lt;/style&gt;</p>
-<p>&lt;/head&gt;</p>
-<p>&lt;body&gt;</p>
-<p><br/>
-<br/>
+document.addEventListener("keydown", e => {
+  if (document.getElementById("lock").style.display !== "none") {
+    if (e.key >= "0" && e.key <= "9") pressKey(e.key);
+    if (e.key === "Backspace") delKey();
+  }
+});
 
-</p>
-<p>&lt;!-- ══ DIGICODE ══ --&gt;</p>
-<p>&lt;div id=&quot;lock&quot;&gt;</p>
-<p>&lt;div class=&quot;lock-icon&quot;&gt;⬡&lt;/div&gt;</p>
-<p>&lt;div class=&quot;lock-title&quot;&gt;Code d'accès&lt;/div&gt;</p>
-<p>&lt;div class=&quot;dots&quot;&gt;</p>
-<p>&lt;div class=&quot;dot&quot; id=&quot;d0&quot;&gt;&lt;/div&gt;</p>
-<p>&lt;div class=&quot;dot&quot; id=&quot;d1&quot;&gt;&lt;/div&gt;</p>
-<p>&lt;div class=&quot;dot&quot; id=&quot;d2&quot;&gt;&lt;/div&gt;</p>
-<p>&lt;div class=&quot;dot&quot; id=&quot;d3&quot;&gt;&lt;/div&gt;</p>
-<p>&lt;/div&gt;</p>
-<p>&lt;div class=&quot;numpad&quot;&gt;</p>
-<p>&lt;button class=&quot;key&quot;
-onclick=&quot;pressKey('1')&quot;&gt;1&lt;/button&gt;</p>
-<p>&lt;button class=&quot;key&quot;
-onclick=&quot;pressKey('2')&quot;&gt;2&lt;/button&gt;</p>
-<p>&lt;button class=&quot;key&quot;
-onclick=&quot;pressKey('3')&quot;&gt;3&lt;/button&gt;</p>
-<p>&lt;button class=&quot;key&quot;
-onclick=&quot;pressKey('4')&quot;&gt;4&lt;/button&gt;</p>
-<p>&lt;button class=&quot;key&quot;
-onclick=&quot;pressKey('5')&quot;&gt;5&lt;/button&gt;</p>
-<p>&lt;button class=&quot;key&quot;
-onclick=&quot;pressKey('6')&quot;&gt;6&lt;/button&gt;</p>
-<p>&lt;button class=&quot;key&quot;
-onclick=&quot;pressKey('7')&quot;&gt;7&lt;/button&gt;</p>
-<p>&lt;button class=&quot;key&quot;
-onclick=&quot;pressKey('8')&quot;&gt;8&lt;/button&gt;</p>
-<p>&lt;button class=&quot;key&quot;
-onclick=&quot;pressKey('9')&quot;&gt;9&lt;/button&gt;</p>
-<p>&lt;button class=&quot;key del&quot; onclick=&quot;delKey()&quot;&gt;⌫&lt;/button&gt;</p>
-<p>&lt;button class=&quot;key&quot;
-onclick=&quot;pressKey('0')&quot;&gt;0&lt;/button&gt;</p>
-<p>&lt;button class=&quot;key&quot;
-style=&quot;visibility:hidden&quot;&gt;&lt;/button&gt;</p>
-<p>&lt;/div&gt;</p>
-<p>&lt;/div&gt;</p>
-<p><br/>
-<br/>
+// ── TABLE ───────────────────────────────────
+function db64(b) { try { return atob(b); } catch { return "#"; } }
 
-</p>
-<p>&lt;!-- ══ APP ══ --&gt;</p>
-<p>&lt;div id=&quot;app&quot;&gt;</p>
-<p>&lt;div class=&quot;header&quot;&gt;</p>
-<p>&lt;h1&gt;Nexus-Aegis&lt;/h1&gt;</p>
-<p>&lt;span class=&quot;count-badge&quot; id=&quot;countBadge&quot;&gt;0
-sites&lt;/span&gt;</p>
-<p>&lt;/div&gt;</p>
-<p>&lt;p class=&quot;subtitle&quot;&gt;Base de liens — recherche
-par nom ou code à 3 chiffres&lt;/p&gt;</p>
-<p><br/>
-<br/>
+function codeClass(c) { return "code code-" + (parseInt(c[0]) || 0); }
 
-</p>
-<p>&lt;div class=&quot;search-bar&quot;&gt;</p>
-<p>&lt;input type=&quot;text&quot; id=&quot;search&quot;
-placeholder=&quot;Rechercher un nom, un mot-clé, ou un code XXX…&quot;
-oninput=&quot;filterSites()&quot;&gt;</p>
-<p>&lt;div class=&quot;search-hint&quot;&gt;&lt;span&gt;3
-chiffres&lt;/span&gt; → filtre par code exact &amp;nbsp;·&amp;nbsp;
-&lt;span&gt;texte&lt;/span&gt; → filtre par nom&lt;/div&gt;</p>
-<p>&lt;/div&gt;</p>
-<p><br/>
-<br/>
+function renderTable(data) {
+  const tb = document.getElementById("tbody");
+  if (!data.length) {
+    tb.innerHTML = '<tr><td colspan="4" class="no-results">Aucun résultat</td></tr>';
+    return;
+  }
+  tb.innerHTML = data.map((s, i) => `
+    <tr style="animation-delay:${i * 0.03}s">
+      <td class="num">${String(s.num).padStart(2,"0")}</td>
+      <td class="name">${s.nom}</td>
+      <td><span class="${codeClass(s.code)}">${s.code}</span></td>
+      <td>
+        <button class="btn-open" onclick="openSite('${s.b64}')">Ouvrir</button>
+        <button class="btn-lock" title="Infos" onclick="openModal(${s.num})">🔒</button>
+      </td>
+    </tr>`).join("");
+}
 
-</p>
-<p>&lt;table&gt;</p>
-<p>&lt;thead&gt;</p>
-<p>&lt;tr&gt;</p>
-<p>&lt;th&gt;#&lt;/th&gt;</p>
-<p>&lt;th&gt;Nom&lt;/th&gt;</p>
-<p>&lt;th&gt;Code&lt;/th&gt;</p>
-<p>&lt;th&gt;Lien&lt;/th&gt;</p>
-<p>&lt;/tr&gt;</p>
-<p>&lt;/thead&gt;</p>
-<p>&lt;tbody id=&quot;tbody&quot;&gt;&lt;/tbody&gt;</p>
-<p>&lt;/table&gt;</p>
-<p><br/>
-<br/>
+function filterSites() {
+  const q = document.getElementById("search").value.trim().toLowerCase();
+  if (!q) { renderTable(sites); return; }
+  if (/^\d{3}$/.test(q)) {
+    renderTable(sites.filter(s => s.code === q));
+  } else {
+    renderTable(sites.filter(s => s.nom.toLowerCase().includes(q)));
+  }
+}
 
-</p>
-<p>&lt;hr class=&quot;sep&quot;&gt;</p>
-<p><br/>
-<br/>
+function openSite(b64) {
+  const url = db64(b64);
+  if (url && url !== "#") window.open(url, "_blank");
+}
 
-</p>
-<p>&lt;div class=&quot;conv-title&quot;&gt;↔ Convertisseur
-Base64&lt;/div&gt;</p>
-<p>&lt;div class=&quot;conv-grid&quot;&gt;</p>
-<p>&lt;div class=&quot;conv-box&quot;&gt;</p>
-<p>&lt;label&gt;URL / Texte brut&lt;/label&gt;</p>
-<p>&lt;textarea id=&quot;rawInput&quot;
-placeholder=&quot;https://exemple.com&quot;&gt;&lt;/textarea&gt;</p>
-<p>&lt;/div&gt;</p>
-<p>&lt;div class=&quot;conv-box&quot;&gt;</p>
-<p>&lt;label&gt;Base64&lt;/label&gt;</p>
-<p>&lt;textarea id=&quot;b64Input&quot;
-placeholder=&quot;aHR0cHM6Ly9leGVtcGxlLmNvbQ==&quot;&gt;&lt;/textarea&gt;</p>
-<p>&lt;/div&gt;</p>
-<p>&lt;/div&gt;</p>
-<p>&lt;div class=&quot;conv-actions&quot;&gt;</p>
-<p>&lt;button class=&quot;btn btn-enc&quot;
-onclick=&quot;encode()&quot;&gt;Encoder →&lt;/button&gt;</p>
-<p>&lt;button class=&quot;btn btn-dec&quot; onclick=&quot;decode()&quot;&gt;←
-Décoder&lt;/button&gt;</p>
-<p>&lt;button class=&quot;btn btn-clear&quot;
-onclick=&quot;clearConv()&quot;&gt;Effacer&lt;/button&gt;</p>
-<p>&lt;/div&gt;</p>
-<p>&lt;/div&gt;</p>
-<p><br/>
-<br/>
+// ── MODAL CADENAS ───────────────────────────
+const MODAL_CODE = "8957";
+let mIn = "", currentNum = null;
 
-</p>
-<p>&lt;script&gt;</p>
-<p>// ── DONNÉES
-──────────────────────────────────────────────────────────</p>
-<p>const sites = [</p>
-<p>{ num: 1, nom: &quot;Base 208&quot;, b64:
-&quot;aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2Jhc2UtY291cnMtMjA4Lw==&quot;,
-code: &quot;100&quot; },</p>
-<p>{ num: 2, nom: &quot;Français&quot;, b64:
-&quot;aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2ZyYW5jYWlzLWNvdXJzLTIwOC8=&quot;,
-code: &quot;101&quot; },</p>
-<p>{ num: 3, nom: &quot;Synthèse&quot;, b64:
-&quot;aHR0cHM6Ly9ldmFubG9wZXowNjMwMC1sZ3RtLmdpdGh1Yi5pby9mcmFuY2Fpcy0yMDgv&quot;,
-code: &quot;102&quot; },</p>
-<p>{ num: 4, nom: &quot;Textes&quot;, b64:
-&quot;aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3RleHRlLWZyYW5jYWlzLTIwOC8=&quot;,
-code: &quot;103&quot; },</p>
-<p>{ num: 5, nom: &quot;Anglais LV1&quot;, b64:
-&quot;aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2FuZ2xhaXMtY291cnMtMjA4Lw==&quot;,
-code: &quot;104&quot; },</p>
-<p>{ num: 6, nom: &quot;Padlet Anglais&quot;, b64:
-&quot;aHR0cHM6Ly9wYWRsZXQuY29tL2NoYWlsbGFuX2FuZ2xhaXMvY2xhc3Nlcy1kZS1zZWNvbmRlLTIwMjUtMjAyNi03NnZqcnE2bjd4cXUxNWdwcQ==&quot;,
-code: &quot;105&quot; },</p>
-<p>{ num: 7, nom: &quot;Russe LV3&quot;, b64:
-&quot;aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3J1c3NlLWNvdXJzLTIwOC8=&quot;,
-code: &quot;106&quot; },</p>
-<p>{ num: 8, nom: &quot;Italien LV2&quot;, b64:
-&quot;aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2l0YWxpZW4tY291cnMtMjA4Lw==&quot;,
-code: &quot;107&quot; },</p>
-<p>{ num: 9, nom: &quot;Physique-Chimie&quot;, b64:
-&quot;aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3BoeXNpcXVlLWNvdXJzLTIwOC8=&quot;,
-code: &quot;108&quot; },</p>
-<p>{ num: 10, nom: &quot;SVT&quot;, b64:
-&quot;aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3N2dC1jb3Vycy0yMDgv&quot;,
-code: &quot;109&quot; },</p>
-<p>{ num: 11, nom: &quot;SNT&quot;, b64:
-&quot;aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3NudC1jb3Vycy0yMDgv&quot;,
-code: &quot;110&quot; },</p>
-<p>{ num: 12, nom: &quot;SES&quot;, b64:
-&quot;aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3Nlcy1jb3Vycy0yMDgv&quot;,
-code: &quot;111&quot; },</p>
-<p>{ num: 13, nom: &quot;Heure&quot;, b64:
-&quot;aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2hldXJlLw==&quot;, code:
-&quot;200&quot; },</p>
-<p>{ num: 14, nom: &quot;Vecteurs Maths&quot;, b64:
-&quot;aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2NoYXAtNi12ZWN0ZXVycy8=&quot;,
-code: &quot;113&quot; },</p>
-<p>{ num: 15, nom: &quot;Fonctions Maths&quot;, b64:
-&quot;aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2NoYXAtNy1mb25jdGlvbnMv&quot;,
-code: &quot;114&quot; },</p>
-<p>{ num: 16, nom: &quot;Sea Shepherd Diapo&quot;, b64:
-&quot;aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2V4cG8tZW1jLWRpYXBvLw==&quot;,
-code: &quot;115&quot; },</p>
-<p>{ num: 17, nom: &quot;Sea Shepherd Texte&quot;, b64:
-&quot;aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2V4cG8tZW1jLXRleHRlLw==&quot;,
-code: &quot;116&quot; },</p>
-<p>{ num: 18, nom: &quot;Physique 10-11&quot;, b64:
-&quot;aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2NoYXAtcGgv&quot;, code:
-&quot;117&quot; },</p>
-<p>{ num: 19, nom: &quot;Aviapro Inter&quot;, b64:
-&quot;aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2F2aWFwcm8taW50ZXIv&quot;,
-code: &quot;201&quot; },</p>
-<p>{ num: 20, nom: &quot;Métro Paris&quot;, b64:
-&quot;aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL21ldHJvLXBhcmlzLw==&quot;,
-code: &quot;202&quot; },</p>
-<p>{ num: 21, nom: &quot;Réveil&quot;, b64:
-&quot;aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3JldmVpbC8=&quot;, code:
-&quot;203&quot; },</p>
-<p>{ num: 22, nom: &quot;Horloge Exam'&quot;, b64:
-&quot;aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2hvcmxvZ2UtZXhhbWVuLXByb21wdGV1ci8=&quot;,
-code: &quot;204&quot; },</p>
-<p>{ num: 23, nom: &quot;Exposé 1984&quot;, b64:
-&quot;aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2V4cG8taXRhLw==&quot;,
-code: &quot;118&quot; },</p>
-<p>{ num: 24, nom: &quot;Prompteur Original&quot;, b64:
-&quot;aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3Byb21wdGV1ci1vcmlnaW5hbC8=&quot;,
-code: &quot;205&quot; },</p>
-<p>{ num: 25, nom: &quot;Flightradar&quot;, b64:
-&quot;aHR0cHM6Ly93dy5mbGlnaHRyYWRhcjI0LmNvbS80My4zMCw1LjM5LzY=&quot;,
-code: &quot;300&quot; },</p>
-<p>{ num: 26, nom: &quot;Cartometro&quot;, b64:
-&quot;aHR0cHM6Ly9jYXJ0b21ldHJvLmNvbS9jYXJ0ZXMvcGFyaXMtbXVsdGktZGFyay8=&quot;,
-code: &quot;301&quot; },</p>
-<p>{ num: 27, nom: &quot;IDFM&quot;, b64:
-&quot;aHR0cHM6Ly93dy5pbGVkZWZyYW5jZS1tb2JpbGl0ZXMuZnIv&quot;, code:
-&quot;302&quot; },</p>
-<p>{ num: 28, nom: &quot;ChatGPT&quot;, b64:
-&quot;aHR0cHM6Ly9jaGF0Z3B0LmNvbS8=&quot;, code: &quot;303&quot; },</p>
-<p>{ num: 29, nom: &quot;Gemini&quot;, b64:
-&quot;aHR0cHM6Ly9nZW1pbmkuZ29vZ2xlLmNvbS9hcHA/aGw9ZnI=&quot;, code:
-&quot;304&quot; },</p>
-<p>{ num: 30, nom: &quot;Claude&quot;, b64:
-&quot;aHR0cHM6Ly9jbGF1ZGUuYWkvcmVjZW50cw==&quot;, code: &quot;305&quot;
-},</p>
-<p>{ num: 31, nom: &quot;Canva&quot;, b64:
-&quot;aHR0cHM6Ly93dy5jYW52YS5jb20vZnJfZnIv&quot;, code: &quot;306&quot;
-},</p>
-<p>{ num: 32, nom: &quot;Github&quot;, b64:
-&quot;aHR0cHM6Ly9naXRodWIuY29tLw==&quot;, code: &quot;307&quot; },</p>
-<p>{ num: 33, nom: &quot;Atrium&quot;, b64:
-&quot;aHR0cHM6Ly9hdHJpdW0tc3VkLmZyLw==&quot;, code: &quot;308&quot;
-},</p>
-<p>{ num: 34, nom: &quot;RATP&quot;, b64:
-&quot;aHR0cHM6Ly93dy5yYXRwLmZyLw==&quot;, code: &quot;309&quot; },</p>
-<p>{ num: 35, nom: &quot;Ita Mestieri&quot;, b64:
-&quot;aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2l0YS1tZXN0aWVyaQ==&quot;,
-code: &quot;119&quot; }</p>
-<p>];</p>
-<p><br/>
-<br/>
+function openModal(num) {
+  currentNum = num;
+  mIn = "";
+  updateMDots(false);
+  document.getElementById("m-code-panel").style.display = "flex";
+  document.getElementById("info-panel").classList.remove("open");
+  document.getElementById("modal-heading").textContent = "Code d'accès";
+  document.getElementById("modal-overlay").classList.add("open");
+}
+function closeModal() {
+  document.getElementById("modal-overlay").classList.remove("open");
+  currentNum = null; mIn = "";
+}
 
-</p>
-<p>// ── DIGICODE
-─────────────────────────────────────────────────────────</p>
-<p>const CODE = &quot;1710&quot;;</p>
-<p>let input = &quot;&quot;;</p>
-<p><br/>
-<br/>
+function mKey(k) {
+  if (mIn.length >= 4) return;
+  mIn += k;
+  updateMDots(false);
+  if (mIn.length === 4) setTimeout(checkModal, 80);
+}
+function mDel() { mIn = mIn.slice(0, -1); updateMDots(false); }
 
-</p>
-<p>function pressKey(k) {</p>
-<p>if (input.length &gt;= 4) return;</p>
-<p>input += k;</p>
-<p>updateDots(false);</p>
-<p>if (input.length === 4) setTimeout(checkCode, 80);</p>
-<p>}</p>
-<p><br/>
-<br/>
+function updateMDots(err) {
+  for (let i = 0; i < 4; i++) {
+    const d = document.getElementById("md" + i);
+    d.className = "m-dot";
+    if (err)           d.classList.add("error");
+    else if (i < mIn.length) d.classList.add("filled");
+  }
+}
 
-</p>
-<p>function delKey() {</p>
-<p>input = input.slice(0, -1);</p>
-<p>updateDots(false);</p>
-<p>}</p>
-<p><br/>
-<br/>
+function checkModal() {
+  if (mIn === MODAL_CODE) {
+    const s = sites.find(x => x.num === currentNum);
+    if (!s) return;
+    document.getElementById("m-code-panel").style.display = "none";
+    document.getElementById("modal-heading").textContent = "Informations";
+    document.getElementById("i-nom").textContent  = s.nom;
+    document.getElementById("i-num").textContent  = "#" + String(s.num).padStart(2,"0");
+    document.getElementById("i-code").textContent = s.code;
+    document.getElementById("i-desc").textContent = s.desc || "Non renseigné";
+    document.getElementById("i-date").textContent = s.date || "Non renseigné";
+    document.getElementById("info-panel").classList.add("open");
+  } else {
+    updateMDots(true);
+    setTimeout(() => { mIn = ""; updateMDots(false); }, 700);
+  }
+}
 
-</p>
-<p>function updateDots(err) {</p>
-<p>for (let i = 0; i &lt; 4; i++) {</p>
-<p>const d = document.getElementById(&quot;d&quot; + i);</p>
-<p>d.className = &quot;dot&quot;;</p>
-<p>if (err) d.classList.add(&quot;error&quot;);</p>
-<p>else if (i &lt; input.length) d.classList.add(&quot;filled&quot;);</p>
-<p>}</p>
-<p>}</p>
-<p><br/>
-<br/>
+function openFromModal() {
+  const s = sites.find(x => x.num === currentNum);
+  if (s) { openSite(s.b64); closeModal(); }
+}
 
-</p>
-<p>function checkCode() {</p>
-<p>if (input === CODE) {</p>
-<p>document.getElementById(&quot;lock&quot;).style.opacity = &quot;0&quot;;</p>
-<p>document.getElementById(&quot;lock&quot;).style.transition =
-&quot;opacity .4s&quot;;</p>
-<p>setTimeout(() =&gt; {</p>
-<p>document.getElementById(&quot;lock&quot;).style.display = &quot;none&quot;;</p>
-<p>document.getElementById(&quot;app&quot;).style.display = &quot;block&quot;;</p>
-<p>renderTable(sites);</p>
-<p>document.getElementById(&quot;countBadge&quot;).textContent =
-sites.length + &quot; site&quot; + (sites.length &gt; 1 ? &quot;s&quot;
-: &quot;&quot;);</p>
-<p>}, 400);</p>
-<p>} else {</p>
-<p>updateDots(true);</p>
-<p>setTimeout(() =&gt; { input = &quot;&quot;; updateDots(false); },
-700);</p>
-<p>}</p>
-<p>}</p>
-<p><br/>
-<br/>
+document.getElementById("modal-overlay").addEventListener("click", e => {
+  if (e.target === document.getElementById("modal-overlay")) closeModal();
+});
 
-</p>
-<p>document.addEventListener(&quot;keydown&quot;, e =&gt; {</p>
-<p>if (document.getElementById(&quot;lock&quot;).style.display !==
-&quot;none&quot;) {</p>
-<p>if (e.key &gt;= &quot;0&quot; &amp;&amp; e.key &lt;= &quot;9&quot;)
-pressKey(e.key);</p>
-<p>if (e.key === &quot;Backspace&quot;) delKey();</p>
-<p>}</p>
-<p>});</p>
-<p><br/>
-<br/>
-
-</p>
-<p>// ── TABLE
-─────────────────────────────────────────────────────────────</p>
-<p>function decodeB64(b64) {</p>
-<p>try { return atob(b64); } catch { return &quot;#&quot;; }</p>
-<p>}</p>
-<p><br/>
-<br/>
-
-</p>
-<p>function codeClass(code) {</p>
-<p>const c = parseInt(code[0]) || 0;</p>
-<p>return &quot;code code-&quot; + c;</p>
-<p>}</p>
-<p><br/>
-<br/>
-
-</p>
-<p>function renderTable(data) {</p>
-<p>const tbody = document.getElementById(&quot;tbody&quot;);</p>
-<p>if (!data.length) {</p>
-<p>tbody.innerHTML = '&lt;tr&gt;&lt;td colspan=&quot;4&quot;
-class=&quot;no-results&quot;&gt;Aucun résultat&lt;/td&gt;&lt;/tr&gt;';</p>
-<p>return;</p>
-<p>}</p>
-<p>tbody.innerHTML = data.map(s =&gt; {</p>
-<p>const url = decodeB64(s.b64);</p>
-<p>const display = url.replace(/^https?:\/\//, &quot;&quot;).substring(0,
-42) + (url.length &gt; 45 ? &quot;…&quot; : &quot;&quot;);</p>
-<p>return `&lt;tr&gt;</p>
-<p>&lt;td class=&quot;num&quot;&gt;${String(s.num).padStart(2,&quot;0&quot;)}&lt;/td&gt;</p>
-<p>&lt;td class=&quot;name&quot;&gt;${s.nom}&lt;/td&gt;</p>
-<p>&lt;td&gt;&lt;span
-class=&quot;${codeClass(s.code)}&quot;&gt;${s.code}&lt;/span&gt;&lt;/td&gt;</p>
-<p>&lt;td class=&quot;link-cell&quot;&gt;&lt;a href=&quot;${url}&quot;
-target=&quot;_blank&quot;&gt;${display}&lt;/a&gt;&lt;/td&gt;</p>
-<p>&lt;/tr&gt;`;</p>
-<p>}).join(&quot;&quot;);</p>
-<p>}</p>
-<p><br/>
-<br/>
-
-</p>
-<p>function filterSites() {</p>
-<p>const q =
-document.getElementById(&quot;search&quot;).value.trim().toLowerCase();</p>
-<p>if (!q) { renderTable(sites); return; }</p>
-<p>if (/^\d{3}$/.test(q)) {</p>
-<p>renderTable(sites.filter(s =&gt; s.code === q));</p>
-<p>} else {</p>
-<p>renderTable(sites.filter(s =&gt;
-s.nom.toLowerCase().includes(q)));</p>
-<p>}</p>
-<p>}</p>
-<p><br/>
-<br/>
-
-</p>
-<p>// ── CONVERTISSEUR
-────────────────────────────────────────────────────</p>
-<p>function encode() {</p>
-<p>const raw = document.getElementById(&quot;rawInput&quot;).value;</p>
-<p>document.getElementById(&quot;b64Input&quot;).value =
-btoa(unescape(encodeURIComponent(raw)));</p>
-<p>}</p>
-<p>function decode() {</p>
-<p>try {</p>
-<p>const b64 = document.getElementById(&quot;b64Input&quot;).value.trim();</p>
-<p>document.getElementById(&quot;rawInput&quot;).value =
-decodeURIComponent(escape(atob(b64)));</p>
-<p>} catch { document.getElementById(&quot;rawInput&quot;).value = &quot;⚠
-Base64 invalide&quot;; }</p>
-<p>}</p>
-<p>function clearConv() {</p>
-<p>document.getElementById(&quot;rawInput&quot;).value = &quot;&quot;;</p>
-<p>document.getElementById(&quot;b64Input&quot;).value = &quot;&quot;;</p>
-<p>}</p>
-<p>&lt;/script&gt;</p>
-<p>&lt;/body&gt;</p>
-<p>&lt;/html&gt;</p>
+// ── CONVERTISSEUR ───────────────────────────
+function encode() {
+  document.getElementById("b64Input").value = btoa(unescape(encodeURIComponent(document.getElementById("rawInput").value)));
+}
+function decode() {
+  try { document.getElementById("rawInput").value = decodeURIComponent(escape(atob(document.getElementById("b64Input").value.trim()))); }
+  catch { document.getElementById("rawInput").value = "⚠ Base64 invalide"; }
+}
+function clearConv() {
+  document.getElementById("rawInput").value = "";
+  document.getElementById("b64Input").value = "";
+}
+</script>
 </body>
 </html>
