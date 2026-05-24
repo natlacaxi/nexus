@@ -1,869 +1,886 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Nexus-Aegis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap');
-
 :root {
-  --bg: #0d0d12;
-  --surface: #13131a;
-  --border: #1e1e2e;
-  --accent: #6c63ff;
-  --accent2: #c084fc;
-  --accent3: #38bdf8;
-  --accent4: #34d399;
-  --text: #e8e8f4;
-  --muted: #52527a;
-  --red: #f87171;
-  --grad: linear-gradient(135deg, #6c63ff, #c084fc);
+  --bg:    #08080f;
+  --s1:    #0f0f1a;
+  --s2:    #13131f;
+  --br:    #1f1f32;
+  --br2:   #2a2a42;
+  --v1:    #7c6fff;
+  --v2:    #d47cff;
+  --v3:    #5ee7ff;
+  --v4:    #5fffc8;
+  --v5:    #ff7eb3;
+  --text:  #eeeeff;
+  --text2: #9898c0;
+  --muted: #4a4a72;
+  --red:   #ff6b6b;
+  --shadow: #00000080;
 }
-
+[data-theme="light"] {
+  --bg:    #f0f0fa;
+  --s1:    #ffffff;
+  --s2:    #f5f5ff;
+  --br:    #d0d0e8;
+  --br2:   #b8b8d8;
+  --v1:    #6a5af0;
+  --v2:    #b060e0;
+  --v3:    #1ab8d8;
+  --v4:    #18c888;
+  --v5:    #e05090;
+  --text:  #18183a;
+  --text2: #5050a0;
+  --muted: #9090b8;
+  --red:   #e04040;
+  --shadow: #00000030;
+}
 * { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; transition: background .3s, color .3s; }
 
-body {
-  font-family: 'IBM Plex Sans', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  overflow-x: hidden;
-}
+/* WAVES */
+#waveCanvas { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
 
-/* ── CANVAS WAVES ── */
-#waveCanvas {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  opacity: 0.28;
-}
-
-/* ── DIGICODE ── */
+/* LOCK */
 #lock {
-  position: fixed; inset: 0;
-  background: radial-gradient(ellipse at 50% 40%, #1a1030 0%, var(--bg) 70%);
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  gap: 28px;
-  z-index: 999;
-  transition: opacity .45s ease;
+  position: fixed; inset: 0; z-index: 900;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 36px;
+  transition: opacity .6s ease;
 }
-
+.lock-glow {
+  position: absolute; width: 600px; height: 600px; border-radius: 50%;
+  background: radial-gradient(circle, #7c6fff18 0%, transparent 70%);
+  pointer-events: none; animation: glowPulse 4s ease-in-out infinite;
+}
+@keyframes glowPulse { 0%,100%{transform:scale(1);opacity:.6} 50%{transform:scale(1.15);opacity:1} }
 .lock-brand {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 30px;
-  font-weight: 600;
-  background: linear-gradient(135deg, #6c63ff 0%, #c084fc 50%, #38bdf8 100%);
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: gradShift 3s linear infinite;
-  letter-spacing: -0.02em;
+  font-family: 'Syne', sans-serif; font-size: 52px; font-weight: 800; letter-spacing: -.04em;
+  background: linear-gradient(135deg, var(--v1) 0%, var(--v2) 40%, var(--v3) 80%);
+  background-size: 300% 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text; animation: gradMove 5s ease infinite;
 }
+@keyframes gradMove { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+.lock-sub { font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.4em; color:var(--muted); text-transform:uppercase; margin-top:-28px; }
+.lock-dots { display:flex; gap:16px; }
+.ldot { width:13px; height:13px; border-radius:50%; border:1.5px solid var(--muted); transition:all .3s cubic-bezier(.34,1.6,.64,1); }
+.ldot.filled { border-color:transparent; background:linear-gradient(135deg,var(--v1),var(--v2)); box-shadow:0 0 16px #7c6fff66,0 0 32px #7c6fff22; transform:scale(1.25); }
+.ldot.error  { background:var(--red); border-color:var(--red); box-shadow:0 0 16px #ff6b6b66; animation:shake .35s ease; }
+@keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-4px)} 60%{transform:translateX(4px)} }
+.numpad { display:grid; grid-template-columns:repeat(3,68px); gap:12px; }
+.nkey {
+  width:68px; height:68px; border-radius:50%; background:var(--s1); border:1.5px solid var(--br);
+  color:var(--text); font-family:'Syne',sans-serif; font-size:22px; font-weight:600;
+  cursor:pointer; transition:all .2s; position:relative; overflow:hidden;
+}
+.nkey::before { content:''; position:absolute; inset:0; border-radius:50%; background:radial-gradient(circle at center,var(--v1) 0%,transparent 70%); opacity:0; transition:opacity .2s; }
+.nkey:hover  { border-color:var(--v1); box-shadow:0 0 0 4px #7c6fff18,0 0 20px #7c6fff1a; }
+.nkey:hover::before { opacity:.12; }
+.nkey:active { transform:scale(.88); }
+.nkey:active::before { opacity:.3; }
+.nkey.nkdel { font-size:17px; color:var(--muted); font-family:inherit; }
+.nkey.nkdel:hover { border-color:var(--red); color:var(--red); box-shadow:0 0 0 4px #ff6b6b14; }
 
-@keyframes gradShift {
-  0%   { background-position: 0% 50%; }
-  50%  { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+/* APP */
+#app { display:none; position:relative; z-index:1; max-width:1100px; margin:0 auto; padding:56px 36px 120px; animation:pageIn .7s cubic-bezier(.16,1,.3,1) both; }
+@keyframes pageIn { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
+.app-header { display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:10px; flex-wrap:wrap; gap:12px; }
+.app-brand {
+  font-family:'Syne',sans-serif; font-size:44px; font-weight:800; letter-spacing:-.04em;
+  background:linear-gradient(135deg,var(--v1) 0%,var(--v2) 45%,var(--v3) 90%);
+  background-size:300% 300%; -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text; animation:gradMove 5s ease infinite; line-height:1;
 }
+.app-meta { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+.count-pill { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text2); background:var(--s2); border:1px solid var(--br); border-radius:20px; padding:4px 14px; }
 
-.lock-title {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 0.35em;
-  color: var(--muted);
-  text-transform: uppercase;
+/* SEARCH */
+.search-wrap { margin-bottom:36px; }
+.search-inner { position:relative; display:flex; align-items:center; }
+.search-icon  { position:absolute; left:18px; font-size:15px; color:var(--muted); pointer-events:none; }
+.search-wrap input {
+  width:100%; padding:16px 160px 16px 48px;
+  background:var(--s1); border:1.5px solid var(--br); border-radius:14px;
+  color:var(--text); font-family:'Outfit',sans-serif; font-size:16px; outline:none;
+  transition:border-color .25s, box-shadow .25s;
 }
+.search-wrap input:focus { border-color:var(--v1); box-shadow:0 0 0 4px #7c6fff14,0 4px 32px #7c6fff0a; }
+.search-wrap input::placeholder { color:var(--muted); }
+.btn-add-trigger {
+  position:absolute; right:12px;
+  padding:9px 18px; background:linear-gradient(135deg,var(--v1),var(--v2));
+  border:none; border-radius:9px; color:#fff;
+  font-family:'Outfit',sans-serif; font-size:13px; font-weight:600;
+  cursor:pointer; transition:filter .15s, box-shadow .15s; white-space:nowrap;
+}
+.btn-add-trigger:hover { filter:brightness(1.15); box-shadow:0 4px 18px #7c6fff44; }
 
-.dots { display: flex; gap: 14px; }
-
-.dot {
-  width: 12px; height: 12px;
-  border-radius: 50%;
-  border: 1.5px solid var(--muted);
-  transition: all .25s cubic-bezier(.34,1.56,.64,1);
-}
-.dot.filled {
-  background: var(--grad);
-  border-color: transparent;
-  box-shadow: 0 0 12px #6c63ff88;
-  transform: scale(1.2);
-}
-.dot.error { background: var(--red); border-color: var(--red); box-shadow: 0 0 12px #f8717188; }
-
-.numpad {
-  display: grid;
-  grid-template-columns: repeat(3, 60px);
-  gap: 10px;
-}
-
-.key {
-  width: 60px; height: 60px;
-  background: var(--surface);
-  border: 1.5px solid var(--border);
-  color: var(--text);
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 20px;
-  border-radius: 50%;
-  cursor: pointer;
-  transition: all .18s;
-  position: relative;
-  overflow: hidden;
-}
-.key::after {
-  content: '';
-  position: absolute; inset: 0;
-  border-radius: 50%;
-  background: var(--grad);
-  opacity: 0;
-  transition: opacity .18s;
-}
-.key:hover { border-color: var(--accent); box-shadow: 0 0 0 4px #6c63ff1e; }
-.key:hover::after { opacity: 0.09; }
-.key:active { transform: scale(.9); }
-.key:active::after { opacity: 0.24; }
-.key.del { font-size: 16px; color: var(--muted); }
-.key.del:hover { color: var(--red); border-color: var(--red); box-shadow: 0 0 0 3px #f8717122; }
-
-/* ── APP ── */
-#app {
-  display: none;
-  position: relative;
-  z-index: 1;
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 48px 24px 80px;
-  animation: fadeUp .55s ease both;
-}
-
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.header {
-  display: flex; align-items: baseline; gap: 12px;
-  margin-bottom: 4px;
-}
-
-h1 {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 26px;
-  font-weight: 600;
-  background: linear-gradient(135deg, #6c63ff 0%, #c084fc 50%, #38bdf8 100%);
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: gradShift 3s linear infinite;
-  letter-spacing: -0.02em;
-}
-
-.count-badge {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 11px;
-  color: var(--muted);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 2px 10px;
-}
-
-.subtitle {
-  font-size: 13px;
-  color: var(--muted);
-  margin-bottom: 28px;
-}
-
-/* ── SEARCH ── */
-.search-bar {
-  position: relative;
-  margin-bottom: 24px;
-}
-.search-bar input {
-  width: 100%;
-  padding: 12px 16px;
-  background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: 10px;
-  color: var(--text);
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 14px;
-  outline: none;
-  transition: border-color .2s, box-shadow .2s;
-}
-.search-bar input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px #6c63ff1a;
-}
-.search-bar input::placeholder { color: var(--muted); }
-
-/* ── TABLE ── */
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-}
-thead th {
-  text-align: left;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--muted);
-  padding: 0 12px 12px;
-  border-bottom: 1px solid var(--border);
-}
-tbody tr {
-  border-bottom: 1px solid #15151f;
-  transition: background .15s;
-  animation: rowIn .3s ease both;
-}
-@keyframes rowIn {
-  from { opacity: 0; transform: translateX(-6px); }
-  to   { opacity: 1; transform: translateX(0); }
-}
-tbody tr:hover { background: #141420; }
-tbody td { padding: 11px 12px; vertical-align: middle; }
-
-.num {
-  font-family: 'IBM Plex Mono', monospace;
-  color: var(--muted);
-  font-size: 11px;
-  width: 36px;
-}
-.name { font-weight: 500; color: var(--text); }
-
-.code {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 11px;
-  border-radius: 5px;
-  padding: 2px 8px;
-  display: inline-block;
-  width: 46px;
-  text-align: center;
-  font-weight: 600;
-}
-.code-0 { background: #1a1030; color: #a78bfa; border: 1px solid #3d2a70; }
-.code-1 { background: #0f1f30; color: #38bdf8; border: 1px solid #1a4060; }
-.code-2 { background: #0f2020; color: #34d399; border: 1px solid #1a4040; }
-.code-3 { background: #201510; color: #fb923c; border: 1px solid #50301a; }
-.code-4 { background: #20101a; color: #f472b6; border: 1px solid #50203a; }
-.code-5 { background: #1a1010; color: #f87171; border: 1px solid #502020; }
-.code-6 { background: #181820; color: #e2e8f0; border: 1px solid #303050; }
-.code-7 { background: #1a1a10; color: #facc15; border: 1px solid #504010; }
-.code-8 { background: #0f1a1f; color: #67e8f9; border: 1px solid #1a3f4a; }
-.code-9 { background: #1a1028; color: #c084fc; border: 1px solid #40186a; }
-
-/* ── BOUTONS LIGNE ── */
+/* TABLE */
+.table-wrap { border:1px solid var(--br); border-radius:16px; overflow:hidden; background:var(--s1); }
+table { width:100%; border-collapse:collapse; }
+thead { background:linear-gradient(90deg,#12122080,#0f0f1f80); border-bottom:1px solid var(--br2); }
+[data-theme="light"] thead { background:linear-gradient(90deg,#e0e0f880,#ebebff80); }
+thead th { padding:16px 22px; text-align:left; font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted); font-weight:400; }
+tbody tr { border-bottom:1px solid var(--br); transition:background .18s; animation:rowSlide .4s cubic-bezier(.16,1,.3,1) both; }
+tbody tr:last-child { border-bottom:none; }
+@keyframes rowSlide { from{opacity:0;transform:translateX(-10px)} to{opacity:1;transform:translateX(0)} }
+tbody tr:hover { background:var(--s2); }
+tbody td { padding:18px 22px; vertical-align:middle; }
+.td-num { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--muted); width:52px; letter-spacing:.05em; }
+.td-name { font-family:'Outfit',sans-serif; font-size:16px; font-weight:500; color:var(--text); letter-spacing:-.01em; }
+.td-name .site-emoji { margin-right:6px; font-style:normal; }
+.td-code { width:80px; }
+.ctag { font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:500; border-radius:7px; padding:4px 10px; display:inline-block; text-align:center; width:54px; border:1px solid; letter-spacing:.06em; }
+.c0{background:#1e1540;color:#a78bfa;border-color:#3d2a70}
+.c1{background:#0d1e32;color:#5ee7ff;border-color:#1a4060}
+.c2{background:#0d2018;color:#5fffc8;border-color:#1a4035}
+.c3{background:#221508;color:#ffb347;border-color:#503010}
+.c4{background:#22101a;color:#ff7eb3;border-color:#501830}
+.c5{background:#200f0f;color:#ff6b6b;border-color:#501818}
+.c6{background:#181822;color:#c8cce8;border-color:#282848}
+.c7{background:#1e1c08;color:#ffd060;border-color:#504008}
+.c8{background:#0d1c22;color:#67e8f9;border-color:#1a3f4a}
+.c9{background:#1c1030;color:#d47cff;border-color:#40186a}
+[data-theme="light"] .c0{background:#ede8ff;color:#6a3de0;border-color:#c8b8f8}
+[data-theme="light"] .c1{background:#e0f4ff;color:#1a80b0;border-color:#a8d8f0}
+[data-theme="light"] .c2{background:#e0fff4;color:#1a9060;border-color:#a8e8d0}
+[data-theme="light"] .c3{background:#fff3e0;color:#a06010;border-color:#f0d0a0}
+[data-theme="light"] .c4{background:#ffe0ed;color:#c03070;border-color:#f0a8cc}
+[data-theme="light"] .c5{background:#ffe0e0;color:#c03030;border-color:#f0a8a8}
+[data-theme="light"] .c6{background:#f0f0ff;color:#5060b0;border-color:#c0c0e8}
+[data-theme="light"] .c7{background:#fffce0;color:#908010;border-color:#e8d878}
+[data-theme="light"] .c8{background:#e0f8ff;color:#1888a0;border-color:#90d8ee}
+[data-theme="light"] .c9{background:#f5e0ff;color:#9030c0;border-color:#d898f0}
+.td-desc { font-family:'Outfit',sans-serif; font-size:13px; color:var(--text2); max-width:220px; }
+.td-desc.empty { color:var(--muted); font-style:italic; }
+.td-actions { width:170px; }
+.row-btns { display:flex; gap:8px; align-items:center; }
 .btn-open {
-  padding: 5px 14px;
-  background: linear-gradient(135deg, #6c63ff, #a855f7);
-  border: none;
-  border-radius: 6px;
-  color: #fff;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 11px;
-  cursor: pointer;
-  transition: filter .15s, transform .15s;
-  margin-right: 6px;
+  padding:8px 18px; background:linear-gradient(135deg,var(--v1) 0%,var(--v2) 100%);
+  border:none; border-radius:9px; color:#fff; font-family:'Outfit',sans-serif;
+  font-size:13px; font-weight:600; cursor:pointer; transition:filter .15s,transform .15s,box-shadow .15s;
 }
-.btn-open:hover { filter: brightness(1.15); transform: scale(1.04); }
-
+.btn-open:hover { filter:brightness(1.18); transform:translateY(-1px); box-shadow:0 4px 20px #7c6fff44; }
+.btn-open:active { transform:scale(.95); }
 .btn-lock {
-  padding: 5px 10px;
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  color: var(--muted);
-  font-size: 13px;
-  cursor: pointer;
-  transition: all .15s;
+  width:36px; height:36px; background:var(--s2); border:1.5px solid var(--br2);
+  border-radius:9px; color:var(--muted); font-size:14px; cursor:pointer;
+  transition:all .18s; display:flex; align-items:center; justify-content:center; flex-shrink:0;
 }
-.btn-lock:hover { border-color: var(--accent3); color: var(--accent3); background: #0f1f2a; }
+.btn-lock:hover { border-color:var(--v3); color:var(--v3); background:#0d1e28; box-shadow:0 0 12px #5ee7ff22; }
+.no-results { padding:64px; text-align:center; color:var(--muted); font-family:'JetBrains Mono',monospace; font-size:13px; }
 
-.no-results {
-  text-align: center;
-  padding: 48px;
-  color: var(--muted);
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 13px;
-}
+/* SEP */
+.sep { border:none; height:1px; background:linear-gradient(90deg,transparent,var(--br2),transparent); margin:56px 0; }
 
-/* ── SEPARATOR ── */
-.sep {
-  border: none;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--border), transparent);
-  margin: 44px 0;
-}
-
-/* ── CONVERTER ── */
-.conv-title {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 11px;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--accent2);
-  margin-bottom: 16px;
-}
-.conv-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-@media (max-width: 540px) { .conv-grid { grid-template-columns: 1fr; } }
-.conv-box label {
-  font-size: 11px;
-  color: var(--muted);
-  font-family: 'IBM Plex Mono', monospace;
-  display: block;
-  margin-bottom: 6px;
-}
+/* CONVERTER */
+.section-head { display:flex; align-items:center; gap:12px; margin-bottom:20px; }
+.section-label { font-family:'Syne',sans-serif; font-size:18px; font-weight:700; color:var(--text); letter-spacing:-.02em; }
+.section-pill { font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:var(--v2); background:#2a1540; border:1px solid #4a2060; border-radius:20px; padding:3px 10px; }
+[data-theme="light"] .section-pill { background:#f0e0ff; border-color:#d8b8f8; }
+.conv-grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+@media(max-width:580px){.conv-grid{grid-template-columns:1fr}}
+.conv-box { display:flex; flex-direction:column; gap:8px; }
+.conv-label { font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); }
 .conv-box textarea {
-  width: 100%;
-  height: 80px;
-  background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: 8px;
-  color: var(--text);
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 12px;
-  padding: 10px;
-  resize: none;
-  outline: none;
-  transition: border-color .2s, box-shadow .2s;
+  width:100%; height:96px; background:var(--s1); border:1.5px solid var(--br); border-radius:10px;
+  color:var(--text); font-family:'JetBrains Mono',monospace; font-size:12px; line-height:1.6;
+  padding:12px 14px; resize:none; outline:none; transition:border-color .2s,box-shadow .2s;
 }
-.conv-box textarea:focus {
-  border-color: var(--accent2);
-  box-shadow: 0 0 0 3px #c084fc18;
-}
-.conv-actions { display: flex; gap: 8px; margin-top: 12px; }
-.btn {
-  padding: 8px 18px;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 12px;
-  border-radius: 7px;
-  border: 1.5px solid var(--border);
-  cursor: pointer;
-  transition: all .15s;
-}
-.btn-enc { background: linear-gradient(135deg, #6c63ff, #a855f7); color: #fff; border-color: transparent; }
-.btn-enc:hover { filter: brightness(1.15); }
-.btn-dec { background: transparent; color: var(--accent3); border-color: var(--accent3); }
-.btn-dec:hover { background: #0f1f30; }
-.btn-clear { background: transparent; color: var(--muted); }
-.btn-clear:hover { color: var(--red); border-color: var(--red); }
+.conv-box textarea:focus { border-color:var(--v2); box-shadow:0 0 0 3px #d47cff12; }
+.conv-actions { display:flex; gap:10px; margin-top:14px; flex-wrap:wrap; }
+.cbtn { padding:10px 22px; font-family:'Outfit',sans-serif; font-size:13px; font-weight:600; border-radius:10px; border:1.5px solid var(--br); cursor:pointer; transition:all .18s; }
+.cbtn-enc { background:linear-gradient(135deg,var(--v1),var(--v2)); color:#fff; border-color:transparent; }
+.cbtn-enc:hover { filter:brightness(1.15); box-shadow:0 4px 20px #7c6fff44; }
+.cbtn-dec { background:transparent; color:var(--v3); border-color:var(--v3); }
+.cbtn-dec:hover { background:#0d1e28; box-shadow:0 4px 16px #5ee7ff22; }
+.cbtn-clr { background:transparent; color:var(--muted); }
+.cbtn-clr:hover { color:var(--red); border-color:var(--red); }
 
-/* ── MODAL ── */
-#modal-overlay {
-  display: none;
-  position: fixed; inset: 0;
-  background: #00000090;
-  backdrop-filter: blur(8px);
-  z-index: 500;
-  align-items: center;
-  justify-content: center;
+/* MODAL CADENAS */
+.modal-bg {
+  display:none; position:fixed; inset:0;
+  background:#000000b0; backdrop-filter:blur(12px) saturate(1.4);
+  z-index:800; align-items:center; justify-content:center;
 }
-#modal-overlay.open { display: flex; }
+.modal-bg.open { display:flex; }
+@keyframes modalPop { from{opacity:0;transform:scale(.8) translateY(16px)} to{opacity:1;transform:scale(1) translateY(0)} }
 
-.modal {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 36px 32px 28px;
-  width: 300px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 18px;
-  position: relative;
-  animation: modalIn .3s cubic-bezier(.34,1.56,.64,1);
+.modal-info {
+  background:var(--s1); border:1px solid var(--br2); border-radius:20px;
+  padding:40px 36px 32px; width:340px; display:flex; flex-direction:column;
+  align-items:center; gap:20px; position:relative;
+  animation:modalPop .35s cubic-bezier(.34,1.6,.64,1);
+  box-shadow:0 24px 80px var(--shadow),0 0 0 1px #ffffff06;
 }
-@keyframes modalIn {
-  from { opacity: 0; transform: scale(.86) translateY(10px); }
-  to   { opacity: 1; transform: scale(1)   translateY(0); }
-}
+.modal-x { position:absolute; top:14px; right:16px; background:none; border:none; color:var(--muted); font-size:18px; cursor:pointer; transition:color .15s; line-height:1; padding:4px; }
+.modal-x:hover { color:var(--text); }
+.modal-title { font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.3em; text-transform:uppercase; color:var(--muted); align-self:flex-start; }
+.m-dots { display:flex; gap:14px; }
+.m-dot { width:11px; height:11px; border-radius:50%; border:1.5px solid var(--muted); transition:all .3s cubic-bezier(.34,1.6,.64,1); }
+.m-dot.filled { background:linear-gradient(135deg,var(--v3),var(--v4)); border-color:transparent; box-shadow:0 0 14px #5ee7ff55; transform:scale(1.25); }
+.m-dot.error { background:var(--red); border-color:var(--red); animation:shake .35s ease; }
+.m-numpad { display:grid; grid-template-columns:repeat(3,56px); gap:10px; }
+.mkey { width:56px; height:56px; border-radius:50%; background:var(--bg); border:1.5px solid var(--br); color:var(--text); font-family:'Syne',sans-serif; font-size:19px; font-weight:600; cursor:pointer; transition:all .16s; }
+.mkey:hover { border-color:var(--v3); box-shadow:0 0 0 3px #5ee7ff18; }
+.mkey:active { transform:scale(.88); }
+.mkey.mkdel { font-size:14px; color:var(--muted); font-family:inherit; }
+.mkey.mkdel:hover { color:var(--red); border-color:var(--red); }
+.info-panel { display:none; width:100%; flex-direction:column; gap:12px; animation:pageIn .3s ease; }
+.info-panel.open { display:flex; }
+.irow { display:flex; flex-direction:column; gap:3px; }
+.ilbl { font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:var(--muted); }
+.ival { font-family:'Outfit',sans-serif; font-size:15px; font-weight:600; color:var(--text); letter-spacing:-.01em; }
+.ival.dim { font-weight:400; color:var(--text2); font-size:13px; font-family:'JetBrains Mono',monospace; }
+.ival.gcyan { background:linear-gradient(135deg,var(--v3),var(--v4)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.idiv { height:1px; background:var(--br); width:100%; }
+.info-open-btn { width:100%; padding:12px; margin-top:4px; background:linear-gradient(135deg,var(--v1),var(--v2)); border:none; border-radius:10px; color:#fff; font-family:'Outfit',sans-serif; font-size:14px; font-weight:600; cursor:pointer; transition:filter .15s,box-shadow .15s; }
+.info-open-btn:hover { filter:brightness(1.15); box-shadow:0 6px 24px #7c6fff44; }
 
-.modal-close {
-  position: absolute; top: 12px; right: 14px;
-  background: none; border: none;
-  color: var(--muted); font-size: 18px;
-  cursor: pointer; transition: color .15s;
-  line-height: 1;
+/* MODAL AJOUT */
+.modal-add {
+  background:var(--s1); border:1px solid var(--br2); border-radius:20px;
+  padding:36px 36px 28px; width:560px; max-width:95vw;
+  position:relative; animation:modalPop .35s cubic-bezier(.34,1.6,.64,1);
+  box-shadow:0 24px 80px var(--shadow),0 0 0 1px #ffffff06;
+  display:flex; flex-direction:column; gap:20px;
+  max-height:92vh; overflow-y:auto;
 }
-.modal-close:hover { color: var(--text); }
+.add-head { display:flex; align-items:center; justify-content:space-between; }
+.add-title { font-family:'Syne',sans-serif; font-size:20px; font-weight:700; letter-spacing:-.02em; background:linear-gradient(135deg,var(--v1),var(--v2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.add-fields { display:flex; flex-direction:column; gap:14px; }
+.add-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.add-field { display:flex; flex-direction:column; gap:6px; }
+.add-field.full { grid-column:1/-1; }
+.add-lbl { font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); }
+.add-field input {
+  background:var(--bg); border:1.5px solid var(--br); border-radius:10px;
+  color:var(--text); font-family:'Outfit',sans-serif; font-size:14px;
+  padding:11px 14px; outline:none; transition:border-color .2s,box-shadow .2s; width:100%;
+}
+.add-field input:focus { border-color:var(--v1); box-shadow:0 0 0 3px #7c6fff14; }
+.add-field input::placeholder { color:var(--muted); }
+.url-row { display:flex; gap:8px; align-items:flex-end; }
+.url-row .add-field { flex:1; margin:0; }
+.btn-auto {
+  padding:0 16px; height:44px; background:var(--s2); border:1.5px solid var(--br2);
+  border-radius:10px; color:var(--v3); font-family:'JetBrains Mono',monospace; font-size:11px;
+  cursor:pointer; white-space:nowrap; transition:all .18s; flex-shrink:0;
+}
+.btn-auto:hover { border-color:var(--v3); background:#0d1e28; }
 
-.modal-heading {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
-  color: var(--muted);
-  align-self: flex-start;
+/* EMOJI BANK */
+.emoji-section { display:flex; flex-direction:column; gap:8px; }
+.emoji-bank-label { font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); }
+.emoji-bank { display:flex; flex-wrap:wrap; gap:6px; background:var(--bg); border:1.5px solid var(--br); border-radius:10px; padding:10px 12px; }
+.emoji-btn { width:32px; height:32px; border:none; background:var(--s2); border-radius:7px; font-size:16px; cursor:pointer; transition:all .15s; display:flex; align-items:center; justify-content:center; border:1px solid var(--br); }
+.emoji-btn:hover { background:var(--v1); transform:scale(1.2); box-shadow:0 4px 12px #7c6fff44; border-color:transparent; }
+.emoji-btn:active { transform:scale(.9); }
+.emoji-preview { font-family:'Outfit',sans-serif; font-size:13px; color:var(--text2); margin-top:4px; }
+.emoji-preview span { font-size:16px; }
+.name-with-emoji { display:flex; gap:8px; align-items:flex-end; }
+.name-with-emoji .add-field { flex:1; }
+.emoji-pick-btn {
+  padding:0 14px; height:44px; background:var(--s2); border:1.5px solid var(--br2);
+  border-radius:10px; color:var(--text2); font-size:18px;
+  cursor:pointer; transition:all .18s; flex-shrink:0;
 }
+.emoji-pick-btn:hover { border-color:var(--v2); }
 
-/* modal dots */
-.m-dots { display: flex; gap: 12px; }
-.m-dot {
-  width: 10px; height: 10px;
-  border-radius: 50%;
-  border: 1.5px solid var(--muted);
-  transition: all .25s cubic-bezier(.34,1.56,.64,1);
-}
-.m-dot.filled {
-  background: linear-gradient(135deg, var(--accent3), var(--accent4));
-  border-color: transparent;
-  box-shadow: 0 0 10px #38bdf855;
-  transform: scale(1.2);
-}
-.m-dot.error { background: var(--red); border-color: var(--red); }
+/* DUPLICATE WARNING */
+.dup-warn { display:none; background:#ff6b6b18; border:1px solid #ff6b6b55; border-radius:8px; padding:10px 14px; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--red); }
+.dup-warn.show { display:block; }
 
-/* modal numpad */
-.m-numpad {
-  display: grid;
-  grid-template-columns: repeat(3, 52px);
-  gap: 8px;
+.add-actions { display:flex; gap:10px; flex-wrap:wrap; }
+.btn-add-do {
+  flex:1; padding:12px 20px; background:linear-gradient(135deg,var(--v1),var(--v2));
+  border:none; border-radius:10px; color:#fff; font-family:'Outfit',sans-serif;
+  font-size:14px; font-weight:600; cursor:pointer; transition:filter .15s,box-shadow .15s;
 }
-.m-key {
-  width: 52px; height: 52px;
-  border-radius: 50%;
-  background: var(--bg);
-  border: 1.5px solid var(--border);
-  color: var(--text);
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 18px;
-  cursor: pointer;
-  transition: all .15s;
+.btn-add-do:hover { filter:brightness(1.15); box-shadow:0 6px 24px #7c6fff44; }
+.btn-add-dl {
+  flex:1; padding:12px 20px; background:transparent; border:1.5px solid var(--v4);
+  border-radius:10px; color:var(--v4); font-family:'Outfit',sans-serif;
+  font-size:14px; font-weight:600; cursor:pointer; transition:all .18s; white-space:nowrap;
 }
-.m-key:hover { border-color: var(--accent3); box-shadow: 0 0 0 3px #38bdf81a; }
-.m-key:active { transform: scale(.9); }
-.m-key.mdel { font-size: 13px; color: var(--muted); }
-.m-key.mdel:hover { color: var(--red); border-color: var(--red); }
+.btn-add-dl:hover { background:#0d2018; box-shadow:0 4px 16px #5fffc822; }
+.code-out { display:none; flex-direction:column; gap:8px; }
+.code-out.open { display:flex; }
+.code-out-lbl { font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--v2); }
+.code-out pre { background:var(--bg); border:1px solid var(--br2); border-radius:8px; padding:12px 14px; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--v3); overflow-x:auto; white-space:pre; line-height:1.5; }
+.btn-copy { align-self:flex-start; padding:7px 14px; background:var(--s2); border:1px solid var(--br2); border-radius:7px; color:var(--text2); font-family:'JetBrains Mono',monospace; font-size:11px; cursor:pointer; transition:all .15s; }
+.btn-copy:hover { border-color:var(--v2); color:var(--v2); }
+.btn-copy.ok { border-color:var(--v4); color:var(--v4); }
 
-/* info panel */
-.info-panel {
-  display: none;
-  width: 100%;
-  flex-direction: column;
-  gap: 10px;
-  animation: fadeUp .3s ease;
+/* FLOATING BUTTONS */
+.float-btns {
+  position:fixed; bottom:28px; right:28px; z-index:500;
+  display:flex; flex-direction:column; gap:12px; align-items:center;
 }
-.info-panel.open { display: flex; }
-
-.info-row { display: flex; flex-direction: column; gap: 2px; }
-.info-lbl {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 9px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--muted);
+.float-btn {
+  width:48px; height:48px; border-radius:50%; border:none;
+  display:flex; align-items:center; justify-content:center;
+  font-size:20px; cursor:pointer; transition:all .22s cubic-bezier(.34,1.6,.64,1);
+  box-shadow:0 4px 20px var(--shadow);
 }
-.info-val {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text);
+.float-btn:hover { transform:scale(1.15); }
+.float-btn:active { transform:scale(.9); }
+.float-theme {
+  background:linear-gradient(135deg,var(--v1),var(--v2));
+  color:#fff;
 }
-.info-val.sub {
-  font-size: 12px;
-  font-weight: 400;
-  color: var(--muted);
-  font-family: 'IBM Plex Mono', monospace;
+.float-relock {
+  background:linear-gradient(135deg,var(--v3),var(--v4));
+  color:#08080f;
 }
-.info-val.grad {
-  background: linear-gradient(135deg, var(--accent3), var(--accent4));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+.float-label {
+  font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--muted); margin-top:-6px;
 }
-
-.info-open-btn {
-  width: 100%;
-  padding: 10px;
-  margin-top: 4px;
-  background: linear-gradient(135deg, #6c63ff, #a855f7);
-  border: none;
-  border-radius: 8px;
-  color: #fff;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 12px;
-  cursor: pointer;
-  transition: filter .15s;
-}
-.info-open-btn:hover { filter: brightness(1.15); }
 </style>
 </head>
 <body>
 
 <canvas id="waveCanvas"></canvas>
 
-<!-- ══ DIGICODE ══ -->
+<!-- LOCK -->
 <div id="lock">
+  <div class="lock-glow"></div>
   <div class="lock-brand">Nexus-Aegis</div>
-  <div class="lock-title">Accès sécurisé</div>
-  <div class="dots">
-    <div class="dot" id="d0"></div>
-    <div class="dot" id="d1"></div>
-    <div class="dot" id="d2"></div>
-    <div class="dot" id="d3"></div>
+  <div class="lock-sub">Accès sécurisé</div>
+  <div class="lock-dots">
+    <div class="ldot" id="d0"></div><div class="ldot" id="d1"></div>
+    <div class="ldot" id="d2"></div><div class="ldot" id="d3"></div>
   </div>
   <div class="numpad">
-    <button class="key" onclick="pressKey('1')">1</button>
-    <button class="key" onclick="pressKey('2')">2</button>
-    <button class="key" onclick="pressKey('3')">3</button>
-    <button class="key" onclick="pressKey('4')">4</button>
-    <button class="key" onclick="pressKey('5')">5</button>
-    <button class="key" onclick="pressKey('6')">6</button>
-    <button class="key" onclick="pressKey('7')">7</button>
-    <button class="key" onclick="pressKey('8')">8</button>
-    <button class="key" onclick="pressKey('9')">9</button>
-    <button class="key del" onclick="delKey()">⌫</button>
-    <button class="key" onclick="pressKey('0')">0</button>
-    <button class="key" style="visibility:hidden"></button>
+    <button class="nkey" onclick="nk('1')">1</button>
+    <button class="nkey" onclick="nk('2')">2</button>
+    <button class="nkey" onclick="nk('3')">3</button>
+    <button class="nkey" onclick="nk('4')">4</button>
+    <button class="nkey" onclick="nk('5')">5</button>
+    <button class="nkey" onclick="nk('6')">6</button>
+    <button class="nkey" onclick="nk('7')">7</button>
+    <button class="nkey" onclick="nk('8')">8</button>
+    <button class="nkey" onclick="nk('9')">9</button>
+    <button class="nkey nkdel" onclick="nd()">⌫</button>
+    <button class="nkey" onclick="nk('0')">0</button>
+    <button class="nkey" style="visibility:hidden"></button>
   </div>
 </div>
 
-<!-- ══ APP ══ -->
+<!-- APP -->
 <div id="app">
-  <div class="header">
-    <h1>Nexus-Aegis</h1>
-    <span class="count-badge" id="countBadge">0 sites</span>
+  <div class="app-header">
+    <div class="app-brand">🛰️ Nexus-Aegis</div>
+    <div class="app-meta"><span class="count-pill" id="countPill">— sites</span></div>
   </div>
-  <p class="subtitle">Base de liens — Classe 208</p>
-
-  <div class="search-bar">
-    <input type="text" id="search" placeholder="Rechercher un nom, un mot-clé, ou un code XXX…" oninput="filterSites()">
+  <div class="search-wrap">
+    <div class="search-inner">
+      <span class="search-icon">⌕</span>
+      <input type="text" id="search" placeholder="🔍 Rechercher par nom, émoji, description, mot-clé ou code XXX…" oninput="doFilter()">
+      <button class="btn-add-trigger" onclick="openAdd()">✚ Ajouter</button>
+    </div>
   </div>
-
-  <table>
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Nom</th>
-        <th>Code</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody id="tbody"></tbody>
-  </table>
-
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>N°</th><th>Nom du site</th><th>Code ▼</th><th>Description</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
   <hr class="sep">
-
-  <div class="conv-title">↔ Convertisseur Base64</div>
+  <div class="section-head">
+    <span class="section-label">🔄 Convertisseur Base64</span>
+    <span class="section-pill">Encodeur / Décodeur</span>
+  </div>
   <div class="conv-grid">
     <div class="conv-box">
-      <label>URL / Texte brut</label>
+      <div class="conv-label">🔗 URL brute</div>
       <textarea id="rawInput" placeholder="https://exemple.com"></textarea>
     </div>
     <div class="conv-box">
-      <label>Base64</label>
+      <div class="conv-label">🔐 Base64</div>
       <textarea id="b64Input" placeholder="aHR0cHM6Ly9leGVtcGxlLmNvbQ=="></textarea>
     </div>
   </div>
   <div class="conv-actions">
-    <button class="btn btn-enc" onclick="encode()">Encoder →</button>
-    <button class="btn btn-dec" onclick="decode()">← Décoder</button>
-    <button class="btn btn-clear" onclick="clearConv()">Effacer</button>
+    <button class="cbtn cbtn-enc" onclick="enc()">Encoder →</button>
+    <button class="cbtn cbtn-dec" onclick="dec()">← Décoder</button>
+    <button class="cbtn cbtn-clr" onclick="clr()">🗑️ Effacer</button>
   </div>
 </div>
 
-<!-- ══ MODAL CADENAS ══ -->
-<div id="modal-overlay">
-  <div class="modal">
-    <button class="modal-close" onclick="closeModal()">✕</button>
-    <div class="modal-heading" id="modal-heading">Code d'accès</div>
+<!-- FLOATING BUTTONS -->
+<div class="float-btns" id="floatBtns" style="display:none">
+  <button class="float-btn float-relock" onclick="relockSite()" title="Verrouiller">🔒</button>
+  <button class="float-btn float-theme" onclick="toggleTheme()" id="themeBtn" title="Thème">🌙</button>
+</div>
 
-    <div id="m-code-panel" style="display:flex;flex-direction:column;align-items:center;gap:16px;width:100%">
+<!-- MODAL CADENAS -->
+<div class="modal-bg" id="mbg">
+  <div class="modal-info">
+    <button class="modal-x" onclick="closeLock()">✕</button>
+    <div class="modal-title" id="mtitle">Code d'accès</div>
+    <div id="mcp" style="display:flex;flex-direction:column;align-items:center;gap:18px;width:100%">
       <div class="m-dots">
-        <div class="m-dot" id="md0"></div>
-        <div class="m-dot" id="md1"></div>
-        <div class="m-dot" id="md2"></div>
-        <div class="m-dot" id="md3"></div>
+        <div class="m-dot" id="md0"></div><div class="m-dot" id="md1"></div>
+        <div class="m-dot" id="md2"></div><div class="m-dot" id="md3"></div>
       </div>
       <div class="m-numpad">
-        <button class="m-key" onclick="mKey('1')">1</button>
-        <button class="m-key" onclick="mKey('2')">2</button>
-        <button class="m-key" onclick="mKey('3')">3</button>
-        <button class="m-key" onclick="mKey('4')">4</button>
-        <button class="m-key" onclick="mKey('5')">5</button>
-        <button class="m-key" onclick="mKey('6')">6</button>
-        <button class="m-key" onclick="mKey('7')">7</button>
-        <button class="m-key" onclick="mKey('8')">8</button>
-        <button class="m-key" onclick="mKey('9')">9</button>
-        <button class="m-key mdel" onclick="mDel()">⌫</button>
-        <button class="m-key" onclick="mKey('0')">0</button>
-        <button class="m-key" style="visibility:hidden"></button>
+        <button class="mkey" onclick="mk('1')">1</button>
+        <button class="mkey" onclick="mk('2')">2</button>
+        <button class="mkey" onclick="mk('3')">3</button>
+        <button class="mkey" onclick="mk('4')">4</button>
+        <button class="mkey" onclick="mk('5')">5</button>
+        <button class="mkey" onclick="mk('6')">6</button>
+        <button class="mkey" onclick="mk('7')">7</button>
+        <button class="mkey" onclick="mk('8')">8</button>
+        <button class="mkey" onclick="mk('9')">9</button>
+        <button class="mkey mkdel" onclick="mdel()">⌫</button>
+        <button class="mkey" onclick="mk('0')">0</button>
+        <button class="mkey" style="visibility:hidden"></button>
       </div>
     </div>
+    <div class="info-panel" id="infop">
+      <div class="irow"><span class="ilbl">Nom</span><span class="ival gcyan" id="i-nom">—</span></div>
+      <div class="idiv"></div>
+      <div class="irow"><span class="ilbl">Numéro</span><span class="ival" id="i-num">—</span></div>
+      <div class="irow"><span class="ilbl">Code</span><span class="ival" id="i-code">—</span></div>
+      <div class="idiv"></div>
+      <div class="irow"><span class="ilbl">Description</span><span class="ival dim" id="i-desc">Non renseigné</span></div>
+      <div class="irow"><span class="ilbl">Date d'ajout</span><span class="ival dim" id="i-date">Non renseigné</span></div>
+      <button class="info-open-btn" onclick="openFromLock()">Ouvrir →</button>
+    </div>
+  </div>
+</div>
 
-    <div class="info-panel" id="info-panel">
-      <div class="info-row">
-        <span class="info-lbl">Nom</span>
-        <span class="info-val grad" id="i-nom">—</span>
+<!-- MODAL AJOUT -->
+<div class="modal-bg" id="abg">
+  <div class="modal-add">
+    <div class="add-head">
+      <span class="add-title">✨ Ajouter un site</span>
+      <button class="modal-x" onclick="closeAdd()">✕</button>
+    </div>
+    <div class="add-fields">
+      <div class="add-row">
+        <div class="add-field">
+          <div class="add-lbl">Nom *</div>
+          <div class="name-with-emoji">
+            <div class="add-field"><input id="af-nom" type="text" placeholder="Ex: Base 208"></div>
+            <button class="emoji-pick-btn" onclick="toggleEmojiBank()" title="Choisir un émoji">😀</button>
+          </div>
+        </div>
+        <div class="add-field">
+          <div class="add-lbl">Code (3 chiffres) *</div>
+          <input id="af-code" type="text" maxlength="3" placeholder="Ex: 120" oninput="checkDup()">
+          <div class="dup-warn" id="dup-warn">⚠️ Ce code existe déjà ! Choisissez un autre.</div>
+        </div>
       </div>
-      <div class="info-row">
-        <span class="info-lbl">Numéro</span>
-        <span class="info-val" id="i-num">—</span>
+      <!-- EMOJI BANK (masquée par défaut) -->
+      <div class="emoji-section" id="emoji-section" style="display:none">
+        <div class="emoji-bank-label">🎨 Banque d'émojis — cliquer pour insérer dans le nom</div>
+        <div class="emoji-bank" id="emoji-bank"></div>
       </div>
-      <div class="info-row">
-        <span class="info-lbl">Code</span>
-        <span class="info-val" id="i-code">—</span>
+      <div class="add-field full">
+        <div class="add-lbl">URL brute *</div>
+        <div class="url-row">
+          <div class="add-field"><input id="af-url" type="text" placeholder="https://exemple.com"></div>
+          <button class="btn-auto" onclick="autoB64()">→ Base64</button>
+        </div>
       </div>
-      <div class="info-row">
-        <span class="info-lbl">Description</span>
-        <span class="info-val sub" id="i-desc">Non renseigné</span>
+      <div class="add-field full">
+        <div class="add-lbl">Base64 (auto ou coller)</div>
+        <input id="af-b64" type="text" placeholder="aHR0cHM6Ly9leGVtcGxlLmNvbQ==">
       </div>
-      <div class="info-row">
-        <span class="info-lbl">Date</span>
-        <span class="info-val sub" id="i-date">Non renseigné</span>
+      <div class="add-row">
+        <div class="add-field">
+          <div class="add-lbl">Description</div>
+          <input id="af-desc" type="text" placeholder="Optionnel">
+        </div>
+        <div class="add-field">
+          <div class="add-lbl">Date d'ajout</div>
+          <input id="af-date" type="text" placeholder="JJ/MM/AAAA">
+        </div>
       </div>
-      <button class="info-open-btn" onclick="openFromModal()">Ouvrir le lien →</button>
+    </div>
+    <div class="code-out" id="code-out">
+      <div class="code-out-lbl">Ligne à coller dans le fichier</div>
+      <pre id="code-out-pre"></pre>
+      <button class="btn-copy" id="btn-copy" onclick="copyLine()">Copier</button>
+    </div>
+    <div class="add-actions">
+      <button class="btn-add-do" onclick="addSite()">✅ Ajouter à la liste</button>
+      <button class="btn-add-dl" onclick="addAndDl()">⬇ Télécharger mis à jour</button>
     </div>
   </div>
 </div>
 
 <script>
-// ══════════════════════════════════════════
-//  DONNÉES
-//  Ajouter un site : copier une ligne et remplir
-//  b64  → coller le résultat du convertisseur
-//  desc → description (optionnel)
-//  date → date ajout   (optionnel)
-// ══════════════════════════════════════════
-const sites = [
-  { num:  1, nom: "Base 208",          b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2Jhc2UtY291cnMtMjA4Lw==",                                             code: "100", desc: "Non renseigné", date: "Non renseigné" },
-  { num:  2, nom: "Français",          b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2ZyYW5jYWlzLWNvdXJzLTIwOC8=",                                        code: "101", desc: "Non renseigné", date: "Non renseigné" },
-  { num:  3, nom: "Synthèse",          b64: "aHR0cHM6Ly9ldmFubG9wZXowNjMwMC1sZ3RtLmdpdGh1Yi5pby9mcmFuY2Fpcy0yMDgv",                                    code: "102", desc: "Non renseigné", date: "Non renseigné" },
-  { num:  4, nom: "Textes",            b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3RleHRlLWZyYW5jYWlzLTIwOC8=",                                        code: "103", desc: "Non renseigné", date: "Non renseigné" },
-  { num:  5, nom: "Anglais LV1",       b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2FuZ2xhaXMtY291cnMtMjA4Lw==",                                        code: "104", desc: "Non renseigné", date: "Non renseigné" },
-  { num:  6, nom: "Padlet Anglais",    b64: "aHR0cHM6Ly9wYWRsZXQuY29tL2NoYWlsbGFuX2FuZ2xhaXMvY2xhc3Nlcy1kZS1zZWNvbmRlLTIwMjUtMjAyNi03NnZqcnE2bjd4cXUxNWdwcQ==", code: "105", desc: "Non renseigné", date: "Non renseigné" },
-  { num:  7, nom: "Russe LV3",         b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3J1c3NlLWNvdXJzLTIwOC8=",                                            code: "106", desc: "Non renseigné", date: "Non renseigné" },
-  { num:  8, nom: "Italien LV2",       b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2l0YWxpZW4tY291cnMtMjA4Lw==",                                        code: "107", desc: "Non renseigné", date: "Non renseigné" },
-  { num:  9, nom: "Physique-Chimie",   b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3BoeXNpcXVlLWNvdXJzLTIwOC8=",                                        code: "108", desc: "Non renseigné", date: "Non renseigné" },
-  { num: 10, nom: "SVT",               b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3N2dC1jb3Vycy0yMDgv",                                                 code: "109", desc: "Non renseigné", date: "Non renseigné" },
-  { num: 11, nom: "SNT",               b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3NudC1jb3Vycy0yMDgv",                                                 code: "110", desc: "Non renseigné", date: "Non renseigné" },
-  { num: 12, nom: "SES",               b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3Nlcy1jb3Vycy0yMDgv",                                                 code: "111", desc: "Non renseigné", date: "Non renseigné" },
-  { num: 13, nom: "Heure",             b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2hldXJlLw==",                                                          code: "200", desc: "Non renseigné", date: "Non renseigné" },
-  { num: 14, nom: "Vecteurs Maths",    b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2NoYXAtNi12ZWN0ZXVycy8=",                                             code: "113", desc: "Non renseigné", date: "Non renseigné" },
-  { num: 15, nom: "Fonctions Maths",   b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2NoYXAtNy1mb25jdGlvbnMv",                                             code: "114", desc: "Non renseigné", date: "Non renseigné" },
-  { num: 16, nom: "Sea Shepherd Diapo",b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2V4cG8tZW1jLWRpYXBvLw==",                                             code: "115", desc: "Non renseigné", date: "Non renseigné" },
-  { num: 17, nom: "Sea Shepherd Texte",b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2V4cG8tZW1jLXRleHRlLw==",                                             code: "116", desc: "Non renseigné", date: "Non renseigné" },
-  { num: 18, nom: "Physique 10-11",    b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2NoYXAtcGgv",                                                          code: "117", desc: "Non renseigné", date: "Non renseigné" },
-  { num: 19, nom: "Aviapro Inter",     b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2F2aWFwcm8taW50ZXIv",                                                  code: "201", desc: "Non renseigné", date: "Non renseigné" },
-  { num: 20, nom: "Métro Paris",       b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL21ldHJvLXBhcmlzLw==",                                                  code: "202", desc: "Non renseigné", date: "Non renseigné" },
-  { num: 21, nom: "Réveil",            b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3JldmVpbC8=",                                                           code: "203", desc: "Non renseigné", date: "Non renseigné" },
-  { num: 22, nom: "Horloge Exam'",     b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2hvcmxvZ2UtZXhhbWVuLXByb21wdGV1ci8=",                                 code: "204", desc: "Non renseigné", date: "Non renseigné" },
-  { num: 23, nom: "Exposé 1984",       b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2V4cG8taXRhLw==",                                                      code: "118", desc: "Non renseigné", date: "Non renseigné" },
-  { num: 24, nom: "Prompteur Original",b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3Byb21wdGV1ci1vcmlnaW5hbC8=",                                         code: "205", desc: "Non renseigné", date: "Non renseigné" },
-  { num: 25, nom: "Flightradar",       b64: "aHR0cHM6Ly93dy5mbGlnaHRyYWRhcjI0LmNvbS80My4zMCw1LjM5LzY=",                                                  code: "300", desc: "Non renseigné", date: "Non renseigné" },
-  { num: 26, nom: "Cartometro",        b64: "aHR0cHM6Ly9jYXJ0b21ldHJvLmNvbS9jYXJ0ZXMvcGFyaXMtbXVsdGktZGFyay8=",                                         code: "301", desc: "Non renseigné", date: "Non renseigné" },
-  { num: 27, nom: "IDFM",              b64: "aHR0cHM6Ly93dy5pbGVkZWZyYW5jZS1tb2JpbGl0ZXMuZnIv",                                                           code: "302", desc: "Non renseigné", date: "Non renseigné" },
-  { num: 28, nom: "ChatGPT",           b64: "aHR0cHM6Ly9jaGF0Z3B0LmNvbS8=",                                                                                code: "303", desc: "Non renseigné", date: "Non renseigné" },
-  { num: 29, nom: "Gemini",            b64: "aHR0cHM6Ly9nZW1pbmkuZ29vZ2xlLmNvbS9hcHA/aGw9ZnI=",                                                           code: "304", desc: "Non renseigné", date: "Non renseigné" },
-  { num: 30, nom: "Claude",            b64: "aHR0cHM6Ly9jbGF1ZGUuYWkvcmVjZW50cw==",                                                                        code: "305", desc: "Non renseigné", date: "Non renseigné" },
-  { num: 31, nom: "Canva",             b64: "aHR0cHM6Ly93dy5jYW52YS5jb20vZnJfZnIv",                                                                        code: "306", desc: "Non renseigné", date: "Non renseigné" },
-  { num: 32, nom: "Github",            b64: "aHR0cHM6Ly9naXRodWIuY29tLw==",                                                                                code: "307", desc: "Non renseigné", date: "Non renseigné" },
-  { num: 33, nom: "Atrium",            b64: "aHR0cHM6Ly9hdHJpdW0tc3VkLmZyLw==",                                                                            code: "308", desc: "Non renseigné", date: "Non renseigné" },
-  { num: 34, nom: "RATP",              b64: "aHR0cHM6Ly93dy5yYXRwLmZyLw==",                                                                                code: "309", desc: "Non renseigné", date: "Non renseigné" },
-  { num: 35, nom: "Ita Mestieri",      b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2l0YS1tZXN0aWVyaQ==",                                                  code: "119", desc: "Non renseigné", date: "Non renseigné" },
-  // ── Ajouter ici : { num: 36, nom: "Nom", b64: "base64", code: "XXX", desc: "...", date: "JJ/MM/AAAA" },
+// ═══════════════════════════════════════════════════════════
+//  DONNÉES — pour ajouter un site, copier une ligne :
+//  { num: X, nom: "Nom", b64: "base64", code: "XXX", desc: "...", date: "JJ/MM/AAAA" },
+// ═══════════════════════════════════════════════════════════
+const SITES = [
+  { num:  1, nom: "📚 Base 208",           b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2Jhc2UtY291cnMtMjA4Lw==",                                             code: "100", desc: "Portail principal de la classe", date: "Non renseigné" },
+  { num:  2, nom: "✍️ Français",           b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2ZyYW5jYWlzLWNvdXJzLTIwOC8=",                                        code: "101", desc: "Cours de français", date: "Non renseigné" },
+  { num:  3, nom: "📝 Synthèse",           b64: "aHR0cHM6Ly9ldmFubG9wZXowNjMwMC1sZ3RtLmdpdGh1Yi5pby9mcmFuY2Fpcy0yMDgv",                                    code: "102", desc: "Fiches de synthèse", date: "Non renseigné" },
+  { num:  4, nom: "📖 Textes",             b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3RleHRlLWZyYW5jYWlzLTIwOC8=",                                        code: "103", desc: "Textes littéraires", date: "Non renseigné" },
+  { num:  5, nom: "🇬🇧 Anglais LV1",        b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2FuZ2xhaXMtY291cnMtMjA4Lw==",                                        code: "104", desc: "Cours d'anglais LV1", date: "Non renseigné" },
+  { num:  6, nom: "📌 Padlet Anglais",     b64: "aHR0cHM6Ly9wYWRsZXQuY29tL2NoYWlsbGFuX2FuZ2xhaXMvY2xhc3Nlcy1kZS1zZWNvbmRlLTIwMjUtMjAyNi03NnZqcnE2bjd4cXUxNWdwcQ==", code: "105", desc: "Padlet de la classe", date: "Non renseigné" },
+  { num:  7, nom: "🇷🇺 Russe LV3",          b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3J1c3NlLWNvdXJzLTIwOC8=",                                            code: "106", desc: "Cours de russe LV3", date: "Non renseigné" },
+  { num:  8, nom: "🇮🇹 Italien LV2",        b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2l0YWxpZW4tY291cnMtMjA4Lw==",                                        code: "107", desc: "Cours d'italien LV2", date: "Non renseigné" },
+  { num:  9, nom: "⚗️ Physique-Chimie",    b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3BoeXNpcXVlLWNvdXJzLTIwOC8=",                                        code: "108", desc: "Cours de physique-chimie", date: "Non renseigné" },
+  { num: 10, nom: "🌿 SVT",                b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3N2dC1jb3Vycy0yMDgv",                                                 code: "109", desc: "Sciences de la vie et de la Terre", date: "Non renseigné" },
+  { num: 11, nom: "💻 SNT",                b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3NudC1jb3Vycy0yMDgv",                                                 code: "110", desc: "Sciences numériques et technologie", date: "Non renseigné" },
+  { num: 12, nom: "📊 SES",                b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3Nlcy1jb3Vycy0yMDgv",                                                 code: "111", desc: "Sciences économiques et sociales", date: "Non renseigné" },
+  { num: 13, nom: "⏰ Heure",              b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2hldXJlLw==",                                                          code: "200", desc: "Horloge en ligne", date: "Non renseigné" },
+  { num: 14, nom: "📐 Vecteurs Maths",     b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2NoYXAtNi12ZWN0ZXVycy8=",                                             code: "113", desc: "Chapitre 6 — Vecteurs", date: "Non renseigné" },
+  { num: 15, nom: "📈 Fonctions Maths",    b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2NoYXAtNy1mb25jdGlvbnMv",                                             code: "114", desc: "Chapitre 7 — Fonctions", date: "Non renseigné" },
+  { num: 16, nom: "🐋 Sea Shepherd Diapo", b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2V4cG8tZW1jLWRpYXBvLw==",                                             code: "115", desc: "Diaporama exposé EMC", date: "Non renseigné" },
+  { num: 17, nom: "🌊 Sea Shepherd Texte", b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2V4cG8tZW1jLXRleHRlLw==",                                             code: "116", desc: "Texte exposé EMC", date: "Non renseigné" },
+  { num: 18, nom: "🔭 Physique 10-11",     b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2NoYXAtcGgv",                                                          code: "117", desc: "Chapitres 10 et 11", date: "Non renseigné" },
+  { num: 19, nom: "✈️ Aviapro Inter",      b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2F2aWFwcm8taW50ZXIv",                                                  code: "201", desc: "Aviapro international", date: "Non renseigné" },
+  { num: 20, nom: "🚇 Métro Paris",        b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL21ldHJvLXBhcmlzLw==",                                                  code: "202", desc: "Plan du métro parisien", date: "Non renseigné" },
+  { num: 21, nom: "⏱️ Réveil",             b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3JldmVpbC8=",                                                           code: "203", desc: "Minuteur / réveil", date: "Non renseigné" },
+  { num: 22, nom: "🕐 Horloge Exam'",      b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2hvcmxvZ2UtZXhhbWVuLXByb21wdGV1ci8=",                                 code: "204", desc: "Horloge d'examen avec prompteur", date: "Non renseigné" },
+  { num: 23, nom: "📕 Exposé 1984",        b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2V4cG8taXRhLw==",                                                      code: "118", desc: "Exposé sur le roman 1984", date: "Non renseigné" },
+  { num: 24, nom: "🎙️ Prompteur Original", b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3Byb21wdGV1ci1vcmlnaW5hbC8=",                                         code: "205", desc: "Prompteur de présentation", date: "Non renseigné" },
+  { num: 25, nom: "🛩️ Flightradar",        b64: "aHR0cHM6Ly93dy5mbGlnaHRyYWRhcjI0LmNvbS80My4zMCw1LjM5LzY=",                                                  code: "300", desc: "Radar aérien en direct", date: "Non renseigné" },
+  { num: 26, nom: "🗺️ Cartometro",         b64: "aHR0cHM6Ly9jYXJ0b21ldHJvLmNvbS9jYXJ0ZXMvcGFyaXMtbXVsdGktZGFyay8=",                                         code: "301", desc: "Carte du métro parisien", date: "Non renseigné" },
+  { num: 27, nom: "🚉 IDFM",               b64: "aHR0cHM6Ly93dy5pbGVkZWZyYW5jZS1tb2JpbGl0ZXMuZnIv",                                                           code: "302", desc: "Île-de-France Mobilités", date: "Non renseigné" },
+  { num: 28, nom: "🤖 ChatGPT",            b64: "aHR0cHM6Ly9jaGF0Z3B0LmNvbS8=",                                                                                code: "303", desc: "Assistant IA OpenAI", date: "Non renseigné" },
+  { num: 29, nom: "💎 Gemini",             b64: "aHR0cHM6Ly9nZW1pbmkuZ29vZ2xlLmNvbS9hcHA/aGw9ZnI=",                                                           code: "304", desc: "Assistant IA Google", date: "Non renseigné" },
+  { num: 30, nom: "🧠 Claude",             b64: "aHR0cHM6Ly9jbGF1ZGUuYWkvcmVjZW50cw==",                                                                        code: "305", desc: "Assistant IA Anthropic", date: "Non renseigné" },
+  { num: 31, nom: "🎨 Canva",              b64: "aHR0cHM6Ly93dy5jYW52YS5jb20vZnJfZnIv",                                                                        code: "306", desc: "Création graphique en ligne", date: "Non renseigné" },
+  { num: 32, nom: "🐙 Github",             b64: "aHR0cHM6Ly9naXRodWIuY29tLw==",                                                                                code: "307", desc: "Hébergement de code", date: "Non renseigné" },
+  { num: 33, nom: "🏫 Atrium",             b64: "aHR0cHM6Ly9hdHJpdW0tc3VkLmZyLw==",                                                                            code: "308", desc: "ENT Atrium Sud", date: "Non renseigné" },
+  { num: 34, nom: "🚌 RATP",               b64: "aHR0cHM6Ly93dy5yYXRwLmZyLw==",                                                                                code: "309", desc: "Transports en commun Paris", date: "Non renseigné" },
+  { num: 35, nom: "🇮🇹 Ita Mestieri",       b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2l0YS1tZXN0aWVyaQ==",                                                  code: "119", desc: "Les métiers en italien", date: "Non renseigné" },
+  // MARKER_AJOUT
 ];
-// ══════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 
-// ── WAVES ──────────────────────────────────
+// EMOJI BANK DATA
+const EMOJI_BANK = [
+  "📚","📖","📝","✍️","📌","📎","📋","📊","📈","📉",
+  "🏫","🎓","🧠","💡","🔬","⚗️","🔭","🧬","🌿","🌊",
+  "🇫🇷","🇬🇧","🇮🇹","🇷🇺","🇩🇪","🇪🇸","🌍","🌐","🗺️","🗓️",
+  "💻","🖥️","⌨️","🖱️","📱","🔒","🔓","🔑","🛡️","⚙️",
+  "🤖","🧩","💎","🎨","✏️","🖌️","📐","📏","🗂️","📂",
+  "🚇","🚌","✈️","🛩️","🚉","🚀","🌙","⭐","🔥","💧",
+  "⏰","⏱️","🕐","⌚","📡","📻","🎙️","🎤","🎵","🎶",
+  "🐋","🦈","🐠","🌺","🍃","🌱","🦋","🐝","🌸","🌻",
+  "🏆","🥇","🎯","🎲","♟️","🎭","🎬","🎮","🕹️","🎠",
+  "⚡","💫","✨","🌟","💥","🔮","🎪","🎡","🌈","🪄",
+];
+
+// BUILD EMOJI BANK UI
+function buildEmojiBank(){
+  const bank = document.getElementById("emoji-bank");
+  bank.innerHTML = EMOJI_BANK.map(e =>
+    `<button class="emoji-btn" onclick="insertEmoji('${e}')" title="${e}">${e}</button>`
+  ).join("");
+}
+buildEmojiBank();
+
+function toggleEmojiBank(){
+  const s = document.getElementById("emoji-section");
+  s.style.display = s.style.display === "none" ? "flex" : "none";
+  s.style.flexDirection = "column";
+}
+
+function insertEmoji(e){
+  const inp = document.getElementById("af-nom");
+  inp.value = e + " " + inp.value.replace(/^[\p{Emoji}\s]+/u, "");
+  inp.focus();
+}
+
+// WAVES
 const canvas = document.getElementById("waveCanvas");
-const ctx    = canvas.getContext("2d");
-let W, H, tick = 0;
-
-const WAVES = [
-  { amp: 48, freq: 0.011, speed: 0.28, yRatio: 0.20, color: "#6c63ff" },
-  { amp: 36, freq: 0.016, speed: 0.18, yRatio: 0.40, color: "#c084fc" },
-  { amp: 52, freq: 0.009, speed: 0.22, yRatio: 0.58, color: "#38bdf8" },
-  { amp: 30, freq: 0.020, speed: 0.15, yRatio: 0.74, color: "#34d399" },
-  { amp: 42, freq: 0.013, speed: 0.20, yRatio: 0.88, color: "#f472b6" },
+const cx = canvas.getContext("2d");
+let W, H, T = 0;
+const WV = [
+  {a:55,f:0.010,s:0.22,y:.18,c:"#7c6fff"},
+  {a:38,f:0.015,s:0.16,y:.36,c:"#d47cff"},
+  {a:62,f:0.009,s:0.20,y:.54,c:"#5ee7ff"},
+  {a:32,f:0.019,s:0.13,y:.70,c:"#5fffc8"},
+  {a:46,f:0.012,s:0.18,y:.84,c:"#ff7eb3"},
 ];
-
-function resize() { W = canvas.width = innerWidth; H = canvas.height = innerHeight; }
-window.addEventListener("resize", resize);
-resize();
-
-(function loop() {
-  ctx.clearRect(0, 0, W, H);
-  WAVES.forEach(w => {
-    ctx.beginPath();
-    for (let x = 0; x <= W; x += 2) {
-      const y = w.yRatio * H + Math.sin(x * w.freq + tick * w.speed) * w.amp;
-      x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+function resize(){ W=canvas.width=innerWidth; H=canvas.height=innerHeight; }
+window.addEventListener("resize",resize); resize();
+(function loop(){
+  cx.clearRect(0,0,W,H);
+  // dim waves in light mode
+  const isLight = document.documentElement.getAttribute("data-theme")==="light";
+  WV.forEach(w=>{
+    cx.beginPath();
+    for(let x=0;x<=W;x+=2){
+      const y=w.y*H+Math.sin(x*w.f+T*w.s)*w.a;
+      x===0?cx.moveTo(x,y):cx.lineTo(x,y);
     }
-    ctx.strokeStyle = w.color;
-    ctx.lineWidth   = 1.4;
-    ctx.globalAlpha = 0.55;
-    ctx.stroke();
+    cx.strokeStyle=w.c; cx.lineWidth=1.6; cx.globalAlpha=isLight?0.18:0.45; cx.stroke();
   });
-  ctx.globalAlpha = 1;
-  tick += 0.04;
+  cx.globalAlpha=1; T+=0.04;
   requestAnimationFrame(loop);
 })();
 
-// ── DIGICODE PRINCIPAL ──────────────────────
-const MAIN_CODE = "1710";
-let mainIn = "";
-
-function pressKey(k) {
-  if (mainIn.length >= 4) return;
-  mainIn += k;
-  updateDots(false);
-  if (mainIn.length === 4) setTimeout(checkMain, 80);
+// THEME
+function toggleTheme(){
+  const html = document.documentElement;
+  const isDark = html.getAttribute("data-theme")==="dark";
+  html.setAttribute("data-theme", isDark?"light":"dark");
+  document.getElementById("themeBtn").textContent = isDark?"☀️":"🌙";
+  localStorage.setItem("na-theme", isDark?"light":"dark");
 }
-function delKey() { mainIn = mainIn.slice(0, -1); updateDots(false); }
+// restore theme
+(function(){
+  const t = localStorage.getItem("na-theme")||"dark";
+  document.documentElement.setAttribute("data-theme",t);
+  // themeBtn not visible yet, set after load
+})();
 
-function updateDots(err) {
-  for (let i = 0; i < 4; i++) {
-    const d = document.getElementById("d" + i);
-    d.className = "dot";
-    if (err)              d.classList.add("error");
-    else if (i < mainIn.length) d.classList.add("filled");
-  }
-}
-
-function checkMain() {
-  if (mainIn === MAIN_CODE) {
-    const lock = document.getElementById("lock");
-    lock.style.opacity = "0";
-    setTimeout(() => {
-      lock.style.display = "none";
-      document.getElementById("app").style.display = "block";
-      renderTable(sites);
-      document.getElementById("countBadge").textContent = sites.length + " site" + (sites.length > 1 ? "s" : "");
-    }, 450);
-  } else {
-    updateDots(true);
-    setTimeout(() => { mainIn = ""; updateDots(false); }, 700);
-  }
+// RELOCK
+function relockSite(){
+  document.getElementById("app").style.display="none";
+  document.getElementById("floatBtns").style.display="none";
+  const l=document.getElementById("lock");
+  l.style.display="flex"; l.style.opacity="0";
+  setTimeout(()=>{l.style.opacity="1";},20);
+  mi=""; ud(false);
 }
 
-document.addEventListener("keydown", e => {
-  if (document.getElementById("lock").style.display !== "none") {
-    if (e.key >= "0" && e.key <= "9") pressKey(e.key);
-    if (e.key === "Backspace") delKey();
+// MAIN DIGICODE
+const MC="1710"; let mi="";
+function nk(k){ if(mi.length>=4)return; mi+=k; ud(false); if(mi.length===4)setTimeout(chkMain,80); }
+function nd(){ mi=mi.slice(0,-1); ud(false); }
+function ud(e){
+  for(let i=0;i<4;i++){
+    const d=document.getElementById("d"+i); d.className="ldot";
+    if(e) d.classList.add("error"); else if(i<mi.length) d.classList.add("filled");
   }
+}
+function chkMain(){
+  if(mi===MC){
+    const l=document.getElementById("lock"); l.style.opacity="0";
+    setTimeout(()=>{
+      l.style.display="none";
+      const app = document.getElementById("app");
+      app.style.display="block";
+      const fb = document.getElementById("floatBtns");
+      fb.style.display="flex";
+      // set theme button icon
+      const t = document.documentElement.getAttribute("data-theme");
+      document.getElementById("themeBtn").textContent = t==="dark"?"🌙":"☀️";
+      // sort desc by code, render
+      SITES.sort((a,b)=>parseInt(b.code)-parseInt(a.code));
+      render(SITES);
+      document.getElementById("countPill").textContent=SITES.length+" site"+(SITES.length>1?"s":"");
+    },600);
+  } else { ud(true); setTimeout(()=>{mi="";ud(false);},700); }
+}
+document.addEventListener("keydown",e=>{
+  // Ne pas intercepter si on tape dans un vrai champ texte
+  const tag = document.activeElement ? document.activeElement.tagName : "";
+  const isInput = tag==="INPUT"||tag==="TEXTAREA";
+
+  // Écran de verrouillage principal
+  const lockEl = document.getElementById("lock");
+  const lockVisible = lockEl.style.display!=="none";
+  if(lockVisible && !isInput){
+    if(e.key>="0"&&e.key<="9"){ e.preventDefault(); nk(e.key); }
+    if(e.key==="Backspace"){ e.preventDefault(); nd(); }
+  }
+
+  // Modal cadenas (info site)
+  const mbgOpen = document.getElementById("mbg").classList.contains("open");
+  const mcpVisible = document.getElementById("mcp").style.display!=="none";
+  if(mbgOpen && mcpVisible && !isInput){
+    if(e.key>="0"&&e.key<="9"){ e.preventDefault(); mk(e.key); }
+    if(e.key==="Backspace"){ e.preventDefault(); mdel(); }
+    if(e.key==="Escape"){ closeLock(); }
+  }
+
+  // Fermer modal ajout avec Échap
+  if(document.getElementById("abg").classList.contains("open") && e.key==="Escape") closeAdd();
 });
 
-// ── TABLE ───────────────────────────────────
-function db64(b) { try { return atob(b); } catch { return "#"; } }
-
-function codeClass(c) { return "code code-" + (parseInt(c[0]) || 0); }
-
-function renderTable(data) {
-  const tb = document.getElementById("tbody");
-  if (!data.length) {
-    tb.innerHTML = '<tr><td colspan="4" class="no-results">Aucun résultat</td></tr>';
-    return;
-  }
-  tb.innerHTML = data.map((s, i) => `
-    <tr style="animation-delay:${i * 0.03}s">
-      <td class="num">${String(s.num).padStart(2,"0")}</td>
-      <td class="name">${s.nom}</td>
-      <td><span class="${codeClass(s.code)}">${s.code}</span></td>
-      <td>
+// TABLE — tri décroissant par code
+function db(b){ try{return atob(b);}catch{return "#";} }
+function cc(c){ return "ctag c"+(parseInt(c[0])||0); }
+function render(data){
+  const tb=document.getElementById("tbody");
+  if(!data.length){tb.innerHTML='<tr><td colspan="5" class="no-results">🔍 Aucun résultat</td></tr>';return;}
+  // tri décroissant par code numérique
+  const sorted=[...data].sort((a,b)=>parseInt(b.code)-parseInt(a.code));
+  tb.innerHTML=sorted.map((s,i)=>`
+    <tr style="animation-delay:${i*.025}s">
+      <td class="td-num">${String(s.num).padStart(2,"0")}</td>
+      <td class="td-name">${s.nom}</td>
+      <td class="td-code"><span class="${cc(s.code)}">${s.code}</span></td>
+      <td class="td-desc${(!s.desc||s.desc==='Non renseigné')?' empty':''}">${(!s.desc||s.desc==='Non renseigné')?'—':s.desc}</td>
+      <td class="td-actions"><div class="row-btns">
         <button class="btn-open" onclick="openSite('${s.b64}')">Ouvrir</button>
-        <button class="btn-lock" title="Infos" onclick="openModal(${s.num})">🔒</button>
-      </td>
+        <button class="btn-lock" onclick="openLock(${s.num})">🔒</button>
+      </div></td>
     </tr>`).join("");
 }
 
-function filterSites() {
-  const q = document.getElementById("search").value.trim().toLowerCase();
-  if (!q) { renderTable(sites); return; }
-  if (/^\d{3}$/.test(q)) {
-    renderTable(sites.filter(s => s.code === q));
+// SEARCH — élargie (nom, code, desc, b64 décodé)
+function doFilter(){
+  const q=document.getElementById("search").value.trim().toLowerCase();
+  if(!q){render(SITES);return;}
+  render(SITES.filter(s=>{
+    const url = db(s.b64).toLowerCase();
+    return (
+      s.nom.toLowerCase().includes(q)||
+      s.code.includes(q)||
+      (s.desc&&s.desc!=="Non renseigné"&&s.desc.toLowerCase().includes(q))||
+      (s.date&&s.date!=="Non renseigné"&&s.date.toLowerCase().includes(q))||
+      url.includes(q)
+    );
+  }));
+}
+function openSite(b){ const u=db(b); if(u&&u!=="#")window.open(u,"_blank"); }
+
+// DUPLICATE CHECK
+function checkDup(){
+  const code = document.getElementById("af-code").value.trim();
+  const warn = document.getElementById("dup-warn");
+  if(code.length===3 && SITES.some(s=>s.code===code)){
+    warn.classList.add("show");
   } else {
-    renderTable(sites.filter(s => s.nom.toLowerCase().includes(q)));
+    warn.classList.remove("show");
   }
 }
-
-function openSite(b64) {
-  const url = db64(b64);
-  if (url && url !== "#") window.open(url, "_blank");
+function isDupCode(code){
+  return SITES.some(s=>s.code===code);
 }
 
-// ── MODAL CADENAS ───────────────────────────
-const MODAL_CODE = "8957";
-let mIn = "", currentNum = null;
-
-function openModal(num) {
-  currentNum = num;
-  mIn = "";
-  updateMDots(false);
-  document.getElementById("m-code-panel").style.display = "flex";
-  document.getElementById("info-panel").classList.remove("open");
-  document.getElementById("modal-heading").textContent = "Code d'accès";
-  document.getElementById("modal-overlay").classList.add("open");
+// MODAL CADENAS
+const MC2="8957"; let mi2="", cur=null;
+function openLock(num){
+  cur=num; mi2=""; umd(false);
+  document.getElementById("mcp").style.display="flex";
+  document.getElementById("infop").classList.remove("open");
+  document.getElementById("mtitle").textContent="Code d'accès";
+  document.getElementById("mbg").classList.add("open");
 }
-function closeModal() {
-  document.getElementById("modal-overlay").classList.remove("open");
-  currentNum = null; mIn = "";
-}
-
-function mKey(k) {
-  if (mIn.length >= 4) return;
-  mIn += k;
-  updateMDots(false);
-  if (mIn.length === 4) setTimeout(checkModal, 80);
-}
-function mDel() { mIn = mIn.slice(0, -1); updateMDots(false); }
-
-function updateMDots(err) {
-  for (let i = 0; i < 4; i++) {
-    const d = document.getElementById("md" + i);
-    d.className = "m-dot";
-    if (err)           d.classList.add("error");
-    else if (i < mIn.length) d.classList.add("filled");
+function closeLock(){ document.getElementById("mbg").classList.remove("open"); cur=null; mi2=""; }
+function mk(k){ if(mi2.length>=4)return; mi2+=k; umd(false); if(mi2.length===4)setTimeout(chkLock,80); }
+function mdel(){ mi2=mi2.slice(0,-1); umd(false); }
+function umd(e){
+  for(let i=0;i<4;i++){
+    const d=document.getElementById("md"+i); d.className="m-dot";
+    if(e) d.classList.add("error"); else if(i<mi2.length) d.classList.add("filled");
   }
 }
+function chkLock(){
+  if(mi2===MC2){
+    const s=SITES.find(x=>x.num===cur); if(!s)return;
+    document.getElementById("mcp").style.display="none";
+    document.getElementById("mtitle").textContent="Informations";
+    document.getElementById("i-nom").textContent=s.nom;
+    document.getElementById("i-num").textContent="#"+String(s.num).padStart(2,"0");
+    document.getElementById("i-code").textContent=s.code;
+    document.getElementById("i-desc").textContent=s.desc||"Non renseigné";
+    document.getElementById("i-date").textContent=s.date||"Non renseigné";
+    document.getElementById("infop").classList.add("open");
+  } else { umd(true); setTimeout(()=>{mi2="";umd(false);},700); }
+}
+function openFromLock(){ const s=SITES.find(x=>x.num===cur); if(s){openSite(s.b64);closeLock();} }
+document.getElementById("mbg").addEventListener("click",e=>{ if(e.target===document.getElementById("mbg"))closeLock(); });
 
-function checkModal() {
-  if (mIn === MODAL_CODE) {
-    const s = sites.find(x => x.num === currentNum);
-    if (!s) return;
-    document.getElementById("m-code-panel").style.display = "none";
-    document.getElementById("modal-heading").textContent = "Informations";
-    document.getElementById("i-nom").textContent  = s.nom;
-    document.getElementById("i-num").textContent  = "#" + String(s.num).padStart(2,"0");
-    document.getElementById("i-code").textContent = s.code;
-    document.getElementById("i-desc").textContent = s.desc || "Non renseigné";
-    document.getElementById("i-date").textContent = s.date || "Non renseigné";
-    document.getElementById("info-panel").classList.add("open");
-  } else {
-    updateMDots(true);
-    setTimeout(() => { mIn = ""; updateMDots(false); }, 700);
+// MODAL AJOUT
+function openAdd(){
+  const now=new Date();
+  const dd=String(now.getDate()).padStart(2,"0"), mm=String(now.getMonth()+1).padStart(2,"0");
+  document.getElementById("af-date").value=dd+"/"+mm+"/"+now.getFullYear();
+  document.getElementById("af-nom").value="";
+  document.getElementById("af-code").value="";
+  document.getElementById("af-url").value="";
+  document.getElementById("af-b64").value="";
+  document.getElementById("af-desc").value="";
+  document.getElementById("code-out").classList.remove("open");
+  document.getElementById("dup-warn").classList.remove("show");
+  document.getElementById("emoji-section").style.display="none";
+  document.getElementById("abg").classList.add("open");
+}
+function closeAdd(){ document.getElementById("abg").classList.remove("open"); }
+document.getElementById("abg").addEventListener("click",e=>{ if(e.target===document.getElementById("abg"))closeAdd(); });
+
+function autoB64(){
+  const url=document.getElementById("af-url").value.trim();
+  if(url) document.getElementById("af-b64").value=btoa(unescape(encodeURIComponent(url)));
+}
+function getForm(){
+  const nom =document.getElementById("af-nom").value.trim();
+  const code=document.getElementById("af-code").value.trim();
+  const url =document.getElementById("af-url").value.trim();
+  const b64 =document.getElementById("af-b64").value.trim()||(url?btoa(unescape(encodeURIComponent(url))):"");
+  const desc=document.getElementById("af-desc").value.trim()||"Non renseigné";
+  const date=document.getElementById("af-date").value.trim()||"Non renseigné";
+  return {nom,code,b64,desc,date};
+}
+function validate(s){
+  if(!s.nom||!s.code||!s.b64){alert("⚠️ Nom, code et URL/Base64 sont requis.");return false;}
+  if(!/^\d{3}$/.test(s.code)){alert("⚠️ Le code doit être exactement 3 chiffres.");return false;}
+  if(isDupCode(s.code)){alert("❌ Ce code ("+s.code+") est déjà utilisé ! Choisissez un code unique.");return false;}
+  return true;
+}
+function buildLine(s,num){
+  return `  { num: ${num}, nom: "${s.nom}", b64: "${s.b64}", code: "${s.code}", desc: "${s.desc}", date: "${s.date}" },`;
+}
+function showOut(line){
+  document.getElementById("code-out-pre").textContent=line;
+  document.getElementById("code-out").classList.add("open");
+  const btn=document.getElementById("btn-copy"); btn.textContent="Copier"; btn.classList.remove("ok");
+}
+function copyLine(){
+  navigator.clipboard.writeText(document.getElementById("code-out-pre").textContent).then(()=>{
+    const btn=document.getElementById("btn-copy"); btn.textContent="✓ Copié !"; btn.classList.add("ok");
+    setTimeout(()=>{btn.textContent="Copier";btn.classList.remove("ok");},2000);
+  });
+}
+function addSite(){
+  const s=getForm(); if(!validate(s))return;
+  const num=SITES.length+1;
+  SITES.push({num,...s});
+  SITES.sort((a,b)=>parseInt(b.code)-parseInt(a.code));
+  render(SITES);
+  doFilter();
+  document.getElementById("countPill").textContent=SITES.length+" site"+(SITES.length>1?"s":"");
+  showOut(buildLine(s,num));
+}
+function addAndDl(){
+  const s=getForm(); if(!validate(s))return;
+  const num=SITES.length+1;
+  if(!SITES.find(x=>x.num===num)){
+    SITES.push({num,...s});
+    SITES.sort((a,b)=>parseInt(b.code)-parseInt(a.code));
+    render(SITES);
+    document.getElementById("countPill").textContent=SITES.length+" site"+(SITES.length>1?"s":"");
   }
+  const line=buildLine(s,num);
+  showOut(line);
+  const src=document.documentElement.outerHTML;
+  const updated=src.replace("  // MARKER_AJOUT","  "+line.trim()+"\n  // MARKER_AJOUT");
+  const blob=new Blob([updated],{type:"text/html;charset=utf-8"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="annuaire.html"; a.click();
+  URL.revokeObjectURL(a.href);
 }
 
-function openFromModal() {
-  const s = sites.find(x => x.num === currentNum);
-  if (s) { openSite(s.b64); closeModal(); }
-}
-
-document.getElementById("modal-overlay").addEventListener("click", e => {
-  if (e.target === document.getElementById("modal-overlay")) closeModal();
-});
-
-// ── CONVERTISSEUR ───────────────────────────
-function encode() {
-  document.getElementById("b64Input").value = btoa(unescape(encodeURIComponent(document.getElementById("rawInput").value)));
-}
-function decode() {
-  try { document.getElementById("rawInput").value = decodeURIComponent(escape(atob(document.getElementById("b64Input").value.trim()))); }
-  catch { document.getElementById("rawInput").value = "⚠ Base64 invalide"; }
-}
-function clearConv() {
-  document.getElementById("rawInput").value = "";
-  document.getElementById("b64Input").value = "";
-}
+// CONVERTER
+function enc(){ document.getElementById("b64Input").value=btoa(unescape(encodeURIComponent(document.getElementById("rawInput").value))); }
+function dec(){ try{document.getElementById("rawInput").value=decodeURIComponent(escape(atob(document.getElementById("b64Input").value.trim())));}catch{document.getElementById("rawInput").value="⚠ Base64 invalide";} }
+function clr(){ document.getElementById("rawInput").value=""; document.getElementById("b64Input").value=""; }
 </script>
 </body>
 </html>
