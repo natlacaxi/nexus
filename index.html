@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="fr" data-theme="dark">
-<head>
+<html lang="fr" data-theme="dark"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Nexus-Aegis</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&amp;family=Outfit:wght@300;400;500;600&amp;family=JetBrains+Mono:wght@300;400;500&amp;display=swap" rel="stylesheet">
 <style>
 :root {
   --bg:    #08080f;
@@ -44,8 +42,21 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; transition: background .3s, color .3s; }
 
-/* WAVES */
-#waveCanvas { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+/* VIDEO / IMAGE BG */
+#bgMedia {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  width: 100%; height: 100%; object-fit: cover; opacity: 0.15;
+}
+#bgImg {
+  display: none;
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  width: 100%; height: 100%; object-fit: cover; opacity: 0.18;
+}
+[data-theme="light"] #bgMedia { opacity: 0.10; }
+[data-theme="light"] #bgImg   { opacity: 0.10; }
+
+/* WAVES overlay */
+#waveCanvas { position: fixed; inset: 0; pointer-events: none; z-index: 1; }
 
 /* LOCK */
 #lock {
@@ -87,7 +98,7 @@ body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--te
 .nkey.nkdel:hover { border-color:var(--red); color:var(--red); box-shadow:0 0 0 4px #ff6b6b14; }
 
 /* APP */
-#app { display:none; position:relative; z-index:1; max-width:1100px; margin:0 auto; padding:56px 36px 120px; animation:pageIn .7s cubic-bezier(.16,1,.3,1) both; }
+#app { display:none; position:relative; z-index:2; max-width:1100px; margin:0 auto; padding:56px 36px 120px; animation:pageIn .7s cubic-bezier(.16,1,.3,1) both; }
 @keyframes pageIn { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
 .app-header { display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:10px; flex-wrap:wrap; gap:12px; }
 .app-brand {
@@ -99,8 +110,19 @@ body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--te
 .app-meta { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
 .count-pill { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text2); background:var(--s2); border:1px solid var(--br); border-radius:20px; padding:4px 14px; }
 
+/* SORT BUTTONS */
+.sort-bar { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; align-items:center; }
+.sort-lbl { font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); margin-right:4px; }
+.sort-btn {
+  font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.1em; text-transform:uppercase;
+  padding:5px 13px; border-radius:20px; border:1.5px solid var(--br2); background:var(--s2);
+  color:var(--text2); cursor:pointer; transition:all .18s; white-space:nowrap;
+}
+.sort-btn:hover { border-color:var(--v1); color:var(--v1); }
+.sort-btn.active { border-color:var(--v1); background:linear-gradient(135deg,#7c6fff22,#d47cff11); color:var(--v1); box-shadow:0 0 0 3px #7c6fff14; }
+
 /* SEARCH */
-.search-wrap { margin-bottom:36px; }
+.search-wrap { margin-bottom:20px; }
 .search-inner { position:relative; display:flex; align-items:center; }
 .search-icon  { position:absolute; left:18px; font-size:15px; color:var(--muted); pointer-events:none; }
 .search-wrap input {
@@ -133,7 +155,6 @@ tbody tr:hover { background:var(--s2); }
 tbody td { padding:18px 22px; vertical-align:middle; }
 .td-num { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--muted); width:52px; letter-spacing:.05em; }
 .td-name { font-family:'Outfit',sans-serif; font-size:16px; font-weight:500; color:var(--text); letter-spacing:-.01em; }
-.td-name .site-emoji { margin-right:6px; font-style:normal; }
 .td-code { width:80px; }
 .ctag { font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:500; border-radius:7px; padding:4px 10px; display:inline-block; text-align:center; width:54px; border:1px solid; letter-spacing:.06em; }
 .c0{background:#1e1540;color:#a78bfa;border-color:#3d2a70}
@@ -202,7 +223,7 @@ tbody td { padding:18px 22px; vertical-align:middle; }
 .cbtn-clr { background:transparent; color:var(--muted); }
 .cbtn-clr:hover { color:var(--red); border-color:var(--red); }
 
-/* MODAL CADENAS */
+/* MODAL BG */
 .modal-bg {
   display:none; position:fixed; inset:0;
   background:#000000b0; backdrop-filter:blur(12px) saturate(1.4);
@@ -211,16 +232,23 @@ tbody td { padding:18px 22px; vertical-align:middle; }
 .modal-bg.open { display:flex; }
 @keyframes modalPop { from{opacity:0;transform:scale(.8) translateY(16px)} to{opacity:1;transform:scale(1) translateY(0)} }
 
+/* MODAL CADENAS — LARGE */
 .modal-info {
   background:var(--s1); border:1px solid var(--br2); border-radius:20px;
-  padding:40px 36px 32px; width:340px; display:flex; flex-direction:column;
-  align-items:center; gap:20px; position:relative;
+  padding:36px 36px 28px; width:780px; max-width:95vw;
+  display:flex; flex-direction:column;
+  align-items:stretch; gap:20px; position:relative;
   animation:modalPop .35s cubic-bezier(.34,1.6,.64,1);
   box-shadow:0 24px 80px var(--shadow),0 0 0 1px #ffffff06;
+  max-height:92vh; overflow-y:auto;
+}
+/* Centrage digicode */
+.lock-center {
+  display:flex; flex-direction:column; align-items:center; gap:18px;
 }
 .modal-x { position:absolute; top:14px; right:16px; background:none; border:none; color:var(--muted); font-size:18px; cursor:pointer; transition:color .15s; line-height:1; padding:4px; }
 .modal-x:hover { color:var(--text); }
-.modal-title { font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.3em; text-transform:uppercase; color:var(--muted); align-self:flex-start; }
+.modal-title { font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.3em; text-transform:uppercase; color:var(--muted); }
 .m-dots { display:flex; gap:14px; }
 .m-dot { width:11px; height:11px; border-radius:50%; border:1.5px solid var(--muted); transition:all .3s cubic-bezier(.34,1.6,.64,1); }
 .m-dot.filled { background:linear-gradient(135deg,var(--v3),var(--v4)); border-color:transparent; box-shadow:0 0 14px #5ee7ff55; transform:scale(1.25); }
@@ -231,16 +259,40 @@ tbody td { padding:18px 22px; vertical-align:middle; }
 .mkey:active { transform:scale(.88); }
 .mkey.mkdel { font-size:14px; color:var(--muted); font-family:inherit; }
 .mkey.mkdel:hover { color:var(--red); border-color:var(--red); }
-.info-panel { display:none; width:100%; flex-direction:column; gap:12px; animation:pageIn .3s ease; }
-.info-panel.open { display:flex; }
+
+/* INFO PANEL — 2 colonnes */
+.info-panel { display:none; animation:pageIn .3s ease; }
+.info-panel.open { display:grid; grid-template-columns:1fr 380px; gap:20px; }
+@media(max-width:660px){ .info-panel.open{ grid-template-columns:1fr; } }
+
+.info-left { display:flex; flex-direction:column; gap:12px; }
 .irow { display:flex; flex-direction:column; gap:3px; }
 .ilbl { font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:var(--muted); }
 .ival { font-family:'Outfit',sans-serif; font-size:15px; font-weight:600; color:var(--text); letter-spacing:-.01em; }
 .ival.dim { font-weight:400; color:var(--text2); font-size:13px; font-family:'JetBrains Mono',monospace; }
 .ival.gcyan { background:linear-gradient(135deg,var(--v3),var(--v4)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
 .idiv { height:1px; background:var(--br); width:100%; }
-.info-open-btn { width:100%; padding:12px; margin-top:4px; background:linear-gradient(135deg,var(--v1),var(--v2)); border:none; border-radius:10px; color:#fff; font-family:'Outfit',sans-serif; font-size:14px; font-weight:600; cursor:pointer; transition:filter .15s,box-shadow .15s; }
+.info-open-btn { width:100%; padding:12px; margin-top:auto; background:linear-gradient(135deg,var(--v1),var(--v2)); border:none; border-radius:10px; color:#fff; font-family:'Outfit',sans-serif; font-size:14px; font-weight:600; cursor:pointer; transition:filter .15s,box-shadow .15s; }
 .info-open-btn:hover { filter:brightness(1.15); box-shadow:0 6px 24px #7c6fff44; }
+
+/* SITE PREVIEW */
+.info-right { display:flex; flex-direction:column; gap:8px; }
+.preview-lbl { font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:var(--muted); }
+.preview-frame-wrap {
+  flex:1; min-height:320px; border-radius:12px; overflow:hidden;
+  border:1.5px solid var(--br2); position:relative; background:var(--bg);
+}
+.preview-frame-wrap iframe {
+  width:100%; height:100%; border:none;
+  transform-origin: top left;
+  pointer-events:none;
+}
+.preview-no {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  height:100%; min-height:300px; gap:10px; color:var(--muted);
+  font-family:'JetBrains Mono',monospace; font-size:11px; text-align:center; padding:20px;
+}
+.preview-no span { font-size:32px; }
 
 /* MODAL AJOUT */
 .modal-add {
@@ -281,8 +333,6 @@ tbody td { padding:18px 22px; vertical-align:middle; }
 .emoji-btn { width:32px; height:32px; border:none; background:var(--s2); border-radius:7px; font-size:16px; cursor:pointer; transition:all .15s; display:flex; align-items:center; justify-content:center; border:1px solid var(--br); }
 .emoji-btn:hover { background:var(--v1); transform:scale(1.2); box-shadow:0 4px 12px #7c6fff44; border-color:transparent; }
 .emoji-btn:active { transform:scale(.9); }
-.emoji-preview { font-family:'Outfit',sans-serif; font-size:13px; color:var(--text2); margin-top:4px; }
-.emoji-preview span { font-size:16px; }
 .name-with-emoji { display:flex; gap:8px; align-items:flex-end; }
 .name-with-emoji .add-field { flex:1; }
 .emoji-pick-btn {
@@ -318,44 +368,85 @@ tbody td { padding:18px 22px; vertical-align:middle; }
 .btn-copy.ok { border-color:var(--v4); color:var(--v4); }
 
 /* FLOATING BUTTONS */
+@keyframes fbIn { from{opacity:0;transform:translateY(20px) scale(.7)} to{opacity:1;transform:translateY(0) scale(1)} }
+@keyframes pulseRed { 0%,100%{box-shadow:0 0 0 0 #ff6b6b55,0 6px 28px #ff6b6b44} 50%{box-shadow:0 0 0 8px #ff6b6b00,0 6px 28px #ff6b6b66} }
+@keyframes pulseViolet { 0%,100%{box-shadow:0 0 0 0 #7c6fff55,0 6px 28px #7c6fff44} 50%{box-shadow:0 0 0 8px #7c6fff00,0 6px 28px #7c6fff66} }
+@keyframes pulseCyan { 0%,100%{box-shadow:0 0 0 0 #5ee7ff55,0 6px 28px #5ee7ff44} 50%{box-shadow:0 0 0 8px #5ee7ff00,0 6px 28px #5ee7ff66} }
+@keyframes spinGrad { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+
 .float-btns {
   position:fixed; bottom:28px; right:28px; z-index:500;
-  display:flex; flex-direction:column; gap:12px; align-items:center;
+  display:flex; flex-direction:row; gap:14px; align-items:center;
 }
 .float-btn {
-  width:48px; height:48px; border-radius:50%; border:none;
+  width:52px; height:52px; border-radius:16px; border:none;
   display:flex; align-items:center; justify-content:center;
-  font-size:20px; cursor:pointer; transition:all .22s cubic-bezier(.34,1.6,.64,1);
-  box-shadow:0 4px 20px var(--shadow);
+  font-size:22px; cursor:pointer;
+  transition:transform .22s cubic-bezier(.34,1.6,.64,1), filter .2s;
+  position:relative; overflow:hidden;
+  animation: fbIn .5s cubic-bezier(.34,1.6,.64,1) both;
 }
-.float-btn:hover { transform:scale(1.15); }
-.float-btn:active { transform:scale(.9); }
-.float-theme {
-  background:linear-gradient(135deg,var(--v1),var(--v2));
-  color:#fff;
+.float-btn::before {
+  content:''; position:absolute; inset:0; border-radius:16px;
+  background:inherit; filter:blur(8px); opacity:0; z-index:-1;
+  transition:opacity .2s; transform:scale(1.3);
 }
+.float-btn:hover { transform:scale(1.18) translateY(-3px); filter:brightness(1.2); }
+.float-btn:hover::before { opacity:.7; }
+.float-btn:active { transform:scale(.88); }
+
+/* Verrouiller — rouge/rose */
 .float-relock {
-  background:linear-gradient(135deg,var(--v3),var(--v4));
-  color:#08080f;
+  background:linear-gradient(135deg,#ff416c,#ff4b2b);
+  background-size:200% 200%;
+  color:#fff;
+  box-shadow:0 6px 28px #ff416c55;
+  animation: fbIn .5s cubic-bezier(.34,1.6,.64,1) both, pulseRed 2.8s ease-in-out infinite;
+  animation-delay:.1s, 1s;
+  border:1.5px solid #ff6b6b44;
 }
-.float-label {
-  font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.12em;
-  text-transform:uppercase; color:var(--muted); margin-top:-6px;
+
+/* Thème — violet/indigo */
+.float-theme {
+  background:linear-gradient(135deg,#7c6fff,#d47cff);
+  background-size:200% 200%;
+  color:#fff;
+  box-shadow:0 6px 28px #7c6fff55;
+  animation: fbIn .5s cubic-bezier(.34,1.6,.64,1) both, pulseViolet 3s ease-in-out infinite;
+  animation-delay:.2s, 1.3s;
+  border:1.5px solid #7c6fff44;
+}
+
+/* Télécharger — cyan/vert */
+.float-dl {
+  background:linear-gradient(135deg,#5ee7ff,#5fffc8);
+  background-size:200% 200%;
+  color:#08080f;
+  box-shadow:0 6px 28px #5ee7ff55;
+  animation: fbIn .5s cubic-bezier(.34,1.6,.64,1) both, pulseCyan 3.2s ease-in-out infinite;
+  animation-delay:.3s, 1.6s;
+  border:1.5px solid #5ee7ff44;
+  font-size:20px;
 }
 </style>
 </head>
 <body>
 
-<canvas id="waveCanvas"></canvas>
+<!-- BG VIDEO / IMAGE -->
+<video id="bgMedia" autoplay="" muted="" loop="" playsinline="" src="https://res.cloudinary.com/dmvoedoe6/video/upload/v1778483058/WhatsApp_Video_2026-05-11_at_09.01.47_suoa9x.mp4" onerror="this.style.display='none';document.getElementById('bgImg').style.display='block'">
+</video>
+<img id="bgImg" src="https://res.cloudinary.com/dmvoedoe6/image/upload/v1778481411/mer-vers-komodo-rinca_epb5oj.jpg" alt="">
+
+<canvas id="waveCanvas" width="1920" height="911"></canvas>
 
 <!-- LOCK -->
-<div id="lock">
+<div id="lock" style="opacity: 0; display: none;">
   <div class="lock-glow"></div>
   <div class="lock-brand">Nexus-Aegis</div>
   <div class="lock-sub">Accès sécurisé</div>
   <div class="lock-dots">
-    <div class="ldot" id="d0"></div><div class="ldot" id="d1"></div>
-    <div class="ldot" id="d2"></div><div class="ldot" id="d3"></div>
+    <div class="ldot filled" id="d0"></div><div class="ldot filled" id="d1"></div>
+    <div class="ldot filled" id="d2"></div><div class="ldot filled" id="d3"></div>
   </div>
   <div class="numpad">
     <button class="nkey" onclick="nk('1')">1</button>
@@ -374,10 +465,10 @@ tbody td { padding:18px 22px; vertical-align:middle; }
 </div>
 
 <!-- APP -->
-<div id="app">
+<div id="app" style="display: block;">
   <div class="app-header">
     <div class="app-brand">🛰️ Nexus-Aegis</div>
-    <div class="app-meta"><span class="count-pill" id="countPill">— sites</span></div>
+    <div class="app-meta"><span class="count-pill" id="countPill">38 sites</span></div>
   </div>
   <div class="search-wrap">
     <div class="search-inner">
@@ -386,14 +477,480 @@ tbody td { padding:18px 22px; vertical-align:middle; }
       <button class="btn-add-trigger" onclick="openAdd()">✚ Ajouter</button>
     </div>
   </div>
+  <!-- SORT BAR -->
+  <div class="sort-bar">
+    <span class="sort-lbl">Trier :</span>
+    <button class="sort-btn active" id="sb-num-desc" onclick="setSort('num-desc')">N° ↓</button>
+    <button class="sort-btn" id="sb-num-asc" onclick="setSort('num-asc')">N° ↑</button>
+    <button class="sort-btn" id="sb-az" onclick="setSort('az')">A → Z</button>
+    <button class="sort-btn" id="sb-za" onclick="setSort('za')">Z → A</button>
+    <button class="sort-btn" id="sb-code-asc" onclick="setSort('code-asc')">Code ↑</button>
+    <button class="sort-btn" id="sb-code-desc" onclick="setSort('code-desc')">Code ↓</button>
+  </div>
   <div class="table-wrap">
     <table>
       <thead>
         <tr>
-          <th>N°</th><th>Nom du site</th><th>Code ▼</th><th>Description</th><th>Actions</th>
+          <th>N°</th><th>Nom du site</th><th>Code</th><th>Description</th><th>Actions</th>
         </tr>
       </thead>
-      <tbody id="tbody"></tbody>
+      <tbody id="tbody">
+    <tr style="animation-delay:0s">
+      <td class="td-num">38</td>
+      <td class="td-name">Stats Maths</td>
+      <td class="td-code"><span class="ctag c1">122</span></td>
+      <td class="td-desc">
+        Guide pour Excel
+      </td>
+      <td class="td-actions"><div class="row-btns">
+        <button class="btn-open" onclick="openSite('aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3N0YXRzLW1hdGhzLWd1aWRlLw==')">Ouvrir</button>
+        <button class="btn-lock" onclick="openLock(38)">🔒</button>
+      </div></td>
+    </tr>
+    <tr style="animation-delay:0.025s">
+      <td class="td-num">37</td>
+      <td class="td-name">Base Vacances</td>
+      <td class="td-code"><span class="ctag c1">121</span></td>
+      <td class="td-desc">
+        Base 208 fonctionnel
+      </td>
+      <td class="td-actions"><div class="row-btns">
+        <button class="btn-open" onclick="openSite('aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2Jhc2UtY291cnMtMjA4LTIwMjUtMjAyNi8=')">Ouvrir</button>
+        <button class="btn-lock" onclick="openLock(37)">🔒</button>
+      </div></td>
+    </tr>
+    <tr style="animation-delay:0.05s">
+      <td class="td-num">36</td>
+      <td class="td-name">École des Femmes</td>
+      <td class="td-code"><span class="ctag c1">120</span></td>
+      <td class="td-desc">
+        Apprendre Acte 2 - Scène 5
+      </td>
+      <td class="td-actions"><div class="row-btns">
+        <button class="btn-open" onclick="openSite('aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2VkZi0yLTU=')">Ouvrir</button>
+        <button class="btn-lock" onclick="openLock(36)">🔒</button>
+      </div></td>
+    </tr>
+    <tr style="animation-delay:0.07500000000000001s">
+      <td class="td-num">35</td>
+      <td class="td-name">🇮🇹 Ita Mestieri</td>
+      <td class="td-code"><span class="ctag c1">119</span></td>
+      <td class="td-desc">
+        Les métiers en italien
+      </td>
+      <td class="td-actions"><div class="row-btns">
+        <button class="btn-open" onclick="openSite('aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2l0YS1tZXN0aWVyaQ==')">Ouvrir</button>
+        <button class="btn-lock" onclick="openLock(35)">🔒</button>
+      </div></td>
+    </tr>
+    <tr style="animation-delay:0.1s">
+      <td class="td-num">34</td>
+      <td class="td-name">🚌 RATP</td>
+      <td class="td-code"><span class="ctag c3">309</span></td>
+      <td class="td-desc">
+        Transports en commun Paris
+      </td>
+      <td class="td-actions"><div class="row-btns">
+        <button class="btn-open" onclick="openSite('aHR0cHM6Ly93dy5yYXRwLmZyLw==')">Ouvrir</button>
+        <button class="btn-lock" onclick="openLock(34)">🔒</button>
+      </div></td>
+    </tr>
+    <tr style="animation-delay:0.125s">
+      <td class="td-num">33</td>
+      <td class="td-name">🏫 Atrium</td>
+      <td class="td-code"><span class="ctag c3">308</span></td>
+      <td class="td-desc">
+        ENT Atrium Sud
+      </td>
+      <td class="td-actions"><div class="row-btns">
+        <button class="btn-open" onclick="openSite('aHR0cHM6Ly9hdHJpdW0tc3VkLmZyLw==')">Ouvrir</button>
+        <button class="btn-lock" onclick="openLock(33)">🔒</button>
+      </div></td>
+    </tr>
+    <tr style="animation-delay:0.15000000000000002s">
+      <td class="td-num">32</td>
+      <td class="td-name">🐙 Github</td>
+      <td class="td-code"><span class="ctag c3">307</span></td>
+      <td class="td-desc">
+        Hébergement de code
+      </td>
+      <td class="td-actions"><div class="row-btns">
+        <button class="btn-open" onclick="openSite('aHR0cHM6Ly9naXRodWIuY29tLw==')">Ouvrir</button>
+        <button class="btn-lock" onclick="openLock(32)">🔒</button>
+      </div></td>
+    </tr>
+    <tr style="animation-delay:0.17500000000000002s">
+      <td class="td-num">31</td>
+      <td class="td-name">🎨 Canva</td>
+      <td class="td-code"><span class="ctag c3">306</span></td>
+      <td class="td-desc">
+        Création graphique en ligne
+      </td>
+      <td class="td-actions"><div class="row-btns">
+        <button class="btn-open" onclick="openSite('aHR0cHM6Ly93dy5jYW52YS5jb20vZnJfZnIv')">Ouvrir</button>
+        <button class="btn-lock" onclick="openLock(31)">🔒</button>
+      </div></td>
+    </tr>
+    <tr style="animation-delay:0.2s">
+      <td class="td-num">30</td>
+      <td class="td-name">🧠 Claude</td>
+      <td class="td-code"><span class="ctag c3">305</span></td>
+      <td class="td-desc">
+        Assistant IA Anthropic
+      </td>
+      <td class="td-actions"><div class="row-btns">
+        <button class="btn-open" onclick="openSite('aHR0cHM6Ly9jbGF1ZGUuYWkvcmVjZW50cw==')">Ouvrir</button>
+        <button class="btn-lock" onclick="openLock(30)">🔒</button>
+      </div></td>
+    </tr>
+    <tr style="animation-delay:0.225s">
+      <td class="td-num">29</td>
+      <td class="td-name">💎 Gemini</td>
+      <td class="td-code"><span class="ctag c3">304</span></td>
+      <td class="td-desc">
+        Assistant IA Google
+      </td>
+      <td class="td-actions"><div class="row-btns">
+        <button class="btn-open" onclick="openSite('aHR0cHM6Ly9nZW1pbmkuZ29vZ2xlLmNvbS9hcHA/aGw9ZnI=')">Ouvrir</button>
+        <button class="btn-lock" onclick="openLock(29)">🔒</button>
+      </div></td>
+    </tr>
+    <tr style="animation-delay:0.25s">
+      <td class="td-num">28</td>
+      <td class="td-name">🤖 ChatGPT</td>
+      <td class="td-code"><span class="ctag c3">303</span></td>
+      <td class="td-desc">
+        Assistant IA OpenAI
+      </td>
+      <td class="td-actions"><div class="row-btns">
+        <button class="btn-open" onclick="openSite('aHR0cHM6Ly9jaGF0Z3B0LmNvbS8=')">Ouvrir</button>
+        <button class="btn-lock" onclick="openLock(28)">🔒</button>
+      </div></td>
+    </tr>
+    <tr style="animation-delay:0.275s">
+      <td class="td-num">27</td>
+      <td class="td-name">🚉 IDFM</td>
+      <td class="td-code"><span class="ctag c3">302</span></td>
+      <td class="td-desc">
+        Île-de-France Mobilités
+      </td>
+      <td class="td-actions"><div class="row-btns">
+        <button class="btn-open" onclick="openSite('aHR0cHM6Ly93dy5pbGVkZWZyYW5jZS1tb2JpbGl0ZXMuZnIv')">Ouvrir</button>
+        <button class="btn-lock" onclick="openLock(27)">🔒</button>
+      </div></td>
+    </tr>
+    <tr style="animation-delay:0.30000000000000004s">
+      <td class="td-num">26</td>
+      <td class="td-name">🗺️ Cartometro</td>
+      <td class="td-code"><span class="ctag c3">301</span></td>
+      <td class="td-desc">
+        Carte du métro parisien
+      </td>
+      <td class="td-actions"><div class="row-btns">
+        <button class="btn-open" onclick="openSite('aHR0cHM6Ly9jYXJ0b21ldHJvLmNvbS9jYXJ0ZXMvcGFyaXMtbXVsdGktZGFyay8=')">Ouvrir</button>
+        <button class="btn-lock" onclick="openLock(26)">🔒</button>
+      </div></td>
+    </tr>
+    <tr style="animation-delay:0.325s">
+      <td class="td-num">25</td>
+      <td class="td-name">🛩️ Flightradar</td>
+      <td class="td-code"><span class="ctag c3">300</span></td>
+      <td class="td-desc">
+        Radar aérien en direct
+      </td>
+      <td class="td-actions"><div class="row-btns">
+        <button class="btn-open" onclick="openSite('aHR0cHM6Ly93dy5mbGlnaHRyYWRhcjI0LmNvbS80My4zMCw1LjM5LzY=')">Ouvrir</button>
+        <button class="btn-lock" onclick="openLock(25)">🔒</button>
+      </div></td>
+    </tr>
+    <tr style="animation-delay:0.35000000000000003s">
+      <td class="td-num">24</td>
+      <td class="td-name">🎙️ Prompteur Original</td>
+      <td class="td-code"><span class="ctag c2">205</span></td>
+      <td class="td-desc">
+        Prompteur de présentation
+      </td>
+      <td class="td-actions"><div class="row-btns">
+        <button class="btn-open" onclick="openSite('aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3Byb21wdGV1ci1vcmlnaW5hbC8=')">Ouvrir</button>
+        <button class="btn-lock" onclick="openLock(24)">🔒</button>
+      </div></td>
+    </tr>
+    <tr style="animation-delay:0.375s">
+      <td class="td-num">23</td>
+      <td class="td-name">📕 Exposé 1984</td>
+      <td class="td-code"><span class="ctag c1">118</span></td>
+      <td class="td-desc">
+        Exposé sur le roman 1984
+      </td>
+      <td class="td-actions"><div class="row-btns">
+        <button class="btn-open" onclick="openSite('aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2V4cG8taXRhLw==')">Ouvrir</button>
+        <button class="btn-lock" onclick="openLock(23)">🔒</button>
+      </div></td>
+    </tr>
+    <tr style="animation-delay:0.4s">
+      <td class="td-num">22</td>
+      <td class="td-name">🕐 Horloge Exam'</td>
+      <td class="td-code"><span class="ctag c2">204</span></td>
+      <td class="td-desc">
+        Horloge d'examen avec prompteur
+      </td>
+      <td class="td-actions"><div class="row-btns">
+        <button class="btn-open" onclick="openSite('aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2hvcmxvZ2UtZXhhbWVuLXByb21wdGV1ci8=')">Ouvrir</button>
+        <button class="btn-lock" onclick="openLock(22)">🔒</button>
+      </div></td>
+    </tr>
+    <tr style="animation-delay:0.42500000000000004s">
+      <td class="td-num">21</td>
+      <td class="td-name">⏱️ Réveil</td>
+      <td class="td-code"><span class="ctag c2">203</span></td>
+      <td class="td-desc">
+        Minuteur / réveil
+      </td>
+      <td class="td-actions"><div class="row-btns">
+        <button class="btn-open" onclick="openSite('aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3JldmVpbC8=')">Ouvrir</button>
+        <button class="btn-lock" onclick="openLock(21)">🔒</button>
+      </div></td>
+    </tr>
+    <tr style="animation-delay:0.45s">
+      <td class="td-num">20</td>
+      <td class="td-name">🚇 Métro Paris</td>
+      <td class="td-code"><span class="ctag c2">202</span></td>
+      <td class="td-desc">
+        Plan du métro parisien
+      </td>
+      <td class="td-actions"><div class="row-btns">
+        <button class="btn-open" onclick="openSite('aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL21ldHJvLXBhcmlzLw==')">Ouvrir</button>
+        <button class="btn-lock" onclick="openLock(20)">🔒</button>
+      </div></td>
+    </tr>
+    <tr style="animation-delay:0.47500000000000003s">
+      <td class="td-num">19</td>
+      <td class="td-name">✈️ Aviapro Inter</td>
+      <td class="td-code"><span class="ctag c2">201</span></td>
+      <td class="td-desc">
+        Aviapro international
+      </td>
+      <td class="td-actions"><div class="row-btns">
+        <button class="btn-open" onclick="openSite('aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2F2aWFwcm8taW50ZXIv')">Ouvrir</button>
+        <button class="btn-lock" onclick="openLock(19)">🔒</button>
+      </div></td>
+    </tr>
+    <tr style="animation-delay:0.5s">
+      <td class="td-num">18</td>
+      <td class="td-name">🔭 Physique 10-11</td>
+      <td class="td-code"><span class="ctag c1">117</span></td>
+      <td class="td-desc">
+        Chapitres 10 et 11
+      </td>
+      <td class="td-actions"><div class="row-btns">
+        <button class="btn-open" onclick="openSite('aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2NoYXAtcGgv')">Ouvrir</button>
+        <button class="btn-lock" onclick="openLock(18)">🔒</button>
+      </div></td>
+    </tr>
+    <tr style="animation-delay:0.525s">
+      <td class="td-num">17</td>
+      <td class="td-name">🌊 Sea Shepherd Texte</td>
+      <td class="td-code"><span class="ctag c1">116</span></td>
+      <td class="td-desc">
+        Texte exposé EMC
+      </td>
+      <td class="td-actions"><div class="row-btns">
+        <button class="btn-open" onclick="openSite('aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2V4cG8tZW1jLXRleHRlLw==')">Ouvrir</button>
+        <button class="btn-lock" onclick="openLock(17)">🔒</button>
+      </div></td>
+    </tr>
+    <tr style="animation-delay:0.55s">
+      <td class="td-num">16</td>
+      <td class="td-name">🐋 Sea Shepherd Diapo</td>
+      <td class="td-code"><span class="ctag c1">115</span></td>
+      <td class="td-desc">
+        Diaporama exposé EMC
+      </td>
+      <td class="td-actions"><div class="row-btns">
+        <button class="btn-open" onclick="openSite('aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2V4cG8tZW1jLWRpYXBvLw==')">Ouvrir</button>
+        <button class="btn-lock" onclick="openLock(16)">🔒</button>
+      </div></td>
+    </tr>
+    <tr style="animation-delay:0.5750000000000001s">
+      <td class="td-num">15</td>
+      <td class="td-name">📈 Fonctions Maths</td>
+      <td class="td-code"><span class="ctag c1">114</span></td>
+      <td class="td-desc">
+        Chapitre 7 — Fonctions
+      </td>
+      <td class="td-actions"><div class="row-btns">
+        <button class="btn-open" onclick="openSite('aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2NoYXAtNy1mb25jdGlvbnMv')">Ouvrir</button>
+        <button class="btn-lock" onclick="openLock(15)">🔒</button>
+      </div></td>
+    </tr>
+    <tr style="animation-delay:0.6000000000000001s">
+      <td class="td-num">14</td>
+      <td class="td-name">📐 Vecteurs Maths</td>
+      <td class="td-code"><span class="ctag c1">113</span></td>
+      <td class="td-desc">
+        Chapitre 6 — Vecteurs
+      </td>
+      <td class="td-actions"><div class="row-btns">
+        <button class="btn-open" onclick="openSite('aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2NoYXAtNi12ZWN0ZXVycy8=')">Ouvrir</button>
+        <button class="btn-lock" onclick="openLock(14)">🔒</button>
+      </div></td>
+    </tr>
+    <tr style="animation-delay:0.625s">
+      <td class="td-num">13</td>
+      <td class="td-name">⏰ Heure</td>
+      <td class="td-code"><span class="ctag c2">200</span></td>
+      <td class="td-desc">
+        Horloge en ligne
+      </td>
+      <td class="td-actions"><div class="row-btns">
+        <button class="btn-open" onclick="openSite('aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2hldXJlLw==')">Ouvrir</button>
+        <button class="btn-lock" onclick="openLock(13)">🔒</button>
+      </div></td>
+    </tr>
+    <tr style="animation-delay:0.65s">
+      <td class="td-num">12</td>
+      <td class="td-name">📊 SES</td>
+      <td class="td-code"><span class="ctag c1">111</span></td>
+      <td class="td-desc">
+        Sciences économiques et sociales
+      </td>
+      <td class="td-actions"><div class="row-btns">
+        <button class="btn-open" onclick="openSite('aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3Nlcy1jb3Vycy0yMDgv')">Ouvrir</button>
+        <button class="btn-lock" onclick="openLock(12)">🔒</button>
+      </div></td>
+    </tr>
+    <tr style="animation-delay:0.675s">
+      <td class="td-num">11</td>
+      <td class="td-name">💻 SNT</td>
+      <td class="td-code"><span class="ctag c1">110</span></td>
+      <td class="td-desc">
+        Sciences numériques et technologie
+      </td>
+      <td class="td-actions"><div class="row-btns">
+        <button class="btn-open" onclick="openSite('aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3NudC1jb3Vycy0yMDgv')">Ouvrir</button>
+        <button class="btn-lock" onclick="openLock(11)">🔒</button>
+      </div></td>
+    </tr>
+    <tr style="animation-delay:0.7000000000000001s">
+      <td class="td-num">10</td>
+      <td class="td-name">🌿 SVT</td>
+      <td class="td-code"><span class="ctag c1">109</span></td>
+      <td class="td-desc">
+        Sciences de la vie et de la Terre
+      </td>
+      <td class="td-actions"><div class="row-btns">
+        <button class="btn-open" onclick="openSite('aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3N2dC1jb3Vycy0yMDgv')">Ouvrir</button>
+        <button class="btn-lock" onclick="openLock(10)">🔒</button>
+      </div></td>
+    </tr>
+    <tr style="animation-delay:0.7250000000000001s">
+      <td class="td-num">09</td>
+      <td class="td-name">⚗️ Physique-Chimie</td>
+      <td class="td-code"><span class="ctag c1">108</span></td>
+      <td class="td-desc">
+        Cours de physique-chimie
+      </td>
+      <td class="td-actions"><div class="row-btns">
+        <button class="btn-open" onclick="openSite('aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3BoeXNpcXVlLWNvdXJzLTIwOC8=')">Ouvrir</button>
+        <button class="btn-lock" onclick="openLock(9)">🔒</button>
+      </div></td>
+    </tr>
+    <tr style="animation-delay:0.75s">
+      <td class="td-num">08</td>
+      <td class="td-name">🇮🇹 Italien LV2</td>
+      <td class="td-code"><span class="ctag c1">107</span></td>
+      <td class="td-desc">
+        Cours d'italien LV2
+      </td>
+      <td class="td-actions"><div class="row-btns">
+        <button class="btn-open" onclick="openSite('aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2l0YWxpZW4tY291cnMtMjA4Lw==')">Ouvrir</button>
+        <button class="btn-lock" onclick="openLock(8)">🔒</button>
+      </div></td>
+    </tr>
+    <tr style="animation-delay:0.775s">
+      <td class="td-num">07</td>
+      <td class="td-name">🇷🇺 Russe LV3</td>
+      <td class="td-code"><span class="ctag c1">106</span></td>
+      <td class="td-desc">
+        Cours de russe LV3
+      </td>
+      <td class="td-actions"><div class="row-btns">
+        <button class="btn-open" onclick="openSite('aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3J1c3NlLWNvdXJzLTIwOC8=')">Ouvrir</button>
+        <button class="btn-lock" onclick="openLock(7)">🔒</button>
+      </div></td>
+    </tr>
+    <tr style="animation-delay:0.8s">
+      <td class="td-num">06</td>
+      <td class="td-name">📌 Padlet Anglais</td>
+      <td class="td-code"><span class="ctag c1">105</span></td>
+      <td class="td-desc">
+        Padlet de la classe
+      </td>
+      <td class="td-actions"><div class="row-btns">
+        <button class="btn-open" onclick="openSite('aHR0cHM6Ly9wYWRsZXQuY29tL2NoYWlsbGFuX2FuZ2xhaXMvY2xhc3Nlcy1kZS1zZWNvbmRlLTIwMjUtMjAyNi03NnZqcnE2bjd4cXUxNWdwcQ==')">Ouvrir</button>
+        <button class="btn-lock" onclick="openLock(6)">🔒</button>
+      </div></td>
+    </tr>
+    <tr style="animation-delay:0.8250000000000001s">
+      <td class="td-num">05</td>
+      <td class="td-name">🇬🇧 Anglais LV1</td>
+      <td class="td-code"><span class="ctag c1">104</span></td>
+      <td class="td-desc">
+        Cours d'anglais LV1
+      </td>
+      <td class="td-actions"><div class="row-btns">
+        <button class="btn-open" onclick="openSite('aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2FuZ2xhaXMtY291cnMtMjA4Lw==')">Ouvrir</button>
+        <button class="btn-lock" onclick="openLock(5)">🔒</button>
+      </div></td>
+    </tr>
+    <tr style="animation-delay:0.8500000000000001s">
+      <td class="td-num">04</td>
+      <td class="td-name">📖 Textes</td>
+      <td class="td-code"><span class="ctag c1">103</span></td>
+      <td class="td-desc">
+        Textes littéraires
+      </td>
+      <td class="td-actions"><div class="row-btns">
+        <button class="btn-open" onclick="openSite('aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3RleHRlLWZyYW5jYWlzLTIwOC8=')">Ouvrir</button>
+        <button class="btn-lock" onclick="openLock(4)">🔒</button>
+      </div></td>
+    </tr>
+    <tr style="animation-delay:0.875s">
+      <td class="td-num">03</td>
+      <td class="td-name">📝 Synthèse</td>
+      <td class="td-code"><span class="ctag c1">102</span></td>
+      <td class="td-desc">
+        Fiches de synthèse
+      </td>
+      <td class="td-actions"><div class="row-btns">
+        <button class="btn-open" onclick="openSite('aHR0cHM6Ly9ldmFubG9wZXowNjMwMC1sZ3RtLmdpdGh1Yi5pby9mcmFuY2Fpcy0yMDgv')">Ouvrir</button>
+        <button class="btn-lock" onclick="openLock(3)">🔒</button>
+      </div></td>
+    </tr>
+    <tr style="animation-delay:0.9s">
+      <td class="td-num">02</td>
+      <td class="td-name">✍️ Français</td>
+      <td class="td-code"><span class="ctag c1">101</span></td>
+      <td class="td-desc">
+        Cours de français
+      </td>
+      <td class="td-actions"><div class="row-btns">
+        <button class="btn-open" onclick="openSite('aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2ZyYW5jYWlzLWNvdXJzLTIwOC8=')">Ouvrir</button>
+        <button class="btn-lock" onclick="openLock(2)">🔒</button>
+      </div></td>
+    </tr>
+    <tr style="animation-delay:0.925s">
+      <td class="td-num">01</td>
+      <td class="td-name">📚 Base 208</td>
+      <td class="td-code"><span class="ctag c1">100</span></td>
+      <td class="td-desc">
+        Portail principal de la classe
+      </td>
+      <td class="td-actions"><div class="row-btns">
+        <button class="btn-open" onclick="openSite('aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2Jhc2UtY291cnMtMjA4Lw==')">Ouvrir</button>
+        <button class="btn-lock" onclick="openLock(1)">🔒</button>
+      </div></td>
+    </tr></tbody>
     </table>
   </div>
   <hr class="sep">
@@ -419,20 +976,21 @@ tbody td { padding:18px 22px; vertical-align:middle; }
 </div>
 
 <!-- FLOATING BUTTONS -->
-<div class="float-btns" id="floatBtns" style="display:none">
+<div class="float-btns" id="floatBtns" style="display: flex;">
   <button class="float-btn float-relock" onclick="relockSite()" title="Verrouiller">🔒</button>
   <button class="float-btn float-theme" onclick="toggleTheme()" id="themeBtn" title="Thème">🌙</button>
+  <button class="float-btn float-dl" onclick="dlFichier()" title="Télécharger">⬇️</button>
 </div>
 
 <!-- MODAL CADENAS -->
 <div class="modal-bg" id="mbg">
   <div class="modal-info">
     <button class="modal-x" onclick="closeLock()">✕</button>
-    <div class="modal-title" id="mtitle">Code d'accès</div>
-    <div id="mcp" style="display:flex;flex-direction:column;align-items:center;gap:18px;width:100%">
+    <div class="modal-title" id="mtitle">Informations</div>
+    <div id="mcp" class="lock-center" style="display: none;">
       <div class="m-dots">
-        <div class="m-dot" id="md0"></div><div class="m-dot" id="md1"></div>
-        <div class="m-dot" id="md2"></div><div class="m-dot" id="md3"></div>
+        <div class="m-dot filled" id="md0"></div><div class="m-dot filled" id="md1"></div>
+        <div class="m-dot filled" id="md2"></div><div class="m-dot filled" id="md3"></div>
       </div>
       <div class="m-numpad">
         <button class="mkey" onclick="mk('1')">1</button>
@@ -449,15 +1007,24 @@ tbody td { padding:18px 22px; vertical-align:middle; }
         <button class="mkey" style="visibility:hidden"></button>
       </div>
     </div>
-    <div class="info-panel" id="infop">
-      <div class="irow"><span class="ilbl">Nom</span><span class="ival gcyan" id="i-nom">—</span></div>
-      <div class="idiv"></div>
-      <div class="irow"><span class="ilbl">Numéro</span><span class="ival" id="i-num">—</span></div>
-      <div class="irow"><span class="ilbl">Code</span><span class="ival" id="i-code">—</span></div>
-      <div class="idiv"></div>
-      <div class="irow"><span class="ilbl">Description</span><span class="ival dim" id="i-desc">Non renseigné</span></div>
-      <div class="irow"><span class="ilbl">Date d'ajout</span><span class="ival dim" id="i-date">Non renseigné</span></div>
-      <button class="info-open-btn" onclick="openFromLock()">Ouvrir →</button>
+    <div class="info-panel open" id="infop">
+      <!-- Colonne gauche : infos -->
+      <div class="info-left">
+        <div class="irow"><span class="ilbl">Nom</span><span class="ival gcyan" id="i-nom">Stats Maths</span></div>
+        <div class="idiv"></div>
+        <div class="irow"><span class="ilbl">Numéro</span><span class="ival" id="i-num">#38</span></div>
+        <div class="irow"><span class="ilbl">Code</span><span class="ival" id="i-code">122</span></div>
+        <div class="idiv"></div>
+        <div class="irow"><span class="ilbl">Description</span><span class="ival dim" id="i-desc">Guide pour Excel</span></div>
+        <div class="irow"><span class="ilbl">URL décodée</span><span class="ival dim" id="i-url" style="word-break:break-all;font-size:11px">https://natlacaxi.github.io/stats-maths-guide/</span></div>
+        <div class="irow"><span class="ilbl">Date d'ajout</span><span class="ival dim" id="i-date">26/05/2026</span></div>
+        <button class="info-open-btn" onclick="openFromLock()">Ouvrir le site →</button>
+      </div>
+      <!-- Colonne droite : aperçu -->
+      <div class="info-right">
+        <div class="preview-lbl">Aperçu du site</div>
+        <div class="preview-frame-wrap" id="preview-wrap" style="min-height: 320px;"><div class="preview-no" id="preview-no"><span>🌐</span>Chargement de l'aperçu…</div></div>
+      </div>
     </div>
   </div>
 </div>
@@ -484,10 +1051,9 @@ tbody td { padding:18px 22px; vertical-align:middle; }
           <div class="dup-warn" id="dup-warn">⚠️ Ce code existe déjà ! Choisissez un autre.</div>
         </div>
       </div>
-      <!-- EMOJI BANK (masquée par défaut) -->
       <div class="emoji-section" id="emoji-section" style="display:none">
         <div class="emoji-bank-label">🎨 Banque d'émojis — cliquer pour insérer dans le nom</div>
-        <div class="emoji-bank" id="emoji-bank"></div>
+        <div class="emoji-bank" id="emoji-bank"><button class="emoji-btn" onclick="insertEmoji('📚')" title="📚">📚</button><button class="emoji-btn" onclick="insertEmoji('📖')" title="📖">📖</button><button class="emoji-btn" onclick="insertEmoji('📝')" title="📝">📝</button><button class="emoji-btn" onclick="insertEmoji('✍️')" title="✍️">✍️</button><button class="emoji-btn" onclick="insertEmoji('📌')" title="📌">📌</button><button class="emoji-btn" onclick="insertEmoji('📎')" title="📎">📎</button><button class="emoji-btn" onclick="insertEmoji('📋')" title="📋">📋</button><button class="emoji-btn" onclick="insertEmoji('📊')" title="📊">📊</button><button class="emoji-btn" onclick="insertEmoji('📈')" title="📈">📈</button><button class="emoji-btn" onclick="insertEmoji('📉')" title="📉">📉</button><button class="emoji-btn" onclick="insertEmoji('🏫')" title="🏫">🏫</button><button class="emoji-btn" onclick="insertEmoji('🎓')" title="🎓">🎓</button><button class="emoji-btn" onclick="insertEmoji('🧠')" title="🧠">🧠</button><button class="emoji-btn" onclick="insertEmoji('💡')" title="💡">💡</button><button class="emoji-btn" onclick="insertEmoji('🔬')" title="🔬">🔬</button><button class="emoji-btn" onclick="insertEmoji('⚗️')" title="⚗️">⚗️</button><button class="emoji-btn" onclick="insertEmoji('🔭')" title="🔭">🔭</button><button class="emoji-btn" onclick="insertEmoji('🧬')" title="🧬">🧬</button><button class="emoji-btn" onclick="insertEmoji('🌿')" title="🌿">🌿</button><button class="emoji-btn" onclick="insertEmoji('🌊')" title="🌊">🌊</button><button class="emoji-btn" onclick="insertEmoji('🇫🇷')" title="🇫🇷">🇫🇷</button><button class="emoji-btn" onclick="insertEmoji('🇬🇧')" title="🇬🇧">🇬🇧</button><button class="emoji-btn" onclick="insertEmoji('🇮🇹')" title="🇮🇹">🇮🇹</button><button class="emoji-btn" onclick="insertEmoji('🇷🇺')" title="🇷🇺">🇷🇺</button><button class="emoji-btn" onclick="insertEmoji('🇩🇪')" title="🇩🇪">🇩🇪</button><button class="emoji-btn" onclick="insertEmoji('🇪🇸')" title="🇪🇸">🇪🇸</button><button class="emoji-btn" onclick="insertEmoji('🌍')" title="🌍">🌍</button><button class="emoji-btn" onclick="insertEmoji('🌐')" title="🌐">🌐</button><button class="emoji-btn" onclick="insertEmoji('🗺️')" title="🗺️">🗺️</button><button class="emoji-btn" onclick="insertEmoji('🗓️')" title="🗓️">🗓️</button><button class="emoji-btn" onclick="insertEmoji('💻')" title="💻">💻</button><button class="emoji-btn" onclick="insertEmoji('🖥️')" title="🖥️">🖥️</button><button class="emoji-btn" onclick="insertEmoji('⌨️')" title="⌨️">⌨️</button><button class="emoji-btn" onclick="insertEmoji('🖱️')" title="🖱️">🖱️</button><button class="emoji-btn" onclick="insertEmoji('📱')" title="📱">📱</button><button class="emoji-btn" onclick="insertEmoji('🔒')" title="🔒">🔒</button><button class="emoji-btn" onclick="insertEmoji('🔓')" title="🔓">🔓</button><button class="emoji-btn" onclick="insertEmoji('🔑')" title="🔑">🔑</button><button class="emoji-btn" onclick="insertEmoji('🛡️')" title="🛡️">🛡️</button><button class="emoji-btn" onclick="insertEmoji('⚙️')" title="⚙️">⚙️</button><button class="emoji-btn" onclick="insertEmoji('🤖')" title="🤖">🤖</button><button class="emoji-btn" onclick="insertEmoji('🧩')" title="🧩">🧩</button><button class="emoji-btn" onclick="insertEmoji('💎')" title="💎">💎</button><button class="emoji-btn" onclick="insertEmoji('🎨')" title="🎨">🎨</button><button class="emoji-btn" onclick="insertEmoji('✏️')" title="✏️">✏️</button><button class="emoji-btn" onclick="insertEmoji('🖌️')" title="🖌️">🖌️</button><button class="emoji-btn" onclick="insertEmoji('📐')" title="📐">📐</button><button class="emoji-btn" onclick="insertEmoji('📏')" title="📏">📏</button><button class="emoji-btn" onclick="insertEmoji('🗂️')" title="🗂️">🗂️</button><button class="emoji-btn" onclick="insertEmoji('📂')" title="📂">📂</button><button class="emoji-btn" onclick="insertEmoji('🚇')" title="🚇">🚇</button><button class="emoji-btn" onclick="insertEmoji('🚌')" title="🚌">🚌</button><button class="emoji-btn" onclick="insertEmoji('✈️')" title="✈️">✈️</button><button class="emoji-btn" onclick="insertEmoji('🛩️')" title="🛩️">🛩️</button><button class="emoji-btn" onclick="insertEmoji('🚉')" title="🚉">🚉</button><button class="emoji-btn" onclick="insertEmoji('🚀')" title="🚀">🚀</button><button class="emoji-btn" onclick="insertEmoji('🌙')" title="🌙">🌙</button><button class="emoji-btn" onclick="insertEmoji('⭐')" title="⭐">⭐</button><button class="emoji-btn" onclick="insertEmoji('🔥')" title="🔥">🔥</button><button class="emoji-btn" onclick="insertEmoji('💧')" title="💧">💧</button><button class="emoji-btn" onclick="insertEmoji('⏰')" title="⏰">⏰</button><button class="emoji-btn" onclick="insertEmoji('⏱️')" title="⏱️">⏱️</button><button class="emoji-btn" onclick="insertEmoji('🕐')" title="🕐">🕐</button><button class="emoji-btn" onclick="insertEmoji('⌚')" title="⌚">⌚</button><button class="emoji-btn" onclick="insertEmoji('📡')" title="📡">📡</button><button class="emoji-btn" onclick="insertEmoji('📻')" title="📻">📻</button><button class="emoji-btn" onclick="insertEmoji('🎙️')" title="🎙️">🎙️</button><button class="emoji-btn" onclick="insertEmoji('🎤')" title="🎤">🎤</button><button class="emoji-btn" onclick="insertEmoji('🎵')" title="🎵">🎵</button><button class="emoji-btn" onclick="insertEmoji('🎶')" title="🎶">🎶</button><button class="emoji-btn" onclick="insertEmoji('🐋')" title="🐋">🐋</button><button class="emoji-btn" onclick="insertEmoji('🦈')" title="🦈">🦈</button><button class="emoji-btn" onclick="insertEmoji('🐠')" title="🐠">🐠</button><button class="emoji-btn" onclick="insertEmoji('🌺')" title="🌺">🌺</button><button class="emoji-btn" onclick="insertEmoji('🍃')" title="🍃">🍃</button><button class="emoji-btn" onclick="insertEmoji('🌱')" title="🌱">🌱</button><button class="emoji-btn" onclick="insertEmoji('🦋')" title="🦋">🦋</button><button class="emoji-btn" onclick="insertEmoji('🐝')" title="🐝">🐝</button><button class="emoji-btn" onclick="insertEmoji('🌸')" title="🌸">🌸</button><button class="emoji-btn" onclick="insertEmoji('🌻')" title="🌻">🌻</button><button class="emoji-btn" onclick="insertEmoji('🏆')" title="🏆">🏆</button><button class="emoji-btn" onclick="insertEmoji('🥇')" title="🥇">🥇</button><button class="emoji-btn" onclick="insertEmoji('🎯')" title="🎯">🎯</button><button class="emoji-btn" onclick="insertEmoji('🎲')" title="🎲">🎲</button><button class="emoji-btn" onclick="insertEmoji('♟️')" title="♟️">♟️</button><button class="emoji-btn" onclick="insertEmoji('🎭')" title="🎭">🎭</button><button class="emoji-btn" onclick="insertEmoji('🎬')" title="🎬">🎬</button><button class="emoji-btn" onclick="insertEmoji('🎮')" title="🎮">🎮</button><button class="emoji-btn" onclick="insertEmoji('🕹️')" title="🕹️">🕹️</button><button class="emoji-btn" onclick="insertEmoji('🎠')" title="🎠">🎠</button><button class="emoji-btn" onclick="insertEmoji('⚡')" title="⚡">⚡</button><button class="emoji-btn" onclick="insertEmoji('💫')" title="💫">💫</button><button class="emoji-btn" onclick="insertEmoji('✨')" title="✨">✨</button><button class="emoji-btn" onclick="insertEmoji('🌟')" title="🌟">🌟</button><button class="emoji-btn" onclick="insertEmoji('💥')" title="💥">💥</button><button class="emoji-btn" onclick="insertEmoji('🔮')" title="🔮">🔮</button><button class="emoji-btn" onclick="insertEmoji('🎪')" title="🎪">🎪</button><button class="emoji-btn" onclick="insertEmoji('🎡')" title="🎡">🎡</button><button class="emoji-btn" onclick="insertEmoji('🌈')" title="🌈">🌈</button><button class="emoji-btn" onclick="insertEmoji('🪄')" title="🪄">🪄</button></div>
       </div>
       <div class="add-field full">
         <div class="add-lbl">URL brute *</div>
@@ -511,9 +1077,9 @@ tbody td { padding:18px 22px; vertical-align:middle; }
         </div>
       </div>
     </div>
-    <div class="code-out" id="code-out">
+    <div class="code-out open" id="code-out">
       <div class="code-out-lbl">Ligne à coller dans le fichier</div>
-      <pre id="code-out-pre"></pre>
+      <pre id="code-out-pre">  { num: 38, nom: "Stats Maths", b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3N0YXRzLW1hdGhzLWd1aWRlLw==", code: "122", desc: "Guide pour Excel", date: "26/05/2026" },</pre>
       <button class="btn-copy" id="btn-copy" onclick="copyLine()">Copier</button>
     </div>
     <div class="add-actions">
@@ -525,8 +1091,7 @@ tbody td { padding:18px 22px; vertical-align:middle; }
 
 <script>
 // ═══════════════════════════════════════════════════════════
-//  DONNÉES — pour ajouter un site, copier une ligne :
-//  { num: X, nom: "Nom", b64: "base64", code: "XXX", desc: "...", date: "JJ/MM/AAAA" },
+//  DONNÉES
 // ═══════════════════════════════════════════════════════════
 const SITES = [
   { num:  1, nom: "📚 Base 208",           b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2Jhc2UtY291cnMtMjA4Lw==",                                             code: "100", desc: "Portail principal de la classe", date: "Non renseigné" },
@@ -566,9 +1131,17 @@ const SITES = [
   { num: 35, nom: "🇮🇹 Ita Mestieri",       b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2l0YS1tZXN0aWVyaQ==",                                                  code: "119", desc: "Les métiers en italien", date: "Non renseigné" },
   // MARKER_AJOUT
 ];
-// ═══════════════════════════════════════════════════════════
 
-// EMOJI BANK DATA
+// ═══════════════════════════════════════════════════════════
+// NEXT NUM SAFE (no duplicate)
+function nextNum(){
+  const used = new Set(SITES.map(s=>s.num));
+  let n = 1;
+  while(used.has(n)) n++;
+  return n;
+}
+
+// EMOJI BANK
 const EMOJI_BANK = [
   "📚","📖","📝","✍️","📌","📎","📋","📊","📈","📉",
   "🏫","🎓","🧠","💡","🔬","⚗️","🔭","🧬","🌿","🌊",
@@ -581,33 +1154,28 @@ const EMOJI_BANK = [
   "🏆","🥇","🎯","🎲","♟️","🎭","🎬","🎮","🕹️","🎠",
   "⚡","💫","✨","🌟","💥","🔮","🎪","🎡","🌈","🪄",
 ];
-
-// BUILD EMOJI BANK UI
 function buildEmojiBank(){
-  const bank = document.getElementById("emoji-bank");
-  bank.innerHTML = EMOJI_BANK.map(e =>
+  document.getElementById("emoji-bank").innerHTML = EMOJI_BANK.map(e =>
     `<button class="emoji-btn" onclick="insertEmoji('${e}')" title="${e}">${e}</button>`
   ).join("");
 }
 buildEmojiBank();
-
 function toggleEmojiBank(){
   const s = document.getElementById("emoji-section");
-  s.style.display = s.style.display === "none" ? "flex" : "none";
-  s.style.flexDirection = "column";
+  s.style.display = s.style.display==="none"?"flex":"none";
+  s.style.flexDirection="column";
 }
-
 function insertEmoji(e){
   const inp = document.getElementById("af-nom");
-  inp.value = e + " " + inp.value.replace(/^[\p{Emoji}\s]+/u, "");
+  inp.value = e+" "+inp.value.replace(/^[\p{Emoji}\s]+/u,"");
   inp.focus();
 }
 
 // WAVES
 const canvas = document.getElementById("waveCanvas");
 const cx = canvas.getContext("2d");
-let W, H, T = 0;
-const WV = [
+let W,H,T=0;
+const WV=[
   {a:55,f:0.010,s:0.22,y:.18,c:"#7c6fff"},
   {a:38,f:0.015,s:0.16,y:.36,c:"#d47cff"},
   {a:62,f:0.009,s:0.20,y:.54,c:"#5ee7ff"},
@@ -618,8 +1186,7 @@ function resize(){ W=canvas.width=innerWidth; H=canvas.height=innerHeight; }
 window.addEventListener("resize",resize); resize();
 (function loop(){
   cx.clearRect(0,0,W,H);
-  // dim waves in light mode
-  const isLight = document.documentElement.getAttribute("data-theme")==="light";
+  const isLight=document.documentElement.getAttribute("data-theme")==="light";
   WV.forEach(w=>{
     cx.beginPath();
     for(let x=0;x<=W;x+=2){
@@ -634,17 +1201,15 @@ window.addEventListener("resize",resize); resize();
 
 // THEME
 function toggleTheme(){
-  const html = document.documentElement;
-  const isDark = html.getAttribute("data-theme")==="dark";
-  html.setAttribute("data-theme", isDark?"light":"dark");
-  document.getElementById("themeBtn").textContent = isDark?"☀️":"🌙";
-  localStorage.setItem("na-theme", isDark?"light":"dark");
+  const html=document.documentElement;
+  const isDark=html.getAttribute("data-theme")==="dark";
+  html.setAttribute("data-theme",isDark?"light":"dark");
+  document.getElementById("themeBtn").textContent=isDark?"☀️":"🌙";
+  localStorage.setItem("na-theme",isDark?"light":"dark");
 }
-// restore theme
 (function(){
-  const t = localStorage.getItem("na-theme")||"dark";
+  const t=localStorage.getItem("na-theme")||"dark";
   document.documentElement.setAttribute("data-theme",t);
-  // themeBtn not visible yet, set after load
 })();
 
 // RELOCK
@@ -672,60 +1237,74 @@ function chkMain(){
     const l=document.getElementById("lock"); l.style.opacity="0";
     setTimeout(()=>{
       l.style.display="none";
-      const app = document.getElementById("app");
-      app.style.display="block";
-      const fb = document.getElementById("floatBtns");
-      fb.style.display="flex";
-      // set theme button icon
-      const t = document.documentElement.getAttribute("data-theme");
-      document.getElementById("themeBtn").textContent = t==="dark"?"🌙":"☀️";
-      // sort desc by code, render
-      SITES.sort((a,b)=>parseInt(b.code)-parseInt(a.code));
-      render(SITES);
+      const app=document.getElementById("app"); app.style.display="block";
+      const fb=document.getElementById("floatBtns"); fb.style.display="flex";
+      const t=document.documentElement.getAttribute("data-theme");
+      document.getElementById("themeBtn").textContent=t==="dark"?"🌙":"☀️";
+      render(getSorted());
       document.getElementById("countPill").textContent=SITES.length+" site"+(SITES.length>1?"s":"");
     },600);
   } else { ud(true); setTimeout(()=>{mi="";ud(false);},700); }
 }
 document.addEventListener("keydown",e=>{
-  // Ne pas intercepter si on tape dans un vrai champ texte
-  const tag = document.activeElement ? document.activeElement.tagName : "";
-  const isInput = tag==="INPUT"||tag==="TEXTAREA";
-
-  // Écran de verrouillage principal
-  const lockEl = document.getElementById("lock");
-  const lockVisible = lockEl.style.display!=="none";
-  if(lockVisible && !isInput){
-    if(e.key>="0"&&e.key<="9"){ e.preventDefault(); nk(e.key); }
-    if(e.key==="Backspace"){ e.preventDefault(); nd(); }
+  const tag=document.activeElement?document.activeElement.tagName:"";
+  const isInput=tag==="INPUT"||tag==="TEXTAREA";
+  const lockEl=document.getElementById("lock");
+  const lockVisible=lockEl.style.display!=="none";
+  if(lockVisible&&!isInput){
+    if(e.key>="0"&&e.key<="9"){e.preventDefault();nk(e.key);}
+    if(e.key==="Backspace"){e.preventDefault();nd();}
   }
-
-  // Modal cadenas (info site)
-  const mbgOpen = document.getElementById("mbg").classList.contains("open");
-  const mcpVisible = document.getElementById("mcp").style.display!=="none";
-  if(mbgOpen && mcpVisible && !isInput){
-    if(e.key>="0"&&e.key<="9"){ e.preventDefault(); mk(e.key); }
-    if(e.key==="Backspace"){ e.preventDefault(); mdel(); }
-    if(e.key==="Escape"){ closeLock(); }
+  const mbgOpen=document.getElementById("mbg").classList.contains("open");
+  const mcpVisible=document.getElementById("mcp").style.display!=="none";
+  if(mbgOpen&&mcpVisible&&!isInput){
+    if(e.key>="0"&&e.key<="9"){e.preventDefault();mk(e.key);}
+    if(e.key==="Backspace"){e.preventDefault();mdel();}
+    if(e.key==="Escape"){closeLock();}
   }
-
-  // Fermer modal ajout avec Échap
-  if(document.getElementById("abg").classList.contains("open") && e.key==="Escape") closeAdd();
+  if(document.getElementById("abg").classList.contains("open")&&e.key==="Escape")closeAdd();
 });
 
-// TABLE — tri décroissant par code
+// SORT
+let currentSort="num-desc";
+function setSort(s){
+  currentSort=s;
+  document.querySelectorAll(".sort-btn").forEach(b=>b.classList.remove("active"));
+  document.getElementById("sb-"+s).classList.add("active");
+  render(getSorted());
+}
+function getSorted(){
+  const q=document.getElementById("search")?document.getElementById("search").value.trim().toLowerCase():"";
+  let data=q?SITES.filter(s=>{
+    const url=db(s.b64).toLowerCase();
+    return s.nom.toLowerCase().includes(q)||s.code.includes(q)||(s.desc&&s.desc!=="Non renseigné"&&s.desc.toLowerCase().includes(q))||(s.date&&s.date!=="Non renseigné"&&s.date.toLowerCase().includes(q))||url.includes(q);
+  }):[...SITES];
+  switch(currentSort){
+    case "num-asc":   return data.sort((a,b)=>a.num-b.num);
+    case "num-desc":  return data.sort((a,b)=>b.num-a.num);
+    case "az":        return data.sort((a,b)=>stripEmoji(a.nom).localeCompare(stripEmoji(b.nom),"fr"));
+    case "za":        return data.sort((a,b)=>stripEmoji(b.nom).localeCompare(stripEmoji(a.nom),"fr"));
+    case "code-asc":  return data.sort((a,b)=>parseInt(a.code)-parseInt(b.code));
+    case "code-desc": return data.sort((a,b)=>parseInt(b.code)-parseInt(a.code));
+    default:          return data;
+  }
+}
+function stripEmoji(s){ return s.replace(/[\p{Emoji}\s]+/gu,"").trim(); }
+
+// TABLE
 function db(b){ try{return atob(b);}catch{return "#";} }
 function cc(c){ return "ctag c"+(parseInt(c[0])||0); }
 function render(data){
   const tb=document.getElementById("tbody");
   if(!data.length){tb.innerHTML='<tr><td colspan="5" class="no-results">🔍 Aucun résultat</td></tr>';return;}
-  // tri décroissant par code numérique
-  const sorted=[...data].sort((a,b)=>parseInt(b.code)-parseInt(a.code));
-  tb.innerHTML=sorted.map((s,i)=>`
+  tb.innerHTML=data.map((s,i)=>`
     <tr style="animation-delay:${i*.025}s">
       <td class="td-num">${String(s.num).padStart(2,"0")}</td>
       <td class="td-name">${s.nom}</td>
       <td class="td-code"><span class="${cc(s.code)}">${s.code}</span></td>
-      <td class="td-desc${(!s.desc||s.desc==='Non renseigné')?' empty':''}">${(!s.desc||s.desc==='Non renseigné')?'—':s.desc}</td>
+      <td class="td-desc${(!s.desc||s.desc==="Non renseigné")?" empty":""}">
+        ${(!s.desc||s.desc==="Non renseigné")?"—":s.desc}
+      </td>
       <td class="td-actions"><div class="row-btns">
         <button class="btn-open" onclick="openSite('${s.b64}')">Ouvrir</button>
         <button class="btn-lock" onclick="openLock(${s.num})">🔒</button>
@@ -733,39 +1312,21 @@ function render(data){
     </tr>`).join("");
 }
 
-// SEARCH — élargie (nom, code, desc, b64 décodé)
-function doFilter(){
-  const q=document.getElementById("search").value.trim().toLowerCase();
-  if(!q){render(SITES);return;}
-  render(SITES.filter(s=>{
-    const url = db(s.b64).toLowerCase();
-    return (
-      s.nom.toLowerCase().includes(q)||
-      s.code.includes(q)||
-      (s.desc&&s.desc!=="Non renseigné"&&s.desc.toLowerCase().includes(q))||
-      (s.date&&s.date!=="Non renseigné"&&s.date.toLowerCase().includes(q))||
-      url.includes(q)
-    );
-  }));
-}
+// SEARCH
+function doFilter(){ render(getSorted()); }
 function openSite(b){ const u=db(b); if(u&&u!=="#")window.open(u,"_blank"); }
 
 // DUPLICATE CHECK
 function checkDup(){
-  const code = document.getElementById("af-code").value.trim();
-  const warn = document.getElementById("dup-warn");
-  if(code.length===3 && SITES.some(s=>s.code===code)){
-    warn.classList.add("show");
-  } else {
-    warn.classList.remove("show");
-  }
+  const code=document.getElementById("af-code").value.trim();
+  const warn=document.getElementById("dup-warn");
+  if(code.length===3&&SITES.some(s=>s.code===code)) warn.classList.add("show");
+  else warn.classList.remove("show");
 }
-function isDupCode(code){
-  return SITES.some(s=>s.code===code);
-}
+function isDupCode(code){ return SITES.some(s=>s.code===code); }
 
 // MODAL CADENAS
-const MC2="8957"; let mi2="", cur=null;
+const MC2="8957"; let mi2="",cur=null;
 function openLock(num){
   cur=num; mi2=""; umd(false);
   document.getElementById("mcp").style.display="flex";
@@ -773,7 +1334,13 @@ function openLock(num){
   document.getElementById("mtitle").textContent="Code d'accès";
   document.getElementById("mbg").classList.add("open");
 }
-function closeLock(){ document.getElementById("mbg").classList.remove("open"); cur=null; mi2=""; }
+function closeLock(){
+  document.getElementById("mbg").classList.remove("open");
+  cur=null; mi2="";
+  // clear iframe
+  const wrap=document.getElementById("preview-wrap");
+  wrap.innerHTML='<div class="preview-no" id="preview-no"><span>🌐</span>Chargement de l\'aperçu…</div>';
+}
 function mk(k){ if(mi2.length>=4)return; mi2+=k; umd(false); if(mi2.length===4)setTimeout(chkLock,80); }
 function mdel(){ mi2=mi2.slice(0,-1); umd(false); }
 function umd(e){
@@ -792,8 +1359,41 @@ function chkLock(){
     document.getElementById("i-code").textContent=s.code;
     document.getElementById("i-desc").textContent=s.desc||"Non renseigné";
     document.getElementById("i-date").textContent=s.date||"Non renseigné";
+    const url=db(s.b64);
+    document.getElementById("i-url").textContent=url&&url!=="#"?url:"—";
     document.getElementById("infop").classList.add("open");
+    // Load preview
+    loadPreview(url);
   } else { umd(true); setTimeout(()=>{mi2="";umd(false);},700); }
+}
+function loadPreview(url){
+  const wrap=document.getElementById("preview-wrap");
+  if(!url||url==="#"){
+    wrap.innerHTML='<div class="preview-no"><span>🚫</span>URL invalide</div>';
+    return;
+  }
+  wrap.innerHTML='<div class="preview-no" id="preview-no"><span>⏳</span>Chargement…</div>';
+  setTimeout(()=>{
+    try{
+      const iframe=document.createElement("iframe");
+      iframe.src=url;
+      iframe.style.cssText="width:180%;height:180%;border:none;transform:scale(0.555);transform-origin:top left;pointer-events:none;";
+      wrap.style.minHeight="320px";
+      wrap.innerHTML="";
+      wrap.appendChild(iframe);
+      iframe.onerror=()=>{
+        wrap.innerHTML='<div class="preview-no"><span>🚫</span>Aperçu non disponible<br><small>(politique X-Frame-Options du site)</small></div>';
+      };
+      // fallback timeout
+      setTimeout(()=>{
+        if(iframe.contentDocument&&iframe.contentDocument.body&&iframe.contentDocument.body.innerHTML===""){
+          wrap.innerHTML='<div class="preview-no"><span>🔒</span>Aperçu bloqué<br><small>Ce site refuse les iframes</small></div>';
+        }
+      },4000);
+    } catch(e){
+      wrap.innerHTML='<div class="preview-no"><span>🚫</span>Aperçu non disponible</div>';
+    }
+  },100);
 }
 function openFromLock(){ const s=SITES.find(x=>x.num===cur); if(s){openSite(s.b64);closeLock();} }
 document.getElementById("mbg").addEventListener("click",e=>{ if(e.target===document.getElementById("mbg"))closeLock(); });
@@ -801,7 +1401,7 @@ document.getElementById("mbg").addEventListener("click",e=>{ if(e.target===docum
 // MODAL AJOUT
 function openAdd(){
   const now=new Date();
-  const dd=String(now.getDate()).padStart(2,"0"), mm=String(now.getMonth()+1).padStart(2,"0");
+  const dd=String(now.getDate()).padStart(2,"0"),mm=String(now.getMonth()+1).padStart(2,"0");
   document.getElementById("af-date").value=dd+"/"+mm+"/"+now.getFullYear();
   document.getElementById("af-nom").value="";
   document.getElementById("af-code").value="";
@@ -821,10 +1421,10 @@ function autoB64(){
   if(url) document.getElementById("af-b64").value=btoa(unescape(encodeURIComponent(url)));
 }
 function getForm(){
-  const nom =document.getElementById("af-nom").value.trim();
+  const nom=document.getElementById("af-nom").value.trim();
   const code=document.getElementById("af-code").value.trim();
-  const url =document.getElementById("af-url").value.trim();
-  const b64 =document.getElementById("af-b64").value.trim()||(url?btoa(unescape(encodeURIComponent(url))):"");
+  const url=document.getElementById("af-url").value.trim();
+  const b64=document.getElementById("af-b64").value.trim()||(url?btoa(unescape(encodeURIComponent(url))):"");
   const desc=document.getElementById("af-desc").value.trim()||"Non renseigné";
   const date=document.getElementById("af-date").value.trim()||"Non renseigné";
   return {nom,code,b64,desc,date};
@@ -851,21 +1451,19 @@ function copyLine(){
 }
 function addSite(){
   const s=getForm(); if(!validate(s))return;
-  const num=SITES.length+1;
+  const num=nextNum(); // safe no-duplicate
   SITES.push({num,...s});
-  SITES.sort((a,b)=>parseInt(b.code)-parseInt(a.code));
-  render(SITES);
+  render(getSorted());
   doFilter();
   document.getElementById("countPill").textContent=SITES.length+" site"+(SITES.length>1?"s":"");
   showOut(buildLine(s,num));
 }
 function addAndDl(){
   const s=getForm(); if(!validate(s))return;
-  const num=SITES.length+1;
-  if(!SITES.find(x=>x.num===num)){
+  const num=nextNum();
+  if(!SITES.find(x=>x.code===s.code)){
     SITES.push({num,...s});
-    SITES.sort((a,b)=>parseInt(b.code)-parseInt(a.code));
-    render(SITES);
+    render(getSorted());
     document.getElementById("countPill").textContent=SITES.length+" site"+(SITES.length>1?"s":"");
   }
   const line=buildLine(s,num);
@@ -877,10 +1475,18 @@ function addAndDl(){
   URL.revokeObjectURL(a.href);
 }
 
+// DOWNLOAD avec sites en mémoire
+function dlFichier(){
+  const src=document.documentElement.outerHTML;
+  const blob=new Blob([src],{type:"text/html;charset=utf-8"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+  a.download="annuaire.html"; a.click(); URL.revokeObjectURL(a.href);
+}
+
 // CONVERTER
 function enc(){ document.getElementById("b64Input").value=btoa(unescape(encodeURIComponent(document.getElementById("rawInput").value))); }
 function dec(){ try{document.getElementById("rawInput").value=decodeURIComponent(escape(atob(document.getElementById("b64Input").value.trim())));}catch{document.getElementById("rawInput").value="⚠ Base64 invalide";} }
 function clr(){ document.getElementById("rawInput").value=""; document.getElementById("b64Input").value=""; }
 </script>
-</body>
-</html>
+
+</body></html>
