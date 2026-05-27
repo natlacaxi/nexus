@@ -45,7 +45,7 @@ body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--te
 /* VIDEO / IMAGE BG */
 #bgMedia {
   position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  width: 100%; height: 100%; object-fit: cover; opacity: 0.15;
+  width: 100%; height: 100%; object-fit: cover; opacity: 0.22;
 }
 #bgImg {
   display: none;
@@ -437,7 +437,7 @@ tbody td { padding:18px 22px; vertical-align:middle; }
 </video>
 <img id="bgImg" src="https://res.cloudinary.com/dmvoedoe6/image/upload/v1778481411/mer-vers-komodo-rinca_epb5oj.jpg" alt="">
 
-<canvas id="waveCanvas" width="1920" height="911"></canvas>
+<canvas id="waveCanvas" width="800" height="1145"></canvas>
 
 <!-- LOCK -->
 <div id="lock" style="opacity: 0; display: none;">
@@ -468,7 +468,7 @@ tbody td { padding:18px 22px; vertical-align:middle; }
 <div id="app" style="display: block;">
   <div class="app-header">
     <div class="app-brand">🛰️ Nexus-Aegis</div>
-    <div class="app-meta"><span class="count-pill" id="countPill">38 sites</span></div>
+    <div class="app-meta"><span class="count-pill" id="countPill">36 sites</span></div>
   </div>
   <div class="search-wrap">
     <div class="search-inner">
@@ -496,42 +496,18 @@ tbody td { padding:18px 22px; vertical-align:middle; }
       </thead>
       <tbody id="tbody">
     <tr style="animation-delay:0s">
-      <td class="td-num">38</td>
-      <td class="td-name">Stats Maths</td>
-      <td class="td-code"><span class="ctag c1">122</span></td>
-      <td class="td-desc">
-        Guide pour Excel
-      </td>
-      <td class="td-actions"><div class="row-btns">
-        <button class="btn-open" onclick="openSite('aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3N0YXRzLW1hdGhzLWd1aWRlLw==')">Ouvrir</button>
-        <button class="btn-lock" onclick="openLock(38)">🔒</button>
-      </div></td>
-    </tr>
-    <tr style="animation-delay:0.025s">
-      <td class="td-num">37</td>
-      <td class="td-name">Base Vacances</td>
-      <td class="td-code"><span class="ctag c1">121</span></td>
-      <td class="td-desc">
-        Base 208 fonctionnel
-      </td>
-      <td class="td-actions"><div class="row-btns">
-        <button class="btn-open" onclick="openSite('aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2Jhc2UtY291cnMtMjA4LTIwMjUtMjAyNi8=')">Ouvrir</button>
-        <button class="btn-lock" onclick="openLock(37)">🔒</button>
-      </div></td>
-    </tr>
-    <tr style="animation-delay:0.05s">
       <td class="td-num">36</td>
-      <td class="td-name">École des Femmes</td>
+      <td class="td-name">Base Vacances 208</td>
       <td class="td-code"><span class="ctag c1">120</span></td>
       <td class="td-desc">
-        Apprendre Acte 2 - Scène 5
+        Base Vacance fonctionnel
       </td>
       <td class="td-actions"><div class="row-btns">
-        <button class="btn-open" onclick="openSite('aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2VkZi0yLTU=')">Ouvrir</button>
+        <button class="btn-open" onclick="openSite('aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2Jhc2UtY291cnMtMjA4LTIwMjUtMjAyNg==')">Ouvrir</button>
         <button class="btn-lock" onclick="openLock(36)">🔒</button>
       </div></td>
     </tr>
-    <tr style="animation-delay:0.07500000000000001s">
+    <tr style="animation-delay:0.025s">
       <td class="td-num">35</td>
       <td class="td-name">🇮🇹 Ita Mestieri</td>
       <td class="td-code"><span class="ctag c1">119</span></td>
@@ -543,7 +519,7 @@ tbody td { padding:18px 22px; vertical-align:middle; }
         <button class="btn-lock" onclick="openLock(35)">🔒</button>
       </div></td>
     </tr>
-    <tr style="animation-delay:0.1s">
+    <tr style="animation-delay:0.05s">
       <td class="td-num">34</td>
       <td class="td-name">🚌 RATP</td>
       <td class="td-code"><span class="ctag c3">309</span></td>
@@ -555,7 +531,7 @@ tbody td { padding:18px 22px; vertical-align:middle; }
         <button class="btn-lock" onclick="openLock(34)">🔒</button>
       </div></td>
     </tr>
-    <tr style="animation-delay:0.125s">
+    <tr style="animation-delay:0.07500000000000001s">
       <td class="td-num">33</td>
       <td class="td-name">🏫 Atrium</td>
       <td class="td-code"><span class="ctag c3">308</span></td>
@@ -567,7 +543,7 @@ tbody td { padding:18px 22px; vertical-align:middle; }
         <button class="btn-lock" onclick="openLock(33)">🔒</button>
       </div></td>
     </tr>
-    <tr style="animation-delay:0.15000000000000002s">
+    <tr style="animation-delay:0.1s">
       <td class="td-num">32</td>
       <td class="td-name">🐙 Github</td>
       <td class="td-code"><span class="ctag c3">307</span></td>
@@ -579,7 +555,7 @@ tbody td { padding:18px 22px; vertical-align:middle; }
         <button class="btn-lock" onclick="openLock(32)">🔒</button>
       </div></td>
     </tr>
-    <tr style="animation-delay:0.17500000000000002s">
+    <tr style="animation-delay:0.125s">
       <td class="td-num">31</td>
       <td class="td-name">🎨 Canva</td>
       <td class="td-code"><span class="ctag c3">306</span></td>
@@ -591,7 +567,7 @@ tbody td { padding:18px 22px; vertical-align:middle; }
         <button class="btn-lock" onclick="openLock(31)">🔒</button>
       </div></td>
     </tr>
-    <tr style="animation-delay:0.2s">
+    <tr style="animation-delay:0.15000000000000002s">
       <td class="td-num">30</td>
       <td class="td-name">🧠 Claude</td>
       <td class="td-code"><span class="ctag c3">305</span></td>
@@ -603,7 +579,7 @@ tbody td { padding:18px 22px; vertical-align:middle; }
         <button class="btn-lock" onclick="openLock(30)">🔒</button>
       </div></td>
     </tr>
-    <tr style="animation-delay:0.225s">
+    <tr style="animation-delay:0.17500000000000002s">
       <td class="td-num">29</td>
       <td class="td-name">💎 Gemini</td>
       <td class="td-code"><span class="ctag c3">304</span></td>
@@ -615,7 +591,7 @@ tbody td { padding:18px 22px; vertical-align:middle; }
         <button class="btn-lock" onclick="openLock(29)">🔒</button>
       </div></td>
     </tr>
-    <tr style="animation-delay:0.25s">
+    <tr style="animation-delay:0.2s">
       <td class="td-num">28</td>
       <td class="td-name">🤖 ChatGPT</td>
       <td class="td-code"><span class="ctag c3">303</span></td>
@@ -627,7 +603,7 @@ tbody td { padding:18px 22px; vertical-align:middle; }
         <button class="btn-lock" onclick="openLock(28)">🔒</button>
       </div></td>
     </tr>
-    <tr style="animation-delay:0.275s">
+    <tr style="animation-delay:0.225s">
       <td class="td-num">27</td>
       <td class="td-name">🚉 IDFM</td>
       <td class="td-code"><span class="ctag c3">302</span></td>
@@ -639,7 +615,7 @@ tbody td { padding:18px 22px; vertical-align:middle; }
         <button class="btn-lock" onclick="openLock(27)">🔒</button>
       </div></td>
     </tr>
-    <tr style="animation-delay:0.30000000000000004s">
+    <tr style="animation-delay:0.25s">
       <td class="td-num">26</td>
       <td class="td-name">🗺️ Cartometro</td>
       <td class="td-code"><span class="ctag c3">301</span></td>
@@ -651,7 +627,7 @@ tbody td { padding:18px 22px; vertical-align:middle; }
         <button class="btn-lock" onclick="openLock(26)">🔒</button>
       </div></td>
     </tr>
-    <tr style="animation-delay:0.325s">
+    <tr style="animation-delay:0.275s">
       <td class="td-num">25</td>
       <td class="td-name">🛩️ Flightradar</td>
       <td class="td-code"><span class="ctag c3">300</span></td>
@@ -663,7 +639,7 @@ tbody td { padding:18px 22px; vertical-align:middle; }
         <button class="btn-lock" onclick="openLock(25)">🔒</button>
       </div></td>
     </tr>
-    <tr style="animation-delay:0.35000000000000003s">
+    <tr style="animation-delay:0.30000000000000004s">
       <td class="td-num">24</td>
       <td class="td-name">🎙️ Prompteur Original</td>
       <td class="td-code"><span class="ctag c2">205</span></td>
@@ -675,7 +651,7 @@ tbody td { padding:18px 22px; vertical-align:middle; }
         <button class="btn-lock" onclick="openLock(24)">🔒</button>
       </div></td>
     </tr>
-    <tr style="animation-delay:0.375s">
+    <tr style="animation-delay:0.325s">
       <td class="td-num">23</td>
       <td class="td-name">📕 Exposé 1984</td>
       <td class="td-code"><span class="ctag c1">118</span></td>
@@ -687,7 +663,7 @@ tbody td { padding:18px 22px; vertical-align:middle; }
         <button class="btn-lock" onclick="openLock(23)">🔒</button>
       </div></td>
     </tr>
-    <tr style="animation-delay:0.4s">
+    <tr style="animation-delay:0.35000000000000003s">
       <td class="td-num">22</td>
       <td class="td-name">🕐 Horloge Exam'</td>
       <td class="td-code"><span class="ctag c2">204</span></td>
@@ -699,7 +675,7 @@ tbody td { padding:18px 22px; vertical-align:middle; }
         <button class="btn-lock" onclick="openLock(22)">🔒</button>
       </div></td>
     </tr>
-    <tr style="animation-delay:0.42500000000000004s">
+    <tr style="animation-delay:0.375s">
       <td class="td-num">21</td>
       <td class="td-name">⏱️ Réveil</td>
       <td class="td-code"><span class="ctag c2">203</span></td>
@@ -711,7 +687,7 @@ tbody td { padding:18px 22px; vertical-align:middle; }
         <button class="btn-lock" onclick="openLock(21)">🔒</button>
       </div></td>
     </tr>
-    <tr style="animation-delay:0.45s">
+    <tr style="animation-delay:0.4s">
       <td class="td-num">20</td>
       <td class="td-name">🚇 Métro Paris</td>
       <td class="td-code"><span class="ctag c2">202</span></td>
@@ -723,7 +699,7 @@ tbody td { padding:18px 22px; vertical-align:middle; }
         <button class="btn-lock" onclick="openLock(20)">🔒</button>
       </div></td>
     </tr>
-    <tr style="animation-delay:0.47500000000000003s">
+    <tr style="animation-delay:0.42500000000000004s">
       <td class="td-num">19</td>
       <td class="td-name">✈️ Aviapro Inter</td>
       <td class="td-code"><span class="ctag c2">201</span></td>
@@ -735,7 +711,7 @@ tbody td { padding:18px 22px; vertical-align:middle; }
         <button class="btn-lock" onclick="openLock(19)">🔒</button>
       </div></td>
     </tr>
-    <tr style="animation-delay:0.5s">
+    <tr style="animation-delay:0.45s">
       <td class="td-num">18</td>
       <td class="td-name">🔭 Physique 10-11</td>
       <td class="td-code"><span class="ctag c1">117</span></td>
@@ -747,7 +723,7 @@ tbody td { padding:18px 22px; vertical-align:middle; }
         <button class="btn-lock" onclick="openLock(18)">🔒</button>
       </div></td>
     </tr>
-    <tr style="animation-delay:0.525s">
+    <tr style="animation-delay:0.47500000000000003s">
       <td class="td-num">17</td>
       <td class="td-name">🌊 Sea Shepherd Texte</td>
       <td class="td-code"><span class="ctag c1">116</span></td>
@@ -759,7 +735,7 @@ tbody td { padding:18px 22px; vertical-align:middle; }
         <button class="btn-lock" onclick="openLock(17)">🔒</button>
       </div></td>
     </tr>
-    <tr style="animation-delay:0.55s">
+    <tr style="animation-delay:0.5s">
       <td class="td-num">16</td>
       <td class="td-name">🐋 Sea Shepherd Diapo</td>
       <td class="td-code"><span class="ctag c1">115</span></td>
@@ -771,7 +747,7 @@ tbody td { padding:18px 22px; vertical-align:middle; }
         <button class="btn-lock" onclick="openLock(16)">🔒</button>
       </div></td>
     </tr>
-    <tr style="animation-delay:0.5750000000000001s">
+    <tr style="animation-delay:0.525s">
       <td class="td-num">15</td>
       <td class="td-name">📈 Fonctions Maths</td>
       <td class="td-code"><span class="ctag c1">114</span></td>
@@ -783,7 +759,7 @@ tbody td { padding:18px 22px; vertical-align:middle; }
         <button class="btn-lock" onclick="openLock(15)">🔒</button>
       </div></td>
     </tr>
-    <tr style="animation-delay:0.6000000000000001s">
+    <tr style="animation-delay:0.55s">
       <td class="td-num">14</td>
       <td class="td-name">📐 Vecteurs Maths</td>
       <td class="td-code"><span class="ctag c1">113</span></td>
@@ -795,7 +771,7 @@ tbody td { padding:18px 22px; vertical-align:middle; }
         <button class="btn-lock" onclick="openLock(14)">🔒</button>
       </div></td>
     </tr>
-    <tr style="animation-delay:0.625s">
+    <tr style="animation-delay:0.5750000000000001s">
       <td class="td-num">13</td>
       <td class="td-name">⏰ Heure</td>
       <td class="td-code"><span class="ctag c2">200</span></td>
@@ -807,7 +783,7 @@ tbody td { padding:18px 22px; vertical-align:middle; }
         <button class="btn-lock" onclick="openLock(13)">🔒</button>
       </div></td>
     </tr>
-    <tr style="animation-delay:0.65s">
+    <tr style="animation-delay:0.6000000000000001s">
       <td class="td-num">12</td>
       <td class="td-name">📊 SES</td>
       <td class="td-code"><span class="ctag c1">111</span></td>
@@ -819,7 +795,7 @@ tbody td { padding:18px 22px; vertical-align:middle; }
         <button class="btn-lock" onclick="openLock(12)">🔒</button>
       </div></td>
     </tr>
-    <tr style="animation-delay:0.675s">
+    <tr style="animation-delay:0.625s">
       <td class="td-num">11</td>
       <td class="td-name">💻 SNT</td>
       <td class="td-code"><span class="ctag c1">110</span></td>
@@ -831,7 +807,7 @@ tbody td { padding:18px 22px; vertical-align:middle; }
         <button class="btn-lock" onclick="openLock(11)">🔒</button>
       </div></td>
     </tr>
-    <tr style="animation-delay:0.7000000000000001s">
+    <tr style="animation-delay:0.65s">
       <td class="td-num">10</td>
       <td class="td-name">🌿 SVT</td>
       <td class="td-code"><span class="ctag c1">109</span></td>
@@ -843,7 +819,7 @@ tbody td { padding:18px 22px; vertical-align:middle; }
         <button class="btn-lock" onclick="openLock(10)">🔒</button>
       </div></td>
     </tr>
-    <tr style="animation-delay:0.7250000000000001s">
+    <tr style="animation-delay:0.675s">
       <td class="td-num">09</td>
       <td class="td-name">⚗️ Physique-Chimie</td>
       <td class="td-code"><span class="ctag c1">108</span></td>
@@ -855,7 +831,7 @@ tbody td { padding:18px 22px; vertical-align:middle; }
         <button class="btn-lock" onclick="openLock(9)">🔒</button>
       </div></td>
     </tr>
-    <tr style="animation-delay:0.75s">
+    <tr style="animation-delay:0.7000000000000001s">
       <td class="td-num">08</td>
       <td class="td-name">🇮🇹 Italien LV2</td>
       <td class="td-code"><span class="ctag c1">107</span></td>
@@ -867,7 +843,7 @@ tbody td { padding:18px 22px; vertical-align:middle; }
         <button class="btn-lock" onclick="openLock(8)">🔒</button>
       </div></td>
     </tr>
-    <tr style="animation-delay:0.775s">
+    <tr style="animation-delay:0.7250000000000001s">
       <td class="td-num">07</td>
       <td class="td-name">🇷🇺 Russe LV3</td>
       <td class="td-code"><span class="ctag c1">106</span></td>
@@ -879,7 +855,7 @@ tbody td { padding:18px 22px; vertical-align:middle; }
         <button class="btn-lock" onclick="openLock(7)">🔒</button>
       </div></td>
     </tr>
-    <tr style="animation-delay:0.8s">
+    <tr style="animation-delay:0.75s">
       <td class="td-num">06</td>
       <td class="td-name">📌 Padlet Anglais</td>
       <td class="td-code"><span class="ctag c1">105</span></td>
@@ -891,7 +867,7 @@ tbody td { padding:18px 22px; vertical-align:middle; }
         <button class="btn-lock" onclick="openLock(6)">🔒</button>
       </div></td>
     </tr>
-    <tr style="animation-delay:0.8250000000000001s">
+    <tr style="animation-delay:0.775s">
       <td class="td-num">05</td>
       <td class="td-name">🇬🇧 Anglais LV1</td>
       <td class="td-code"><span class="ctag c1">104</span></td>
@@ -903,7 +879,7 @@ tbody td { padding:18px 22px; vertical-align:middle; }
         <button class="btn-lock" onclick="openLock(5)">🔒</button>
       </div></td>
     </tr>
-    <tr style="animation-delay:0.8500000000000001s">
+    <tr style="animation-delay:0.8s">
       <td class="td-num">04</td>
       <td class="td-name">📖 Textes</td>
       <td class="td-code"><span class="ctag c1">103</span></td>
@@ -915,7 +891,7 @@ tbody td { padding:18px 22px; vertical-align:middle; }
         <button class="btn-lock" onclick="openLock(4)">🔒</button>
       </div></td>
     </tr>
-    <tr style="animation-delay:0.875s">
+    <tr style="animation-delay:0.8250000000000001s">
       <td class="td-num">03</td>
       <td class="td-name">📝 Synthèse</td>
       <td class="td-code"><span class="ctag c1">102</span></td>
@@ -927,7 +903,7 @@ tbody td { padding:18px 22px; vertical-align:middle; }
         <button class="btn-lock" onclick="openLock(3)">🔒</button>
       </div></td>
     </tr>
-    <tr style="animation-delay:0.9s">
+    <tr style="animation-delay:0.8500000000000001s">
       <td class="td-num">02</td>
       <td class="td-name">✍️ Français</td>
       <td class="td-code"><span class="ctag c1">101</span></td>
@@ -939,7 +915,7 @@ tbody td { padding:18px 22px; vertical-align:middle; }
         <button class="btn-lock" onclick="openLock(2)">🔒</button>
       </div></td>
     </tr>
-    <tr style="animation-delay:0.925s">
+    <tr style="animation-delay:0.875s">
       <td class="td-num">01</td>
       <td class="td-name">📚 Base 208</td>
       <td class="td-code"><span class="ctag c1">100</span></td>
@@ -1010,14 +986,14 @@ tbody td { padding:18px 22px; vertical-align:middle; }
     <div class="info-panel open" id="infop">
       <!-- Colonne gauche : infos -->
       <div class="info-left">
-        <div class="irow"><span class="ilbl">Nom</span><span class="ival gcyan" id="i-nom">Stats Maths</span></div>
+        <div class="irow"><span class="ilbl">Nom</span><span class="ival gcyan" id="i-nom">Base Vacances 208</span></div>
         <div class="idiv"></div>
-        <div class="irow"><span class="ilbl">Numéro</span><span class="ival" id="i-num">#38</span></div>
-        <div class="irow"><span class="ilbl">Code</span><span class="ival" id="i-code">122</span></div>
+        <div class="irow"><span class="ilbl">Numéro</span><span class="ival" id="i-num">#36</span></div>
+        <div class="irow"><span class="ilbl">Code</span><span class="ival" id="i-code">120</span></div>
         <div class="idiv"></div>
-        <div class="irow"><span class="ilbl">Description</span><span class="ival dim" id="i-desc">Guide pour Excel</span></div>
-        <div class="irow"><span class="ilbl">URL décodée</span><span class="ival dim" id="i-url" style="word-break:break-all;font-size:11px">https://natlacaxi.github.io/stats-maths-guide/</span></div>
-        <div class="irow"><span class="ilbl">Date d'ajout</span><span class="ival dim" id="i-date">26/05/2026</span></div>
+        <div class="irow"><span class="ilbl">Description</span><span class="ival dim" id="i-desc">Base Vacance fonctionnel</span></div>
+        <div class="irow"><span class="ilbl">URL décodée</span><span class="ival dim" id="i-url" style="word-break:break-all;font-size:11px">https://natlacaxi.github.io/base-cours-208-2025-2026</span></div>
+        <div class="irow"><span class="ilbl">Date d'ajout</span><span class="ival dim" id="i-date">27/05/2026</span></div>
         <button class="info-open-btn" onclick="openFromLock()">Ouvrir le site →</button>
       </div>
       <!-- Colonne droite : aperçu -->
@@ -1077,9 +1053,9 @@ tbody td { padding:18px 22px; vertical-align:middle; }
         </div>
       </div>
     </div>
-    <div class="code-out open" id="code-out">
+    <div class="code-out" id="code-out">
       <div class="code-out-lbl">Ligne à coller dans le fichier</div>
-      <pre id="code-out-pre">  { num: 38, nom: "Stats Maths", b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3N0YXRzLW1hdGhzLWd1aWRlLw==", code: "122", desc: "Guide pour Excel", date: "26/05/2026" },</pre>
+      <pre id="code-out-pre">  { num: 36, nom: "Base Vacances 208", b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2Jhc2UtY291cnMtMjA4LTIwMjUtMjAyNg==", code: "120", desc: "Base Vacance fonctionnel", date: "27/05/2026" },</pre>
       <button class="btn-copy" id="btn-copy" onclick="copyLine()">Copier</button>
     </div>
     <div class="add-actions">
@@ -1477,10 +1453,29 @@ function addAndDl(){
 
 // DOWNLOAD avec sites en mémoire
 function dlFichier(){
-  const src=document.documentElement.outerHTML;
-  const blob=new Blob([src],{type:"text/html;charset=utf-8"});
-  const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
-  a.download="annuaire.html"; a.click(); URL.revokeObjectURL(a.href);
+  // Récupère le source HTML original (avant tout rendu DOM)
+  const req = new XMLHttpRequest();
+  req.open("GET", location.href, false);
+  try { req.send(); } catch(e) {}
+
+  let src = req.responseText || "";
+
+  if(src){
+    // Reconstruit le bloc SITES complet depuis le tableau en mémoire
+    const lines = SITES.map(s=>`  { num: ${s.num}, nom: ${JSON.stringify(s.nom)}, b64: ${JSON.stringify(s.b64)}, code: ${JSON.stringify(s.code)}, desc: ${JSON.stringify(s.desc)}, date: ${JSON.stringify(s.date)} },`).join("\n");
+    // Remplace tout le contenu entre "const SITES = [" et "// MARKER_AJOUT\n];"
+    src = src.replace(
+      /const SITES = \[[\s\S]*?\/\/ MARKER_AJOUT\n\];/,
+      `const SITES = [\n${lines}\n  // MARKER_AJOUT\n];`
+    );
+  } else {
+    // Fallback : outerHTML si fetch bloqué (fichier local)
+    src = document.documentElement.outerHTML;
+  }
+
+  const blob = new Blob([src], {type:"text/html;charset=utf-8"});
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
+  a.download = "annuaire.html"; a.click(); URL.revokeObjectURL(a.href);
 }
 
 // CONVERTER
@@ -1488,5 +1483,6 @@ function enc(){ document.getElementById("b64Input").value=btoa(unescape(encodeUR
 function dec(){ try{document.getElementById("rawInput").value=decodeURIComponent(escape(atob(document.getElementById("b64Input").value.trim())));}catch{document.getElementById("rawInput").value="⚠ Base64 invalide";} }
 function clr(){ document.getElementById("rawInput").value=""; document.getElementById("b64Input").value=""; }
 </script>
+
 
 </body></html>
