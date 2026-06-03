@@ -8,46 +8,46 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg:    #08080f;
-  --s1:    #0f0f1aaa;
-  --s2:    #13131fcc;
-  --br:    #ffffff18;
-  --br2:   #ffffff28;
-  --v1:    #7c6fff;
-  --v2:    #d47cff;
-  --v3:    #5ee7ff;
-  --v4:    #5fffc8;
-  --v5:    #ff7eb3;
-  --text:  #eeeeff;
-  --text2: #9898c0;
-  --muted: #6060a0;
-  --red:   #ff6b6b;
-  --shadow: #00000080;
-  --glass: rgba(255,255,255,0.06);
-  --glass2: rgba(255,255,255,0.10);
-  --glass-border: rgba(255,255,255,0.18);
-  --glass-blur: blur(24px) saturate(1.8);
+ --bg:    #08080f;
+ --s1:    #0f0f1aaa;
+ --s2:    #13131fcc;
+ --br:    #ffffff18;
+ --br2:   #ffffff28;
+ --v1:    #7c6fff;
+ --v2:    #d47cff;
+ --v3:    #5ee7ff;
+ --v4:    #5fffc8;
+ --v5:    #ff7eb3;
+ --text:  #eeeeff;
+ --text2: #9898c0;
+ --muted: #6060a0;
+ --red:   #ff6b6b;
+ --shadow: #00000080;
+ --glass: rgba(255,255,255,0.06);
+ --glass2: rgba(255,255,255,0.10);
+ --glass-border: rgba(255,255,255,0.18);
+ --glass-blur: blur(24px) saturate(1.8);
 }
 [data-theme="light"] {
-  --bg:    #e8e8f8;
-  --s1:    rgba(255,255,255,0.55);
-  --s2:    rgba(245,245,255,0.65);
-  --br:    rgba(0,0,0,0.10);
-  --br2:   rgba(0,0,0,0.16);
-  --v1:    #6a5af0;
-  --v2:    #b060e0;
-  --v3:    #1ab8d8;
-  --v4:    #18c888;
-  --v5:    #e05090;
-  --text:  #18183a;
-  --text2: #5050a0;
-  --muted: #9090b8;
-  --red:   #e04040;
-  --shadow: #00000030;
-  --glass: rgba(255,255,255,0.45);
-  --glass2: rgba(255,255,255,0.65);
-  --glass-border: rgba(255,255,255,0.7);
-  --glass-blur: blur(24px) saturate(2);
+ --bg:    #e8e8f8;
+ --s1:    rgba(255,255,255,0.55);
+ --s2:    rgba(245,245,255,0.65);
+ --br:    rgba(0,0,0,0.10);
+ --br2:   rgba(0,0,0,0.16);
+ --v1:    #6a5af0;
+ --v2:    #b060e0;
+ --v3:    #1ab8d8;
+ --v4:    #18c888;
+ --v5:    #e05090;
+ --text:  #18183a;
+ --text2: #5050a0;
+ --muted: #9090b8;
+ --red:   #e04040;
+ --shadow: #00000030;
+ --glass: rgba(255,255,255,0.45);
+ --glass2: rgba(255,255,255,0.65);
+ --glass-border: rgba(255,255,255,0.7);
+ --glass-blur: blur(24px) saturate(2);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -815,10 +815,41 @@ const SITES = [
   { num: 37, nom: "🇮🇹 Ita Mestieri",         b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2l0YS1tZXN0aWVyaQ==",                                                   code: "120", desc: "Les métiers en italien",                 date: "Non renseigné" },
   { num: 38, nom: "🏖️ Base 208 Vacances",    b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2Jhc2UtY291cnMtMjA4LTIwMjUtMjAyNg==",                                  code: "121", desc: "Base fonctionnel pour vacances 2026",    date: "Non renseigné" },
   { num: 39, nom: "🎭 École des Femmes",      b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2VkZi0yLTU=",                                                            code: "122", desc: "Acte 2 – Scène 5 — texte à apprendre",  date: "Non renseigné" },
-  { num: 40, nom: "❓ Questions SNT",         b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3F1ZXN0aW9ucy5zbnQ=",                                                   code: "123", desc: "Questions sur le HTML et CSS",           date: "Non renseigné" },
+  { num: 40, nom: "❓ Questions SNT",         b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3NudC1xdWVzdGlvbnMv ",                                                   code: "123", desc: "Questions sur le HTML et CSS",           date: "Non renseigné" },
   { num: 41, nom: "📉 Stats Maths",           b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3N0YXRzLW1hdGhzLWd1aWRl",                                               code: "124", desc: "Guide statistiques pour Excel",          date: "Non renseigné" },
-  { num: 42, nom: "⏳ Temps de vie",          b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3RlbXBz",                                                                code: "206", desc: "Compteur de temps vécu professionnel",  date: "Non renseigné" },
-  // MARKER_AJOUT
+  { 
+  num: 42, 
+  nom: "⏳ Temps de vie",          
+  b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3RlbXBz",            
+  code: "206",
+  desc: "Compteur de temps vécu professionnel",  
+  date: "Non renseigné" 
+},
+{ 
+  num: 43, 
+  nom: "🎵 Cosmic - Frequency",          
+  b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL211c2ljLw==", // Espace supprimé
+  code: "207", 
+  desc: "Musiques 2024-2026 en ligne", 
+  date: "03/06/2026" 
+},
+{ 
+  num: 44, 
+  nom: "🎧 Mode DJ Cosmic-Frequency",          
+  b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2RqLW11c2ljLw==", // Retour à la ligne et espace supprimés
+  code: "208",
+  desc: "Plateforme de mix simple depuis musiques en ligne", 
+  date: "03/06/2026" 
+},
+{ 
+  num: 45, 
+  nom: "🎤  Paroles de Cosmic-Frequency",          
+  b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3Bhcm9sZXMtbXVzaWMv", // Espace supprimé
+  code: "209", // Corrigé de 208 à 209 pour suivre la logique
+  desc: "Paroles de Cosmic-Frequency – musiques en ligne",  
+  date: "03/06/2026" 
+},
+// MARKER_AJOUT
 ];
 
 // NEXT NUM SAFE
