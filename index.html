@@ -240,9 +240,10 @@ thead {
   border-bottom: 1px solid rgba(255,255,255,0.12);
 }
 thead th { padding:16px 22px; text-align:left; font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted); font-weight:400; }
-tbody tr { border-bottom:1px solid rgba(255,255,255,0.06); transition:background .2s; animation:rowSlide .4s cubic-bezier(.16,1,.3,1) both; }
+tbody tr { border-bottom:1px solid rgba(255,255,255,0.06); transition:background .2s; animation:rowSlide .4s cubic-bezier(.16,1,.3,1) both; cursor:pointer; }
 tbody tr:last-child { border-bottom:none; }
 tbody tr:hover { background: rgba(255,255,255,0.05); }
+tbody tr:active { background: rgba(124,111,255,0.12); }
 tbody td { padding:18px 22px; vertical-align:middle; }
 .td-num { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--muted); width:52px; letter-spacing:.05em; }
 .td-name { font-family:'Outfit',sans-serif; font-size:16px; font-weight:500; color:var(--text); letter-spacing:-.01em; }
@@ -534,7 +535,6 @@ tbody td { padding:18px 22px; vertical-align:middle; }
   position:relative; overflow:hidden;
   animation: fbIn .5s cubic-bezier(.34,1.6,.64,1) both;
 }
-/* Liquid glass inner highlight */
 .float-btn::after {
   content:''; position:absolute;
   top:4px; left:8px; right:8px; height:40%;
@@ -569,6 +569,61 @@ tbody td { padding:18px 22px; vertical-align:middle; }
   animation-delay: .3s, 1.8s;
   border: 1px solid rgba(255,255,255,0.25);
   font-size:20px;
+}
+
+/* ── DOUBLE-CLIC HINT ── */
+.dbl-hint {
+  display:inline-block; margin-left:6px;
+  font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.12em;
+  color:var(--muted); opacity:.7; vertical-align:middle;
+}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .td-desc { display:none; }
+}
+@media(max-width:768px){
+  #app { padding:28px 14px 100px; }
+  .app-header { flex-direction:column; align-items:flex-start; gap:6px; }
+  .app-brand { font-size:30px; }
+  .search-wrap input { padding:13px 120px 13px 42px; font-size:14px; }
+  .btn-add-trigger { padding:7px 13px; font-size:12px; right:8px; }
+  .sort-bar { gap:5px; }
+  .sort-btn { font-size:9px; padding:5px 10px; letter-spacing:.06em; }
+  .sort-lbl { display:none; }
+  .table-wrap { border-radius:14px; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  table { min-width:460px; }
+  thead th { padding:10px 12px; font-size:9px; }
+  tbody td { padding:13px 12px; }
+  .td-num { width:36px; font-size:11px; }
+  .td-name { font-size:14px; }
+  .td-code { width:62px; }
+  .ctag { font-size:11px; width:48px; padding:3px 7px; }
+  .row-btns { gap:5px; }
+  .btn-open { padding:6px 12px; font-size:12px; }
+  .btn-lock { width:30px; height:30px; font-size:12px; }
+  .modal-info { padding:20px 16px 18px; border-radius:18px; }
+  .modal-add  { padding:20px 16px 18px; border-radius:18px; }
+  .info-panel.open { grid-template-columns:1fr; }
+  .preview-frame-wrap { min-height:220px; }
+  .conv-grid { grid-template-columns:1fr; }
+  .float-btns { bottom:18px; right:14px; gap:10px; }
+  .float-btn { width:46px; height:46px; font-size:18px; }
+  .add-row { grid-template-columns:1fr; }
+  .conv-actions { gap:8px; }
+  .cbtn { padding:9px 16px; font-size:12px; }
+  .sep { margin:32px 0; }
+}
+@media(max-width:480px){
+  .app-brand { font-size:24px; }
+  .lock-brand { font-size:34px; }
+  .numpad { grid-template-columns:repeat(3,60px); gap:10px; }
+  .nkey { width:60px; height:60px; font-size:19px; }
+  .m-numpad { grid-template-columns:repeat(3,50px); gap:8px; }
+  .mkey { width:50px; height:50px; font-size:17px; }
+  .td-num { display:none; }
+  table { min-width:360px; }
+  .btn-add-trigger { padding:6px 10px; font-size:11px; }
 }
 </style>
 </head>
@@ -610,7 +665,10 @@ tbody td { padding:18px 22px; vertical-align:middle; }
 <!-- APP -->
 <div id="app">
   <div class="app-header">
-    <div class="app-brand">🛰️ Nexus-Aegis</div>
+    <div>
+      <div class="app-brand">🛰️ Nexus-Aegis</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.18em;color:var(--muted);margin-top:4px;">Double-clic sur une ligne pour ouvrir le site</div>
+    </div>
     <div class="app-meta"><span class="count-pill" id="countPill">— sites</span></div>
   </div>
   <div class="search-wrap">
@@ -815,41 +873,13 @@ const SITES = [
   { num: 37, nom: "🇮🇹 Ita Mestieri",         b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2l0YS1tZXN0aWVyaQ==",                                                   code: "120", desc: "Les métiers en italien",                 date: "Non renseigné" },
   { num: 38, nom: "🏖️ Base 208 Vacances",    b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2Jhc2UtY291cnMtMjA4LTIwMjUtMjAyNg==",                                  code: "121", desc: "Base fonctionnel pour vacances 2026",    date: "Non renseigné" },
   { num: 39, nom: "🎭 École des Femmes",      b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2VkZi0yLTU=",                                                            code: "122", desc: "Acte 2 – Scène 5 — texte à apprendre",  date: "Non renseigné" },
-  { num: 40, nom: "❓ Questions SNT",         b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3NudC1xdWVzdGlvbnMv ",                                                   code: "123", desc: "Questions sur le HTML et CSS",           date: "Non renseigné" },
+  { num: 40, nom: "❓ Questions SNT",         b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3NudC1xdWVzdGlvbnMv",                                                    code: "123", desc: "Questions sur le HTML et CSS",           date: "Non renseigné" },
   { num: 41, nom: "📉 Stats Maths",           b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3N0YXRzLW1hdGhzLWd1aWRl",                                               code: "124", desc: "Guide statistiques pour Excel",          date: "Non renseigné" },
-  { 
-  num: 42, 
-  nom: "⏳ Temps de vie",          
-  b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3RlbXBz",            
-  code: "206",
-  desc: "Compteur de temps vécu professionnel",  
-  date: "Non renseigné" 
-},
-{ 
-  num: 43, 
-  nom: "🎵 Cosmic - Frequency",          
-  b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL211c2ljLw==", // Espace supprimé
-  code: "207", 
-  desc: "Musiques 2024-2026 en ligne", 
-  date: "03/06/2026" 
-},
-{ 
-  num: 44, 
-  nom: "🎧 Mode DJ Cosmic-Frequency",          
-  b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2RqLW11c2ljLw==", // Retour à la ligne et espace supprimés
-  code: "208",
-  desc: "Plateforme de mix simple depuis musiques en ligne", 
-  date: "03/06/2026" 
-},
-{ 
-  num: 45, 
-  nom: "🎤  Paroles de Cosmic-Frequency",          
-  b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3Bhcm9sZXMtbXVzaWMv", // Espace supprimé
-  code: "209", // Corrigé de 208 à 209 pour suivre la logique
-  desc: "Paroles de Cosmic-Frequency – musiques en ligne",  
-  date: "03/06/2026" 
-},
-// MARKER_AJOUT
+  { num: 42, nom: "⏳ Temps de vie",          b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3RlbXBz",                                                                code: "206", desc: "Compteur de temps vécu professionnel",   date: "Non renseigné" },
+  { num: 43, nom: "🎵 Cosmic - Frequency",    b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL211c2ljLw==",                                                             code: "207", desc: "Musiques 2024-2026 en ligne",             date: "03/06/2026" },
+  { num: 44, nom: "🎧 Mode DJ Cosmic-Frequency", b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL2RqLW11c2ljLw==",                                                     code: "208", desc: "Plateforme de mix simple depuis musiques en ligne", date: "03/06/2026" },
+  { num: 45, nom: "🎤 Paroles de Cosmic-Frequency", b64: "aHR0cHM6Ly9uYXRsYWNheGkuZ2l0aHViLmlvL3Bhcm9sZXMtbXVzaWMv",                                              code: "209", desc: "Paroles de Cosmic-Frequency – musiques en ligne", date: "03/06/2026" },
+  // MARKER_AJOUT
 ];
 
 // NEXT NUM SAFE
@@ -973,13 +1003,13 @@ function getSorted(){
 function stripEmoji(s){ return s.replace(/[\p{Emoji}\s]+/gu,"").trim(); }
 
 // TABLE
-function db(b){ try{return atob(b);}catch{return "#";} }
+function db(b){ try{return atob(b.trim());}catch{return "#";} }
 function cc(c){ return "ctag c"+(parseInt(c[0])||0); }
 function render(data){
   const tb=document.getElementById("tbody");
   if(!data.length){tb.innerHTML='<tr><td colspan="5" class="no-results">🔍 Aucun résultat</td></tr>';return;}
   tb.innerHTML=data.map((s,i)=>`
-    <tr style="animation-delay:${i*.022}s">
+    <tr style="animation-delay:${i*.022}s" ondblclick="openSite('${s.b64}')" title="Double-clic pour ouvrir ${s.nom}">
       <td class="td-num">${String(s.num).padStart(2,"0")}</td>
       <td class="td-name">${s.nom}</td>
       <td class="td-code"><span class="${cc(s.code)}">${s.code}</span></td>
@@ -987,8 +1017,8 @@ function render(data){
         ${(!s.desc||s.desc==="Non renseigné")?"—":s.desc}
       </td>
       <td class="td-actions"><div class="row-btns">
-        <button class="btn-open" onclick="openSite('${s.b64}')">Ouvrir</button>
-        <button class="btn-lock" onclick="openLock(${s.num})">🔒</button>
+        <button class="btn-open" onclick="event.stopPropagation();openSite('${s.b64}')">Ouvrir</button>
+        <button class="btn-lock" onclick="event.stopPropagation();openLock(${s.num})">🔒</button>
       </div></td>
     </tr>`).join("");
 }
